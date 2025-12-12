@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/logo";
 
 export default async function AdminLayout({
   children,
@@ -37,9 +38,10 @@ export default async function AdminLayout({
     <div className="min-h-screen">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/admin" className="text-2xl font-bold text-primary">
-            Auxilium Incasso - Admin
-          </Link>
+          <div className="flex items-center">
+            <Logo href="/admin" />
+            <span className="text-lg text-muted-foreground ml-2">- Admin</span>
+          </div>
           <nav className="flex gap-6 items-center">
             <Link href="/admin" className="hover:text-primary">Dashboard</Link>
             <Link href="/admin/cases" className="hover:text-primary">Opdrachten</Link>

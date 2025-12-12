@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/logo";
 
 export default async function PortalLayout({
   children,
@@ -56,9 +57,10 @@ export default async function PortalLayout({
     <div className="min-h-screen">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/portal" className="text-2xl font-bold text-primary">
-            Auxilium Incasso - Portaal
-          </Link>
+          <div className="flex items-center">
+            <Logo href="/portal" />
+            <span className="text-lg text-muted-foreground ml-2">- Portaal</span>
+          </div>
           <nav className="flex gap-6 items-center">
             <Link href="/portal" className="hover:text-primary">Dashboard</Link>
             <Link href="/portal/cases/new" className="hover:text-primary">Nieuwe opdracht</Link>

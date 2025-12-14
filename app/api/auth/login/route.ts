@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createOTPChallenge, canResendOTP } from "@/lib/auth/otp";
 import { sendEmail } from "@/lib/email/service";
+import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,7 +94,33 @@ export async function POST(request: NextRequest) {
       html: emailHtml,
     });
 
-    return NextResponse.json({ success: true, userId: data.user.id });
+    // Get session to ensure cookies are set
+    const { data: sessionData } = await supabase.auth.getSession();
+    
+    // Create response
+    const response = NextResponse.json({ success: true, userId: data.user.id });
+    
+    // Copy all Supabase auth cookies to the response
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    
+    allCookies.forEach(cookie => {
+      // Only copy auth-related cookies
+      if (cookie.name.includes('sb-') || cookie.name.includes('auth')) {
+        // Determine if we're on localhost or IP
+        const isLocalhost = request.headers.get('host')?.includes('localhost') || 
+                           request.headers.get('host')?.includes('127.0.0.1');
+        
+        response.cookies.set(cookie.name, cookie.value, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production' && !isLocalhost,
+          sameSite: 'lax',
+          path: '/',
+        });
+      }
+    });
+
+    return response;
   } catch (error: any) {
     console.error("Login error:", error);
     return NextResponse.json(

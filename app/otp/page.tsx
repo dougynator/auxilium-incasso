@@ -55,24 +55,36 @@ export default function OTPPage() {
         throw new Error(result.error || "OTP code ongeldig");
       }
 
-      // Wait a moment for cookies to be set by the server response
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Refresh the session on client side to ensure it's loaded
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // The cookies are set by the server in the response headers
+      // We need to wait for them to be processed by the browser
+      // Then do a hard redirect which will trigger middleware and server-side auth check
       
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 Client session after OTP:', session ? 'Valid' : 'Invalid');
-        if (sessionError) {
-          console.log('❌ Client session error:', sessionError.message);
-        }
+        console.log('✅ OTP verified, waiting for cookies to be set...');
+        console.log('🔍 Current cookies:', document.cookie);
       }
       
-      // Even if session is not found client-side, try redirect anyway
-      // The server-side will have the session cookies
-      // Use window.location for a hard redirect to ensure session is loaded
-      // This forces a full page reload which will read the cookies properly
-      window.location.href = "/portal";
+      // Wait a bit longer to ensure cookies are set and processed by browser
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Cookies after wait:', document.cookie);
+        console.log('🔄 Redirecting to /portal...');
+      }
+      
+      // Use router.push first to let Next.js handle it, then fallback to window.location
+      try {
+        router.push("/portal");
+        // Give router.push a moment, then force reload if needed
+        setTimeout(() => {
+          if (window.location.pathname !== "/portal") {
+            window.location.href = "/portal";
+          }
+        }, 500);
+      } catch (error) {
+        // Fallback to hard redirect
+        window.location.href = "/portal";
+      }
     } catch (error: any) {
       toast({
         title: "Fout",

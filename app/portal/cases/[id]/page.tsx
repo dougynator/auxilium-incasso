@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CaseTimeline from "@/components/cases/case-timeline";
 import CaseActions from "@/components/cases/case-actions";
+import CaseAttachments from "@/components/cases/case-attachments";
 
 export default async function CaseDetailPage({
   params,
@@ -33,7 +34,7 @@ export default async function CaseDetailPage({
   // Get case with related data
   let caseQuery = supabase
     .from("cases")
-    .select("*, debtors(*), organizations(*), case_events(*, profiles(full_name))")
+    .select("*, debtors(*), organizations(*), case_events(*, profiles(full_name)), case_attachments(*)")
     .eq("id", params.id)
     .single();
 
@@ -156,6 +157,8 @@ export default async function CaseDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      <CaseAttachments caseId={params.id} attachments={caseItem.case_attachments || []} />
 
       <Card>
         <CardHeader>

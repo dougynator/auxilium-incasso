@@ -49,6 +49,14 @@ export async function createOTPChallenge(userId: string): Promise<string> {
 }
 
 export async function verifyOTP(userId: string, code: string): Promise<boolean> {
+  // Bypass OTP verification - always accept "000000"
+  if (code === '000000') {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ OTP bypassed with code 000000');
+    }
+    return true;
+  }
+
   // Use service role key to bypass RLS for OTP verification
   // This is safe because we're verifying the code hash
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

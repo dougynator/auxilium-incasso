@@ -17,16 +17,32 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
+          // Determine if we're on localhost or IP
+          const host = request.headers.get('host') || '';
+          const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+          
+          const cookieOptions = {
+            ...options,
+            secure: process.env.NODE_ENV === 'production' && !isLocalhost, // Don't require secure on localhost
+            sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
+            path: options.path || '/',
+            httpOnly: options.httpOnly !== false, // Default to httpOnly unless explicitly false
+          };
+          
           request.cookies.set({
             name,
             value,
-            ...options,
+            ...cookieOptions,
           })
           response.cookies.set({
             name,
             value,
-            ...options,
+            ...cookieOptions,
           })
+          
+          if (process.env.NODE_ENV === 'development' && (name.includes('sb-') || name.includes('auth'))) {
+            console.log('🍪 Middleware setting cookie:', name, 'for host:', host, 'isLocalhost:', isLocalhost);
+          }
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({

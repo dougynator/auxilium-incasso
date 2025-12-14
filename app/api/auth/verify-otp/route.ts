@@ -1,38 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createClient } from "@/lib/supabase/server";
 import { verifyOTP } from "@/lib/auth/otp";
 import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    
-    // Create supabase client with cookie handling
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: CookieOptions) {
-            try {
-              cookieStore.set({ name, value, ...options });
-            } catch (error) {
-              // Ignore errors in API routes
-            }
-          },
-          remove(name: string, options: CookieOptions) {
-            try {
-              cookieStore.set({ name, value: '', ...options });
-            } catch (error) {
-              // Ignore errors in API routes
-            }
-          },
-        },
-      }
-    );
+    const supabase = await createClient();
     
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -67,29 +40,71 @@ export async function POST(request: NextRequest) {
     }
 
     // Refresh the session to ensure cookies are properly set
-    const { data: sessionData } = await supabase.auth.getSession();
+    // This will update the cookies in the cookieStore
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 Session after OTP:', sessionData?.session ? 'Valid' : 'Invalid');
+      if (sessionError) {
+        console.log('❌ Session error:', sessionError.message);
+      }
     }
 
     // Create response with success
     const response = NextResponse.json({ success: true });
     
-    // Copy all Supabase auth cookies to the response
-    // These cookies are set by the supabase client during getSession()
+    // Get all cookies from cookieStore AFTER getSession() - Supabase should have set them
+    const cookieStore = await cookies();
     const allCookies = cookieStore.getAll();
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🍪 All cookies in cookieStore:', allCookies.map(c => c.name));
+    }
+    
+    // Copy all Supabase auth cookies to the response
+    const host = request.headers.get('host') || '';
+    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+    
     allCookies.forEach(cookie => {
       // Only copy auth-related cookies
       if (cookie.name.includes('sb-') || cookie.name.includes('auth')) {
+        // Build cookie string manually to ensure it's set correctly
+        const cookieOptions = [
+          `Path=/`,
+          `SameSite=Lax`,
+          `HttpOnly`,
+          `Max-Age=${60 * 60 * 24 * 7}`, // 7 days
+        ];
+        
+        if (process.env.NODE_ENV === 'production' && !isLocalhost) {
+          cookieOptions.push(`Secure`);
+        }
+        
+        const cookieString = `${cookie.name}=${cookie.value}; ${cookieOptions.join('; ')}`;
+        
+        // Set cookie using both methods to ensure it works
         response.cookies.set(cookie.name, cookie.value, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production' && !isLocalhost,
+          sameSite: 'lax' as const,
           path: '/',
+          maxAge: 60 * 60 * 24 * 7, // 7 days
         });
+        
+        // Also set in response headers directly
+        response.headers.append('Set-Cookie', cookieString);
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🍪 Setting cookie in response:', cookie.name, 'for host:', host, 'isLocalhost:', isLocalhost);
+          console.log('🍪 Cookie string:', cookieString.substring(0, 100) + '...');
+        }
       }
     });
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🍪 Cookies in response:', response.cookies.getAll().map(c => c.name));
+      console.log('✅ Response cookies set, returning response');
+    }
 
     return response;
   } catch (error: any) {

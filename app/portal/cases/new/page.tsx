@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import { Upload, File as FileIcon, X } from "lucide-react";
+import { BibliotheekSelector } from "@/components/cases/bibliotheek-selector";
 
 const caseSchema = z.object({
   // Debtor info
@@ -56,6 +57,7 @@ export default function NewCasePage() {
     handleSubmit,
     watch,
     trigger,
+    setValue,
     formState: { errors },
   } = useForm<CaseFormData>({
     resolver: zodResolver(caseSchema),
@@ -68,6 +70,34 @@ export default function NewCasePage() {
   const principalAmount = parseFloat(watch("principalAmount") || "0");
   const additionalCosts = parseFloat(watch("additionalCosts") || "0");
   const totalAmount = principalAmount + additionalCosts;
+
+  const handleSelectDebtor = (debtor: any) => {
+    setValue("debtorNameOrCompany", debtor.company_name || debtor.name || "");
+    setValue("debtorEmail", debtor.email);
+    setValue("debtorVatNumber", debtor.vat_number || "");
+    setValue("debtorStreet", debtor.address_street || "");
+    setValue("debtorCity", debtor.address_city || "");
+    setValue("debtorPostalCode", debtor.address_postal_code || "");
+    setValue("debtorCountry", debtor.address_country || "BE");
+  };
+
+  const handleSelectInvoice = (invoice: any) => {
+    setValue("invoiceNumber", invoice.invoice_number || "");
+    setValue("invoiceDate", invoice.invoice_date || "");
+    setValue("dueDate", invoice.due_date || "");
+    setValue("principalAmount", invoice.amount?.toString() || "");
+    
+    // Also fill debtor info if available
+    if (invoice.debtor_name || invoice.debtor_email) {
+      setValue("debtorNameOrCompany", invoice.debtor_name || "");
+      setValue("debtorEmail", invoice.debtor_email || "");
+      setValue("debtorVatNumber", invoice.debtor_vat_number || "");
+      setValue("debtorStreet", invoice.debtor_address_street || "");
+      setValue("debtorCity", invoice.debtor_address_city || "");
+      setValue("debtorPostalCode", invoice.debtor_address_postal_code || "");
+      setValue("debtorCountry", invoice.debtor_address_country || "BE");
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -291,6 +321,7 @@ export default function NewCasePage() {
               <CardDescription>Gegevens van de debiteur</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <BibliotheekSelector onSelectDebtor={handleSelectDebtor} />
               <div className="space-y-2">
                 <Label htmlFor="debtorNameOrCompany">Naam/bedrijfsnaam *</Label>
                 <Input
@@ -362,6 +393,7 @@ export default function NewCasePage() {
               <CardDescription>Gegevens van de factuur</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <BibliotheekSelector onSelectInvoice={handleSelectInvoice} />
               <div className="space-y-2">
                 <Label htmlFor="invoiceNumber">Factuurnummer *</Label>
                 <Input

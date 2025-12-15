@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createOTPChallenge, canResendOTP } from "@/lib/auth/otp";
 import { sendEmail } from "@/lib/email/service";
-import { cookies } from "next/headers";
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +14,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    // Create response first so we can set cookies on it
+    const response = NextResponse.next();
+    
+    // Create Supabase client that sets cookies on the response
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value;
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            const host = request.headers.get('host') || '';
+            const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+            
+            request.cookies.set({
+              name,
+              value,
+              ...options,
+            });
+            // Supabase SSR requires cookies to be readable by browser client
+            // Don't set httpOnly for auth cookies so browser client can read them
+            const isAuthCookie = name.includes('sb-') || name.includes('auth');
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+              httpOnly: isAuthCookie ? false : (options.httpOnly !== false), // Allow browser to read auth cookies
+              secure: process.env.NODE_ENV === 'production' && !isLocalhost,
+              sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
+              path: options.path || '/',
+            });
+          },
+          remove(name: string, options: CookieOptions) {
+            request.cookies.set({
+              name,
+              value: '',
+              ...options,
+            });
+            response.cookies.set({
+              name,
+              value: '',
+              ...options,
+            });
+          },
+        },
+      }
+    );
 
     // Sign in with password
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -94,33 +141,32 @@ export async function POST(request: NextRequest) {
       html: emailHtml,
     });
 
-    // Get session to ensure cookies are set
+    // Get session to ensure cookies are set (this will trigger cookie setting via the client)
     const { data: sessionData } = await supabase.auth.getSession();
     
-    // Create response
-    const response = NextResponse.json({ success: true, userId: data.user.id });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Login successful, session:', sessionData?.session ? 'Valid' : 'Invalid');
+      console.log('🍪 Cookies set in response:', response.cookies.getAll().map(c => c.name));
+    }
     
-    // Copy all Supabase auth cookies to the response
-    const cookieStore = await cookies();
-    const allCookies = cookieStore.getAll();
+    // Create JSON response with the same cookies
+    const jsonResponse = NextResponse.json({ success: true, userId: data.user.id });
     
-    allCookies.forEach(cookie => {
-      // Only copy auth-related cookies
-      if (cookie.name.includes('sb-') || cookie.name.includes('auth')) {
-        // Determine if we're on localhost or IP
-        const isLocalhost = request.headers.get('host')?.includes('localhost') || 
-                           request.headers.get('host')?.includes('127.0.0.1');
-        
-        response.cookies.set(cookie.name, cookie.value, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production' && !isLocalhost,
-          sameSite: 'lax',
-          path: '/',
-        });
-      }
+    // Copy all cookies from the response to the JSON response
+    const host = request.headers.get('host') || '';
+    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+    
+    response.cookies.getAll().forEach(cookie => {
+      const isAuthCookie = cookie.name.includes('sb-') || cookie.name.includes('auth');
+      jsonResponse.cookies.set(cookie.name, cookie.value, {
+        httpOnly: isAuthCookie ? false : true, // Allow browser to read auth cookies
+        secure: process.env.NODE_ENV === 'production' && !isLocalhost,
+        sameSite: 'lax',
+        path: '/',
+      });
     });
 
-    return response;
+    return jsonResponse;
   } catch (error: any) {
     console.error("Login error:", error);
     return NextResponse.json(

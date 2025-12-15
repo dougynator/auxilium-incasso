@@ -29,6 +29,7 @@ const debtorSchema = z.object({
   address_country: z.string().default("BE"),
   phone: z.string().optional(),
   notes: z.string().optional(),
+  debtor_type: z.enum(["particular", "company"]).default("particular"),
 });
 
 type DebtorFormData = z.infer<typeof debtorSchema>;
@@ -72,6 +73,7 @@ export function AddDebtorModal({ open, onOpenChange, onSuccess }: AddDebtorModal
     resolver: zodResolver(debtorSchema),
     defaultValues: {
       address_country: "BE",
+      debtor_type: "particular",
     },
   });
 
@@ -196,6 +198,30 @@ export function AddDebtorModal({ open, onOpenChange, onSuccess }: AddDebtorModal
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="debtor_type">Type *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="particular"
+                  {...register("debtor_type")}
+                  className="w-4 h-4"
+                />
+                <span className="font-sans">Particulier</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="company"
+                  {...register("debtor_type")}
+                  className="w-4 h-4"
+                />
+                <span className="font-sans">Bedrijf</span>
+              </label>
+            </div>
+          </div>
+          
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Naam</Label>

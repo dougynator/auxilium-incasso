@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { extractInvoiceData } from "@/lib/ai/invoice-parser";
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 // Force Node.js runtime for pdf-parse compatibility
 export const runtime = 'nodejs';
@@ -82,11 +83,21 @@ export async function POST(request: NextRequest) {
       };
     }
 
+    // Initialize Supabase service client for debtor operations
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Missing Supabase credentials for service role');
+      throw new Error('Supabase credentials niet gevonden');
+    }
+    const supabaseService = createServiceClient(supabaseUrl, supabaseServiceKey);
+
     // Check if debtor exists, if not create it, and ensure it's in saved_debtors
     let debtorId = null;
     if (invoiceData.debtor_email) {
       // First check if debtor exists in saved_debtors
-      const { data: existingSavedDebtor } = await supabase
+      const { data: existingSavedDebtor } = await supabaseService
         .from("saved_debtors")
         .select("debtor_id")
         .eq("organization_id", profile.organization_id)
@@ -97,7 +108,7 @@ export async function POST(request: NextRequest) {
         debtorId = existingSavedDebtor.debtor_id;
       } else {
         // Check if debtor exists in main debtors table
-        const { data: existingDebtor } = await supabase
+        const { data: existingDebtor } = await supabaseService
           .from("debtors")
           .select("id")
           .eq("email", invoiceData.debtor_email)
@@ -107,28 +118,32 @@ export async function POST(request: NextRequest) {
           debtorId = existingDebtor.id;
           
           // Create saved_debtor entry even if debtor already exists
-          await supabase
+          // Determine debtor_type based on whether company_name exists
+          const debtorType = invoiceData.debtor_company_name ? 'company' : 'particular';
+          await supabaseService
             .from("saved_debtors")
             .insert({
               organization_id: profile.organization_id,
               created_by: user.id,
               debtor_id: debtorId,
-              name: invoiceData.debtor_name,
-              company_name: invoiceData.debtor_company_name || invoiceData.debtor_name,
+              name: invoiceData.debtor_name || null,
+              company_name: invoiceData.debtor_company_name || null,
               email: invoiceData.debtor_email,
               vat_number: invoiceData.debtor_vat_number,
               address_street: invoiceData.debtor_address_street,
               address_city: invoiceData.debtor_address_city,
               address_postal_code: invoiceData.debtor_address_postal_code,
               address_country: invoiceData.debtor_address_country || 'BE',
+              debtor_type: debtorType,
             });
         } else {
           // Create new debtor
-          const { data: newDebtor, error: debtorError } = await supabase
+          const debtorType = invoiceData.debtor_company_name ? 'company' : 'particular';
+          const { data: newDebtor, error: debtorError } = await supabaseService
             .from("debtors")
             .insert({
-              name: invoiceData.debtor_name || invoiceData.debtor_company_name,
-              company_name: invoiceData.debtor_company_name,
+              name: invoiceData.debtor_name || null,
+              company_name: invoiceData.debtor_company_name || null,
               email: invoiceData.debtor_email,
               address_street: invoiceData.debtor_address_street,
               address_city: invoiceData.debtor_address_city,
@@ -144,20 +159,21 @@ export async function POST(request: NextRequest) {
             debtorId = newDebtor.id;
 
             // Also create saved_debtor entry
-            await supabase
+            await supabaseService
               .from("saved_debtors")
               .insert({
                 organization_id: profile.organization_id,
                 created_by: user.id,
                 debtor_id: debtorId,
-                name: invoiceData.debtor_name,
-                company_name: invoiceData.debtor_company_name || invoiceData.debtor_name,
+                name: invoiceData.debtor_name || null,
+                company_name: invoiceData.debtor_company_name || null,
                 email: invoiceData.debtor_email,
                 vat_number: invoiceData.debtor_vat_number,
                 address_street: invoiceData.debtor_address_street,
                 address_city: invoiceData.debtor_address_city,
                 address_postal_code: invoiceData.debtor_address_postal_code,
                 address_country: invoiceData.debtor_address_country || 'BE',
+                debtor_type: debtorType,
               });
           }
         }

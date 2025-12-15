@@ -131,6 +131,52 @@ export async function POST(request: NextRequest) {
       console.log('✅ Debtor created successfully:', newDebtor.id);
       debtorId = newDebtor.id;
     }
+    
+    // Ensure debtor is saved in saved_debtors for this organization
+    const { data: existingSavedDebtor } = await supabaseService
+      .from("saved_debtors")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("debtor_id", debtorId)
+      .single();
+    
+    if (!existingSavedDebtor) {
+      // Create saved_debtor entry
+      await supabaseService
+        .from("saved_debtors")
+        .insert({
+          organization_id: organizationId,
+          created_by: user.id,
+          debtor_id: debtorId,
+          name: body.debtorType === "particular" ? body.debtorNameOrCompany : null,
+          company_name: body.debtorType === "company" ? body.debtorNameOrCompany : null,
+          email: body.debtorEmail,
+          vat_number: body.debtorVatNumber || null,
+          address_street: body.debtorStreet || null,
+          address_city: body.debtorCity || null,
+          address_postal_code: body.debtorPostalCode || null,
+          address_country: body.debtorCountry || "BE",
+          debtor_type: body.debtorType || "particular",
+        });
+      console.log('✅ Debtor saved to bibliotheek');
+    } else {
+      // Update existing saved_debtor entry
+      await supabaseService
+        .from("saved_debtors")
+        .update({
+          name: body.debtorType === "particular" ? body.debtorNameOrCompany : null,
+          company_name: body.debtorType === "company" ? body.debtorNameOrCompany : null,
+          email: body.debtorEmail,
+          vat_number: body.debtorVatNumber || null,
+          address_street: body.debtorStreet || null,
+          address_city: body.debtorCity || null,
+          address_postal_code: body.debtorPostalCode || null,
+          address_country: body.debtorCountry || "BE",
+          debtor_type: body.debtorType || "particular",
+        })
+        .eq("id", existingSavedDebtor.id);
+      console.log('✅ Saved debtor updated in bibliotheek');
+    }
 
     // Calculate total amount
     const principalAmount = parseFloat(body.principalAmount);

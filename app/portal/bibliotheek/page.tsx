@@ -1,15 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Building2, Plus, Trash2, Download, Edit, Eye } from "lucide-react";
-import Link from "next/link";
-import { AddInvoiceModal } from "@/components/bibliotheek/add-invoice-modal";
-import { AddDebtorModal } from "@/components/bibliotheek/add-debtor-modal";
+import { FileText, Building2, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+
+// Dynamically import modals to prevent SSR issues
+const AddInvoiceModal = dynamic(
+  () => import("@/components/bibliotheek/add-invoice-modal").then(mod => ({ default: mod.AddInvoiceModal })),
+  { ssr: false }
+);
+const AddDebtorModal = dynamic(
+  () => import("@/components/bibliotheek/add-debtor-modal").then(mod => ({ default: mod.AddDebtorModal })),
+  { ssr: false }
+);
 
 interface SavedInvoice {
   id: string;
@@ -38,6 +47,7 @@ interface SavedDebtor {
 }
 
 export default function BibliotheekPage() {
+  const router = useRouter();
   const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
   const [debtors, setDebtors] = useState<SavedDebtor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -192,7 +202,8 @@ export default function BibliotheekPage() {
                 {invoices.map((invoice) => (
                   <div
                     key={invoice.id}
-                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/portal/bibliotheek/invoices/${invoice.id}`)}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -208,19 +219,13 @@ export default function BibliotheekPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Link href={`/portal/bibliotheek/invoices/${invoice.id}`}>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            title="Bekijken/Bewerken"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </Link>
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleDeleteInvoice(invoice.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteInvoice(invoice.id);
+                          }}
                           title="Verwijderen"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -279,7 +284,8 @@ export default function BibliotheekPage() {
                 {debtors.map((debtor) => (
                   <div
                     key={debtor.id}
-                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/portal/bibliotheek/debtors/${debtor.id}`)}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -303,19 +309,13 @@ export default function BibliotheekPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Link href={`/portal/bibliotheek/debtors/${debtor.id}`}>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            title="Bekijken/Bewerken"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </Link>
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleDeleteDebtor(debtor.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDebtor(debtor.id);
+                          }}
                           title="Verwijderen"
                         >
                           <Trash2 className="w-4 h-4" />

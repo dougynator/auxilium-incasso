@@ -11,9 +11,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
-import { Upload, File as FileIcon, X } from "lucide-react";
-import { BibliotheekSelector } from "@/components/cases/bibliotheek-selector";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Upload, File as FileIcon, X, Search, Loader2, Check, Eye } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const caseSchema = z.object({
   // Debtor info
@@ -24,6 +31,7 @@ const caseSchema = z.object({
   debtorCity: z.string().optional(),
   debtorPostalCode: z.string().optional(),
   debtorCountry: z.string().default("BE"),
+  debtorType: z.enum(["particular", "company"]).default("particular"),
 
   // Invoice info
   invoiceNumber: z.string().min(1, "Factuurnummer is verplicht"),
@@ -42,15 +50,130 @@ const caseSchema = z.object({
 
 type CaseFormData = z.infer<typeof caseSchema>;
 
+// Invoice Card Component for Modal
+function InvoiceCard({ invoice, onSelect, supabase }: { invoice: any; onSelect: () => void; supabase: any }) {
+  const [documentUrl, setDocumentUrl] = useState<string | null>(null);
+  const [loadingDoc, setLoadingDoc] = useState(false);
+  
+  const loadDocument = async () => {
+    if (invoice.document_path && !documentUrl) {
+      setLoadingDoc(true);
+      try {
+        const { data } = await supabase.storage
+          .from('case-attachments')
+          .createSignedUrl(invoice.document_path, 3600);
+        if (data?.signedUrl) {
+          setDocumentUrl(data.signedUrl);
+        }
+      } catch (error) {
+        console.error("Error loading document:", error);
+      } finally {
+        setLoadingDoc(false);
+      }
+    }
+  };
+  
+  return (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <div>
+              <p className="font-semibold font-sans">{invoice.invoice_number || "Geen nummer"}</p>
+              <p className="text-sm text-muted-foreground font-sans">
+                {invoice.debtor_name || invoice.debtor_email || "Onbekende debiteur"}
+              </p>
+            </div>
+            <div className="text-sm space-y-1 font-sans">
+              <p><strong>Datum:</strong> {formatDate(invoice.invoice_date)}</p>
+              {invoice.due_date && (
+                <p><strong>Vervaldatum:</strong> {formatDate(invoice.due_date)}</p>
+              )}
+              <p><strong>Bedrag:</strong> {formatCurrency(invoice.amount, invoice.currency)}</p>
+            </div>
+            <Button
+              type="button"
+              onClick={onSelect}
+              className="w-full mt-4"
+            >
+              Selecteer deze factuur
+            </Button>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="font-sans">Preview</Label>
+              {invoice.document_path && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={loadDocument}
+                  disabled={loadingDoc || !!documentUrl}
+                >
+                  {loadingDoc ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : documentUrl ? (
+                    <Eye className="w-4 h-4" />
+                  ) : (
+                    "Laad preview"
+                  )}
+                </Button>
+              )}
+            </div>
+            {documentUrl && (
+              <div className="border rounded-lg overflow-hidden bg-gray-50" style={{ height: '300px' }}>
+                <iframe
+                  src={`${documentUrl}#toolbar=0&navpanes=0&scrollbar=1&zoom=page-width`}
+                  className="w-full h-full"
+                  title="Factuur Preview"
+                  style={{ border: 'none' }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface DebtorOption {
+  id?: string;
+  debtor_id?: string;
+  name?: string;
+  company_name?: string;
+  email: string;
+  vat_number?: string;
+  address_street?: string;
+  address_city?: string;
+  address_postal_code?: string;
+  address_country?: string;
+}
+
 export default function NewCasePage() {
   const router = useRouter();
   const { toast } = useToast();
+  const supabase = createClient();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Debtor search state
+  const [debtorSearchQuery, setDebtorSearchQuery] = useState("");
+  const [debtorOptions, setDebtorOptions] = useState<DebtorOption[]>([]);
+  const [isSearchingDebtors, setIsSearchingDebtors] = useState(false);
+  const [selectedDebtor, setSelectedDebtor] = useState<DebtorOption | null>(null);
+  const [showDebtorDropdown, setShowDebtorDropdown] = useState(false);
+  const debtorSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const debtorInputRef = useRef<HTMLDivElement>(null);
+  
+  // Invoice search modal state
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
 
   const {
     register,
@@ -64,24 +187,131 @@ export default function NewCasePage() {
     defaultValues: {
       debtorCountry: "BE",
       additionalCosts: "0",
+      debtorType: "particular",
     },
   });
+  
+  // Watch debtor_name field for search
+  const debtorNameValue = watch("debtorNameOrCompany");
+  
+  // Sync debtorSearchQuery with form field value
+  useEffect(() => {
+    if (debtorNameValue !== undefined) {
+      setDebtorSearchQuery(debtorNameValue || "");
+    }
+  }, [debtorNameValue]);
+  
+  // Search for existing debtors when typing in debtor_name field
+  useEffect(() => {
+    if (debtorSearchTimeoutRef.current) {
+      clearTimeout(debtorSearchTimeoutRef.current);
+    }
+
+    const searchValue = debtorSearchQuery || "";
+    
+    if (searchValue.length >= 2 && !selectedDebtor) {
+      setIsSearchingDebtors(true);
+      setShowDebtorDropdown(true);
+      debtorSearchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/bibliotheek/debtors/search?q=${encodeURIComponent(searchValue)}`);
+          const result = await response.json();
+          
+          if (response.ok && result.debtors) {
+            setDebtorOptions(result.debtors);
+          } else {
+            setDebtorOptions([]);
+          }
+        } catch (error) {
+          console.error("Search error:", error);
+          setDebtorOptions([]);
+        } finally {
+          setIsSearchingDebtors(false);
+        }
+      }, 300); // Debounce 300ms
+    } else {
+      setDebtorOptions([]);
+      if (searchValue.length < 2) {
+        setShowDebtorDropdown(false);
+      }
+    }
+
+    return () => {
+      if (debtorSearchTimeoutRef.current) {
+        clearTimeout(debtorSearchTimeoutRef.current);
+      }
+    };
+  }, [debtorSearchQuery, selectedDebtor]);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (debtorInputRef.current && !debtorInputRef.current.contains(event.target as Node)) {
+        setShowDebtorDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  
+  // Load invoices for modal
+  const loadInvoices = async () => {
+    setLoadingInvoices(true);
+    try {
+      const response = await fetch("/api/bibliotheek/invoices");
+      const result = await response.json();
+      if (result.invoices) {
+        setInvoices(result.invoices);
+      }
+    } catch (error) {
+      console.error("Error loading invoices:", error);
+    } finally {
+      setLoadingInvoices(false);
+    }
+  };
+  
+  useEffect(() => {
+    if (invoiceModalOpen) {
+      loadInvoices();
+    }
+  }, [invoiceModalOpen]);
 
   const principalAmount = parseFloat(watch("principalAmount") || "0");
   const additionalCosts = parseFloat(watch("additionalCosts") || "0");
   const totalAmount = principalAmount + additionalCosts;
 
-  const handleSelectDebtor = (debtor: any) => {
-    setValue("debtorNameOrCompany", debtor.company_name || debtor.name || "");
+  const handleSelectDebtor = (debtor: DebtorOption) => {
+    setSelectedDebtor(debtor);
+    const displayName = debtor.name || debtor.company_name || "";
+    setValue("debtorNameOrCompany", displayName);
     setValue("debtorEmail", debtor.email);
     setValue("debtorVatNumber", debtor.vat_number || "");
     setValue("debtorStreet", debtor.address_street || "");
     setValue("debtorCity", debtor.address_city || "");
     setValue("debtorPostalCode", debtor.address_postal_code || "");
     setValue("debtorCountry", debtor.address_country || "BE");
+    setDebtorOptions([]);
+    setShowDebtorDropdown(false);
+  };
+  
+  const handleDebtorInputChange = (value: string) => {
+    setValue("debtorNameOrCompany", value);
+    if (selectedDebtor && value !== (selectedDebtor.name || selectedDebtor.company_name || "")) {
+      setSelectedDebtor(null);
+      // Clear other debtor fields if a selected debtor is deselected by typing
+      setValue("debtorEmail", "");
+      setValue("debtorVatNumber", "");
+      setValue("debtorStreet", "");
+      setValue("debtorCity", "");
+      setValue("debtorPostalCode", "");
+      setValue("debtorCountry", "BE");
+    }
   };
 
-  const handleSelectInvoice = (invoice: any) => {
+  const handleSelectInvoice = async (invoice: any) => {
     setValue("invoiceNumber", invoice.invoice_number || "");
     setValue("invoiceDate", invoice.invoice_date || "");
     setValue("dueDate", invoice.due_date || "");
@@ -97,6 +327,75 @@ export default function NewCasePage() {
       setValue("debtorPostalCode", invoice.debtor_address_postal_code || "");
       setValue("debtorCountry", invoice.debtor_address_country || "BE");
     }
+    
+    // Load the document file from bibliotheek
+    if (invoice.document_path && invoice.document_name) {
+      try {
+        // Get signed URL for the document
+        const { data: signedUrlData, error: urlError } = await supabase.storage
+          .from('case-attachments')
+          .createSignedUrl(invoice.document_path, 3600);
+        
+        if (urlError || !signedUrlData?.signedUrl) {
+          console.error('Error creating signed URL:', urlError);
+          toast({
+            title: "Waarschuwing",
+            description: "Kon document niet laden uit bibliotheek. Upload het handmatig.",
+            variant: "destructive",
+          });
+        } else {
+          // Download the file
+          const response = await fetch(signedUrlData.signedUrl);
+          if (!response.ok) {
+            throw new Error('Failed to download file');
+          }
+          
+          const blob = await response.blob();
+          
+          // Create a File object from the blob
+          const file = new File([blob], invoice.document_name, { 
+            type: blob.type || 'application/pdf' 
+          });
+          
+          // Set the file as uploaded
+          setUploadedFile(file);
+          
+          // Create preview
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setFilePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+          } else if (file.type === 'application/pdf') {
+            const blobUrl = URL.createObjectURL(file);
+            setPdfBlobUrl(blobUrl);
+            setFilePreview(blobUrl);
+          }
+          
+          // Update form input
+          if (fileInputRef.current) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInputRef.current.files = dataTransfer.files;
+          }
+          
+          toast({
+            title: "Document geladen",
+            description: `Document "${invoice.document_name}" is automatisch geladen uit je bibliotheek`,
+          });
+        }
+      } catch (error: any) {
+        console.error('Error loading document from bibliotheek:', error);
+        toast({
+          title: "Waarschuwing",
+          description: "Kon document niet laden uit bibliotheek. Upload het handmatig.",
+          variant: "destructive",
+        });
+      }
+    }
+    
+    setInvoiceModalOpen(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -321,14 +620,91 @@ export default function NewCasePage() {
               <CardDescription>Gegevens van de debiteur</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <BibliotheekSelector onSelectDebtor={handleSelectDebtor} />
               <div className="space-y-2">
+                <Label htmlFor="debtorType">Type *</Label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="particular"
+                      {...register("debtorType")}
+                      className="w-4 h-4"
+                    />
+                    <span className="font-sans">Particulier</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="company"
+                      {...register("debtorType")}
+                      className="w-4 h-4"
+                    />
+                    <span className="font-sans">Bedrijf</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div className="space-y-2 relative" ref={debtorInputRef}>
                 <Label htmlFor="debtorNameOrCompany">Naam/bedrijfsnaam *</Label>
-                <Input
-                  id="debtorNameOrCompany"
-                  {...register("debtorNameOrCompany")}
-                  placeholder="Jan Janssen of BVBA Example"
-                />
+                <div className="relative">
+                  <Input
+                    id="debtorNameOrCompany"
+                    {...register("debtorNameOrCompany", {
+                      onChange: (e) => {
+                        handleDebtorInputChange(e.target.value);
+                      }
+                    })}
+                    onFocus={() => {
+                      const currentValue = watch("debtorNameOrCompany") || "";
+                      if (currentValue.length >= 2 && debtorOptions.length > 0) {
+                        setShowDebtorDropdown(true);
+                      }
+                    }}
+                    placeholder="Typ naam of bedrijfsnaam..."
+                  />
+                  {isSearchingDebtors && (
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+                  )}
+                  
+                  {/* Dropdown */}
+                  {showDebtorDropdown && (debtorOptions.length > 0 || isSearchingDebtors) && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                      {isSearchingDebtors && debtorOptions.length === 0 && (
+                        <div className="px-4 py-2 text-sm text-muted-foreground flex items-center">
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Zoeken...
+                        </div>
+                      )}
+                      {!isSearchingDebtors && debtorOptions.length === 0 && debtorSearchQuery.length >= 2 && (
+                        <div className="px-4 py-2 text-sm text-muted-foreground">Geen debiteuren gevonden.</div>
+                      )}
+                      {debtorOptions.map((debtor, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleSelectDebtor(debtor)}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">
+                              {debtor.name || debtor.company_name || "Geen naam"}
+                            </div>
+                            {debtor.company_name && debtor.name && (
+                              <div className="text-xs text-muted-foreground truncate">
+                                {debtor.company_name}
+                              </div>
+                            )}
+                            <div className="text-xs text-muted-foreground truncate">
+                              {debtor.email}
+                            </div>
+                          </div>
+                          {selectedDebtor?.email === debtor.email && (
+                            <Check className="w-4 h-4 text-primary ml-2 flex-shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 {errors.debtorNameOrCompany && (
                   <p className="text-sm text-destructive">{errors.debtorNameOrCompany.message}</p>
                 )}
@@ -393,14 +769,26 @@ export default function NewCasePage() {
               <CardDescription>Gegevens van de factuur</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <BibliotheekSelector onSelectInvoice={handleSelectInvoice} />
               <div className="space-y-2">
                 <Label htmlFor="invoiceNumber">Factuurnummer *</Label>
-                <Input
-                  id="invoiceNumber"
-                  {...register("invoiceNumber")}
-                  placeholder="INV-2024-001"
-                />
+                <div className="relative">
+                  <Input
+                    id="invoiceNumber"
+                    {...register("invoiceNumber")}
+                    placeholder="INV-2024-001"
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                    onClick={() => setInvoiceModalOpen(true)}
+                    title="Zoek in bibliotheek"
+                  >
+                    <Search className="w-4 h-4" />
+                  </Button>
+                </div>
                 {errors.invoiceNumber && (
                   <p className="text-sm text-destructive">{errors.invoiceNumber.message}</p>
                 )}
@@ -740,6 +1128,40 @@ export default function NewCasePage() {
           </Card>
         )}
       </form>
+      
+      {/* Invoice Library Modal */}
+      <Dialog open={invoiceModalOpen} onOpenChange={setInvoiceModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Factuurbibliotheek</DialogTitle>
+            <DialogDescription>
+              Selecteer een factuur uit je bibliotheek om de gegevens automatisch in te vullen
+            </DialogDescription>
+          </DialogHeader>
+          
+          {loadingInvoices ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="ml-2 font-sans">Facturen laden...</span>
+            </div>
+          ) : invoices.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="font-sans text-muted-foreground">Nog geen facturen in je bibliotheek</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {invoices.map((invoice) => (
+                <InvoiceCard
+                  key={invoice.id}
+                  invoice={invoice}
+                  onSelect={() => handleSelectInvoice(invoice)}
+                  supabase={supabase}
+                />
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

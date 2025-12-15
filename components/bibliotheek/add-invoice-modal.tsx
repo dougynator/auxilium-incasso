@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, X, Loader2, ArrowLeft, ArrowRight, Save } from "lucide-react";
+import { Upload, X, Loader2, ArrowLeft, ArrowRight, Save, Search, Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
   Dialog,
@@ -33,6 +33,7 @@ const invoiceSchema = z.object({
   debtor_address_city: z.string().optional(),
   debtor_address_postal_code: z.string().optional(),
   debtor_address_country: z.string().default("BE"),
+  debtor_type: z.enum(["particular", "company"]).default("particular"),
 });
 
 type InvoiceFormData = z.infer<typeof invoiceSchema>;
@@ -41,6 +42,19 @@ interface AddInvoiceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+}
+
+interface DebtorOption {
+  id?: string;
+  debtor_id?: string;
+  name?: string;
+  company_name?: string;
+  email: string;
+  vat_number?: string;
+  address_street?: string;
+  address_city?: string;
+  address_postal_code?: string;
+  address_country?: string;
 }
 
 export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceModalProps) {
@@ -53,6 +67,15 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
   const { toast } = useToast();
+  
+  // Debtor search state
+  const [debtorSearchQuery, setDebtorSearchQuery] = useState("");
+  const [debtorOptions, setDebtorOptions] = useState<DebtorOption[]>([]);
+  const [isSearchingDebtors, setIsSearchingDebtors] = useState(false);
+  const [selectedDebtor, setSelectedDebtor] = useState<DebtorOption | null>(null);
+  const [showDebtorDropdown, setShowDebtorDropdown] = useState(false);
+  const debtorSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const debtorInputRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -66,6 +89,7 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
     defaultValues: {
       currency: "EUR",
       debtor_address_country: "BE",
+      debtor_type: "particular",
     },
   });
 
@@ -76,9 +100,104 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
       setFile(null);
       setDocumentUrl(null);
       setInvoiceId(null);
+      setDebtorSearchQuery("");
+      setDebtorOptions([]);
+      setSelectedDebtor(null);
+      setShowDebtorDropdown(false);
       reset();
     }
   }, [open, reset]);
+
+  // Watch debtor_name field for search
+  const debtorNameValue = watch("debtor_name");
+
+  // Sync debtorSearchQuery with form field value
+  useEffect(() => {
+    if (debtorNameValue !== undefined) {
+      setDebtorSearchQuery(debtorNameValue || "");
+    }
+  }, [debtorNameValue]);
+
+  // Search for existing debtors when typing in debtor_name field
+  useEffect(() => {
+    if (debtorSearchTimeoutRef.current) {
+      clearTimeout(debtorSearchTimeoutRef.current);
+    }
+
+    const searchValue = debtorSearchQuery || "";
+    
+    if (searchValue.length >= 2 && !selectedDebtor) {
+      setIsSearchingDebtors(true);
+      setShowDebtorDropdown(true);
+      debtorSearchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/bibliotheek/debtors/search?q=${encodeURIComponent(searchValue)}`);
+          const result = await response.json();
+          
+          if (response.ok && result.debtors) {
+            setDebtorOptions(result.debtors);
+          } else {
+            setDebtorOptions([]);
+          }
+        } catch (error) {
+          console.error("Search error:", error);
+          setDebtorOptions([]);
+        } finally {
+          setIsSearchingDebtors(false);
+        }
+      }, 300); // Debounce 300ms
+    } else {
+      setDebtorOptions([]);
+      if (searchValue.length < 2) {
+        setShowDebtorDropdown(false);
+      }
+    }
+
+    return () => {
+      if (debtorSearchTimeoutRef.current) {
+        clearTimeout(debtorSearchTimeoutRef.current);
+      }
+    };
+  }, [debtorSearchQuery, selectedDebtor]);
+
+  const handleSelectDebtor = (debtor: DebtorOption) => {
+    setSelectedDebtor(debtor);
+    const displayName = debtor.name || debtor.company_name || "";
+    setDebtorSearchQuery(displayName);
+    setDebtorOptions([]);
+    setShowDebtorDropdown(false);
+    
+    // Fill form with selected debtor data
+    setValue("debtor_name", displayName);
+    setValue("debtor_email", debtor.email);
+    setValue("debtor_vat_number", debtor.vat_number || "");
+    setValue("debtor_address_street", debtor.address_street || "");
+    setValue("debtor_address_city", debtor.address_city || "");
+    setValue("debtor_address_postal_code", debtor.address_postal_code || "");
+    setValue("debtor_address_country", debtor.address_country || "BE");
+  };
+
+  const handleDebtorInputChange = (value: string) => {
+    // If user is typing something different than selected debtor, clear selection
+    if (selectedDebtor && value !== (selectedDebtor.name || selectedDebtor.company_name || "")) {
+      setSelectedDebtor(null);
+    }
+    setDebtorSearchQuery(value);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (debtorInputRef.current && !debtorInputRef.current.contains(event.target as Node)) {
+        setShowDebtorDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -141,18 +260,26 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
       // Step 3: Fill form with extracted data
       const extractedData = invoice.extracted_data || {};
       
+      const debtorEmail = invoice.debtor_email || extractedData.debtor_email || "";
+      const debtorName = invoice.debtor_name || extractedData.debtor_name || "";
+      
       setValue("invoice_number", invoice.invoice_number || extractedData.invoice_number || "");
       setValue("invoice_date", invoice.invoice_date || extractedData.invoice_date || "");
       setValue("due_date", invoice.due_date || extractedData.due_date || "");
       setValue("amount", invoice.amount?.toString() || extractedData.amount?.toString() || "0");
       setValue("currency", invoice.currency || extractedData.currency || "EUR");
-      setValue("debtor_name", invoice.debtor_name || extractedData.debtor_name || "");
-      setValue("debtor_email", invoice.debtor_email || extractedData.debtor_email || "");
+      setValue("debtor_name", debtorName);
+      setValue("debtor_email", debtorEmail);
       setValue("debtor_vat_number", invoice.debtor_vat_number || extractedData.debtor_vat_number || "");
       setValue("debtor_address_street", invoice.debtor_address_street || extractedData.debtor_address_street || "");
       setValue("debtor_address_city", invoice.debtor_address_city || extractedData.debtor_address_city || "");
       setValue("debtor_address_postal_code", invoice.debtor_address_postal_code || extractedData.debtor_address_postal_code || "");
       setValue("debtor_address_country", invoice.debtor_address_country || extractedData.debtor_address_country || "BE");
+      
+      // Set debtor search query to trigger search if name exists
+      if (debtorName) {
+        setDebtorSearchQuery(debtorName);
+      }
 
       // Move to verification step
       setStep(2);
@@ -432,13 +559,91 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
                     <div className="space-y-3 border-t pt-4">
                       <Label className="text-base font-semibold">Debiteur informatie</Label>
                       
+                      {/* Type */}
                       <div className="space-y-2">
+                        <Label htmlFor="debtor_type">Type *</Label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              value="particular"
+                              {...register("debtor_type")}
+                              className="w-4 h-4"
+                            />
+                            <span className="font-sans">Particulier</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              value="company"
+                              {...register("debtor_type")}
+                              className="w-4 h-4"
+                            />
+                            <span className="font-sans">Bedrijf</span>
+                          </label>
+                        </div>
+                      </div>
+                      
+                      {/* Naam/Bedrijfsnaam with search dropdown */}
+                      <div className="space-y-2 relative">
                         <Label htmlFor="debtor_name">Naam/Bedrijfsnaam</Label>
-                        <Input
-                          id="debtor_name"
-                          {...register("debtor_name")}
-                          placeholder="Jan Janssen of BVBA Example"
-                        />
+                        <div className="relative" ref={debtorInputRef}>
+                          <Input
+                            id="debtor_name"
+                            {...register("debtor_name", {
+                              onChange: (e) => {
+                                const value = e.target.value;
+                                handleDebtorInputChange(value);
+                              }
+                            })}
+                            onFocus={() => {
+                              const currentValue = watch("debtor_name") || "";
+                              if (currentValue.length >= 2 && debtorOptions.length > 0) {
+                                setShowDebtorDropdown(true);
+                              }
+                            }}
+                            placeholder="Typ naam of bedrijfsnaam..."
+                          />
+                          {isSearchingDebtors && (
+                            <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+                          )}
+                          
+                          {/* Dropdown */}
+                          {showDebtorDropdown && debtorOptions.length > 0 && (
+                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                              {debtorOptions.map((debtor, index) => (
+                                <button
+                                  key={index}
+                                  type="button"
+                                  onClick={() => handleSelectDebtor(debtor)}
+                                  className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium text-sm truncate">
+                                      {debtor.name || debtor.company_name || "Geen naam"}
+                                    </div>
+                                    {debtor.company_name && debtor.name && (
+                                      <div className="text-xs text-muted-foreground truncate">
+                                        {debtor.company_name}
+                                      </div>
+                                    )}
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {debtor.email}
+                                    </div>
+                                  </div>
+                                  {selectedDebtor?.email === debtor.email && (
+                                    <Check className="w-4 h-4 text-primary ml-2 flex-shrink-0" />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {debtorNameValue && !selectedDebtor && debtorOptions.length === 0 && !isSearchingDebtors && debtorNameValue.length >= 2 && (
+                          <p className="text-sm text-muted-foreground">
+                            Geen bestaande relatie gevonden. Deze wordt automatisch opgeslagen bij het opslaan van de factuur.
+                          </p>
+                        )}
                       </div>
 
                       <div className="grid md:grid-cols-2 gap-3">
@@ -449,6 +654,8 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
                             type="email"
                             {...register("debtor_email")}
                             placeholder="debiteur@example.com"
+                            readOnly={!!selectedDebtor}
+                            className={selectedDebtor ? "bg-gray-50" : ""}
                           />
                           {errors.debtor_email && (
                             <p className="text-sm text-destructive">{errors.debtor_email.message}</p>

@@ -33,15 +33,28 @@ export async function POST(request: NextRequest) {
       address_country,
       phone,
       notes,
+      debtor_type,
     } = body;
 
     if (!email) {
       return NextResponse.json({ error: "E-mailadres is verplicht" }, { status: 400 });
     }
 
+    // Use service client for debtor operations to bypass RLS
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Missing Supabase service credentials');
+      return NextResponse.json({ error: "Server configuratie fout" }, { status: 500 });
+    }
+    
+    const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+    const supabaseService = createServiceClient(supabaseUrl, supabaseServiceKey);
+    
     // Check if debtor exists in main debtors table
     let debtorId = null;
-    const { data: existingDebtor } = await supabase
+    const { data: existingDebtor } = await supabaseService
       .from("debtors")
       .select("id")
       .eq("email", email)
@@ -51,7 +64,7 @@ export async function POST(request: NextRequest) {
       debtorId = existingDebtor.id;
     } else {
       // Create new debtor
-      const { data: newDebtor, error: debtorError } = await supabase
+      const { data: newDebtor, error: debtorError } = await supabaseService
         .from("debtors")
         .insert({
           name: name,
@@ -61,6 +74,7 @@ export async function POST(request: NextRequest) {
           address_city: address_city,
           address_postal_code: address_postal_code,
           address_country: address_country || 'BE',
+          debtor_type: debtor_type || "particular",
         })
         .select("id")
         .single();
@@ -79,8 +93,8 @@ export async function POST(request: NextRequest) {
         organization_id: profile.organization_id,
         created_by: user.id,
         debtor_id: debtorId,
-        name: name,
-        company_name: company_name,
+        name: debtor_type === "particular" ? name : null,
+        company_name: debtor_type === "company" ? (company_name || name) : null,
         email: email,
         vat_number: vat_number,
         address_street: address_street,
@@ -89,6 +103,7 @@ export async function POST(request: NextRequest) {
         address_country: address_country || 'BE',
         phone: phone,
         notes: notes,
+        debtor_type: debtor_type || "particular",
       }, {
         onConflict: 'organization_id,email',
       })

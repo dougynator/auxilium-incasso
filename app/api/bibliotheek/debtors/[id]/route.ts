@@ -81,14 +81,15 @@ export async function PUT(
       address_country,
       phone,
       notes,
+      debtor_type,
     } = body;
 
     // Update debtor
     const { data: updatedDebtor, error } = await supabase
       .from("saved_debtors")
       .update({
-        name,
-        company_name,
+        name: debtor_type === "particular" ? name : null,
+        company_name: debtor_type === "company" ? (company_name || name) : null,
         email,
         vat_number,
         address_street,
@@ -97,6 +98,7 @@ export async function PUT(
         address_country: address_country || 'BE',
         phone,
         notes,
+        debtor_type: debtor_type || "particular",
         updated_at: new Date().toISOString(),
       })
       .eq("id", params.id)

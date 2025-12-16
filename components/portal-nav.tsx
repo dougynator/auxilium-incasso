@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, FileText, Library, User, Plug } from "lucide-react";
+import { Home, FileText, Library, User, Plug, Users } from "lucide-react";
 
 interface NavItem {
   name: string;
@@ -20,16 +20,21 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Library,
   User,
   Plug,
+  Users,
 };
 
 export default function PortalNav({ items }: PortalNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="p-4 space-y-2">
+    <nav className="p-4 pt-8 space-y-2">
       {items.map((item) => {
         const Icon = iconMap[item.iconName] || Home;
-        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+        // Special handling for Dashboard (/portal or /admin) - only active on exact match
+        // Other routes are active if exact match or starts with route + "/"
+        const isActive = item.href === "/portal" || item.href === "/admin"
+          ? pathname === item.href
+          : pathname === item.href || pathname.startsWith(item.href + "/");
         
         return (
           <Link

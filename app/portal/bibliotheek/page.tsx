@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Building2, Plus, Trash2, Eye } from "lucide-react";
+import { FileText, Building2, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -223,14 +223,6 @@ export default function BibliotheekPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => router.push(`/portal/bibliotheek/invoices/${invoice.id}`)}
-                          title="Bekijken/Bewerken"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteInvoice(invoice.id);
@@ -320,14 +312,6 @@ export default function BibliotheekPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => router.push(`/portal/bibliotheek/debtors/${debtor.id}`)}
-                          title="Bekijken/Bewerken"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"

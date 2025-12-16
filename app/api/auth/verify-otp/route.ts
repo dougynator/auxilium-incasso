@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         const cookieOptions = [
           `Path=/`,
           `SameSite=Lax`,
-          `HttpOnly`,
+          // Removed HttpOnly so client-side Supabase can read cookies
           `Max-Age=${60 * 60 * 24 * 7}`, // 7 days
         ];
         
@@ -83,8 +83,9 @@ export async function POST(request: NextRequest) {
         const cookieString = `${cookie.name}=${cookie.value}; ${cookieOptions.join('; ')}`;
         
         // Set cookie using both methods to ensure it works
+        // Auth cookies should NOT be httpOnly so client-side Supabase can read them
         response.cookies.set(cookie.name, cookie.value, {
-          httpOnly: true,
+          httpOnly: false, // Changed to false so client can read
           secure: process.env.NODE_ENV === 'production' && !isLocalhost,
           sameSite: 'lax' as const,
           path: '/',

@@ -78,6 +78,7 @@ export function AddDebtorModal({ open, onOpenChange, onSuccess }: AddDebtorModal
   });
 
   const emailValue = watch("email");
+  const debtorType = watch("debtor_type");
 
   // Search for existing debtors when typing
   useEffect(() => {
@@ -126,6 +127,10 @@ export function AddDebtorModal({ open, onOpenChange, onSuccess }: AddDebtorModal
     setSelectedDebtor(debtor);
     setSearchQuery("");
     setDebtorOptions([]);
+    
+    // Determine debtor type based on company_name
+    const isCompany = !!debtor.company_name;
+    setValue("debtor_type", isCompany ? "company" : "particular");
     
     // Fill form with selected debtor data
     setValue("name", debtor.name || "");
@@ -202,21 +207,31 @@ export function AddDebtorModal({ open, onOpenChange, onSuccess }: AddDebtorModal
             <Label htmlFor="debtor_type">Type *</Label>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  value="particular"
-                  {...register("debtor_type")}
-                  className="w-4 h-4"
-                />
+              <input
+                type="radio"
+                value="particular"
+                {...register("debtor_type")}
+                onChange={(e) => {
+                  if (e.target.value === "particular") {
+                    setValue("debtor_type", "particular");
+                    setValue("company_name", "");
+                    setValue("vat_number", "");
+                  }
+                }}
+                className="w-4 h-4"
+              />
                 <span className="font-sans">Particulier</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  value="company"
-                  {...register("debtor_type")}
-                  className="w-4 h-4"
-                />
+              <input
+                type="radio"
+                value="company"
+                {...register("debtor_type")}
+                onChange={(e) => {
+                  setValue("debtor_type", "company");
+                }}
+                className="w-4 h-4"
+              />
                 <span className="font-sans">Bedrijf</span>
               </label>
             </div>
@@ -227,10 +242,12 @@ export function AddDebtorModal({ open, onOpenChange, onSuccess }: AddDebtorModal
               <Label htmlFor="name">Naam</Label>
               <Input id="name" {...register("name")} placeholder="Jan Janssen" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="company_name">Bedrijfsnaam</Label>
-              <Input id="company_name" {...register("company_name")} placeholder="BVBA Example" />
-            </div>
+            {debtorType === "company" && (
+              <div className="space-y-2">
+                <Label htmlFor="company_name">Bedrijfsnaam</Label>
+                <Input id="company_name" {...register("company_name")} placeholder="BVBA Example" />
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -307,10 +324,12 @@ export function AddDebtorModal({ open, onOpenChange, onSuccess }: AddDebtorModal
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="vat_number">BTW nummer</Label>
-              <Input id="vat_number" {...register("vat_number")} placeholder="BE0123456789" />
-            </div>
+            {debtorType === "company" && (
+              <div className="space-y-2">
+                <Label htmlFor="vat_number">BTW nummer</Label>
+                <Input id="vat_number" {...register("vat_number")} placeholder="BE0123456789" />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="phone">Telefoon</Label>
               <Input id="phone" {...register("phone")} placeholder="+32 12 34 56 789" />

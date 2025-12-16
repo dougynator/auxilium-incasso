@@ -110,6 +110,7 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
 
   // Watch debtor_name field for search
   const debtorNameValue = watch("debtor_name");
+  const debtorType = watch("debtor_type");
 
   // Sync debtorSearchQuery with form field value
   useEffect(() => {
@@ -166,6 +167,10 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
     setDebtorSearchQuery(displayName);
     setDebtorOptions([]);
     setShowDebtorDropdown(false);
+    
+    // Determine debtor type based on company_name
+    const isCompany = !!debtor.company_name;
+    setValue("debtor_type", isCompany ? "company" : "particular");
     
     // Fill form with selected debtor data
     setValue("debtor_name", displayName);
@@ -568,6 +573,12 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
                               type="radio"
                               value="particular"
                               {...register("debtor_type")}
+                              onChange={(e) => {
+                                if (e.target.value === "particular") {
+                                  setValue("debtor_type", "particular");
+                                  setValue("debtor_vat_number", "");
+                                }
+                              }}
                               className="w-4 h-4"
                             />
                             <span className="font-sans">Particulier</span>
@@ -577,6 +588,9 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
                               type="radio"
                               value="company"
                               {...register("debtor_type")}
+                              onChange={(e) => {
+                                setValue("debtor_type", "company");
+                              }}
                               className="w-4 h-4"
                             />
                             <span className="font-sans">Bedrijf</span>
@@ -646,7 +660,7 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
                         )}
                       </div>
 
-                      <div className="grid md:grid-cols-2 gap-3">
+                      <div className={`grid gap-3 ${debtorType === "company" ? "md:grid-cols-2" : ""}`}>
                         <div className="space-y-2">
                           <Label htmlFor="debtor_email">E-mailadres</Label>
                           <Input
@@ -661,14 +675,16 @@ export function AddInvoiceModal({ open, onOpenChange, onSuccess }: AddInvoiceMod
                             <p className="text-sm text-destructive">{errors.debtor_email.message}</p>
                           )}
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="debtor_vat_number">BTW nummer</Label>
-                          <Input
-                            id="debtor_vat_number"
-                            {...register("debtor_vat_number")}
-                            placeholder="BE0123456789"
-                          />
-                        </div>
+                        {debtorType === "company" && (
+                          <div className="space-y-2">
+                            <Label htmlFor="debtor_vat_number">BTW nummer</Label>
+                            <Input
+                              id="debtor_vat_number"
+                              {...register("debtor_vat_number")}
+                              placeholder="BE0123456789"
+                            />
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-2">

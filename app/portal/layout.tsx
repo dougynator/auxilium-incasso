@@ -56,6 +56,11 @@ export default async function PortalLayout({
     }
   }
 
+  // Redirect admin/staff users to admin portal
+  if (profile && (profile.role === "admin" || profile.role === "staff")) {
+    redirect("/admin");
+  }
+
   async function handleSignOut() {
     "use server";
     const supabase = await createClient();
@@ -98,7 +103,6 @@ export default async function PortalLayout({
         <div className="px-4 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <Logo href="/portal" />
-            <span className="font-sans text-lg text-muted-foreground ml-2">- Portaal</span>
           </div>
           <div className="flex items-center gap-4">
             {profile?.role === "admin" || profile?.role === "staff" ? (
@@ -118,12 +122,12 @@ export default async function PortalLayout({
 
       <div className="flex">
         {/* Sidebar navigation */}
-        <aside className="w-64 bg-white border-r min-h-[calc(100vh-73px)] sticky top-[73px]">
+        <aside className="w-64 bg-white border-r fixed top-[73px] left-0 bottom-0 overflow-y-auto">
           <PortalNav items={navigationItems} />
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 p-8">{children}</main>
+        <main className="flex-1 p-8 ml-64">{children}</main>
       </div>
     </div>
   );

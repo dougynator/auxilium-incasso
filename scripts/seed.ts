@@ -46,14 +46,32 @@ async function seed() {
       throw new Error('Could not create or find admin user');
     }
 
-    // Update admin profile
-    await supabase
+    // Ensure admin profile exists and has admin role
+    const { data: existingProfile } = await supabase
       .from('profiles')
-      .update({
-        role: 'admin',
-        full_name: 'Admin Gebruiker',
-      })
-      .eq('id', adminUserId);
+      .select('*')
+      .eq('id', adminUserId)
+      .single();
+    
+    if (existingProfile) {
+      // Update if exists
+      await supabase
+        .from('profiles')
+        .update({
+          role: 'admin',
+          full_name: 'Admin Gebruiker',
+        })
+        .eq('id', adminUserId);
+    } else {
+      // Insert if doesn't exist
+      await supabase
+        .from('profiles')
+        .insert({
+          id: adminUserId,
+          role: 'admin',
+          full_name: 'Admin Gebruiker',
+        });
+    }
 
     console.log('✓ Admin user created');
 

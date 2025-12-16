@@ -111,8 +111,9 @@ export async function POST(request: NextRequest) {
         const isLocalhost = request.headers.get('host')?.includes('localhost') || 
                            request.headers.get('host')?.includes('127.0.0.1');
         
+        // Auth cookies should NOT be httpOnly so client-side Supabase can read them
         response.cookies.set(cookie.name, cookie.value, {
-          httpOnly: true,
+          httpOnly: false, // Changed to false so client can read
           secure: process.env.NODE_ENV === 'production' && !isLocalhost,
           sameSite: 'lax',
           path: '/',

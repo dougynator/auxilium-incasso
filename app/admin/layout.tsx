@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
+import { LogOut } from "lucide-react";
+import PortalNav from "@/components/portal-nav";
 
 export default async function AdminLayout({
   children,
@@ -34,28 +36,60 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
+  const navigationItems = [
+    {
+      name: "Dashboard",
+      href: "/admin",
+      iconName: "Home",
+    },
+    {
+      name: "Dossiers",
+      href: "/admin/cases",
+      iconName: "FileText",
+    },
+    {
+      name: "Gebruikers",
+      href: "/admin/users",
+      iconName: "Users",
+    },
+    {
+      name: "Account",
+      href: "/admin/account",
+      iconName: "User",
+    },
+  ];
+
   return (
-    <div className="min-h-screen">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div className="min-h-screen bg-gray-50">
+      {/* Top header */}
+      <header className="bg-white border-b sticky top-0 z-50">
+        <div className="px-4 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <Logo href="/admin" />
-            <span className="text-lg text-muted-foreground ml-2">- Admin</span>
           </div>
-          <nav className="flex gap-6 items-center">
-            <Link href="/admin" className="hover:text-primary">Dashboard</Link>
-            <Link href="/admin/cases" className="hover:text-primary">Opdrachten</Link>
-            <Link href="/admin/users" className="hover:text-primary">Gebruikers</Link>
-            <Link href="/portal" className="hover:text-primary">Portaal</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/portal" className="font-sans text-sm text-muted-foreground hover:text-primary transition-colors">
+              Portaal
+            </Link>
             <form action={handleSignOut}>
-              <Button type="submit" variant="outline">
+              <Button type="submit" variant="outline" size="sm" className="font-sans">
+                <LogOut className="w-4 h-4 mr-2" />
                 Uitloggen
               </Button>
             </form>
-          </nav>
+          </div>
         </div>
       </header>
-      <main className="container mx-auto px-4 py-8">{children}</main>
+
+      <div className="flex">
+        {/* Sidebar navigation */}
+        <aside className="w-64 bg-white border-r fixed top-[73px] left-0 bottom-0 overflow-y-auto">
+          <PortalNav items={navigationItems} />
+        </aside>
+
+        {/* Main content */}
+        <main className="flex-1 p-8 ml-64">{children}</main>
+      </div>
     </div>
   );
 }

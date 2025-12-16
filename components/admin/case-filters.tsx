@@ -1,8 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -17,10 +17,13 @@ export default function CaseFilters() {
     if (search) params.set("search", search);
     if (status) params.set("status", status);
     const queryString = params.toString();
-    if (queryString !== searchParams.toString()) {
+    const currentQuery = searchParams.toString();
+    
+    // Only update if the query string has actually changed
+    if (queryString !== currentQuery) {
       router.push(`/admin/cases${queryString ? `?${queryString}` : ""}`);
     }
-  }, [search, status, router, searchParams]);
+  }, [search, status, router]);
 
   const handleClearFilters = () => {
     setSearch("");
@@ -42,17 +45,16 @@ export default function CaseFilters() {
           </div>
           <div>
             <label className="text-sm font-medium mb-2 block">Status</label>
-            <Select
+            <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Alle statussen</option>
-              <option value="draft">Concept</option>
-              <option value="sent">Verzonden</option>
-              <option value="in_progress">In behandeling</option>
-              <option value="paid">Betaald</option>
-              <option value="closed">Afgesloten</option>
-            </Select>
+              <option value="sent">Open</option>
+              <option value="paid">Ontvangen</option>
+              <option value="bailiff">Deurwaarder</option>
+            </select>
           </div>
           <div className="flex items-end">
             <Button

@@ -11,8 +11,9 @@ import CaseAttachments from "@/components/cases/case-attachments";
 export default async function CaseDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -35,7 +36,7 @@ export default async function CaseDetailPage({
   let caseQuery = supabase
     .from("cases")
     .select("*, debtors(*), organizations(*), case_events(*, profiles(full_name)), case_attachments(*)")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (profile.role === "client") {

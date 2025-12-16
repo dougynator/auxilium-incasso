@@ -32,13 +32,13 @@ export default async function IntegratiesPage() {
     {
       name: "API Integratie",
       description: "Koppel je eigen systeem aan via onze API",
-      status: "available",
+      status: "coming_soon",
       icon: Plug,
     },
     {
       name: "Webhook Integratie",
       description: "Ontvang real-time updates via webhooks",
-      status: "available",
+      status: "coming_soon",
       icon: Plug,
     },
     {

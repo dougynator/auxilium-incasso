@@ -47,6 +47,13 @@ export async function POST(request: NextRequest) {
 
     const body = JSON.parse(dataString);
 
+    // Helper function to combine street and house number
+    const getFullStreet = () => {
+      return body.debtorHouseNumber 
+        ? `${body.debtorStreet || ""} ${body.debtorHouseNumber}`.trim()
+        : body.debtorStreet || null;
+    };
+
     const organizationId =
       profile.role === "client"
         ? profile.organization_id
@@ -87,7 +94,7 @@ export async function POST(request: NextRequest) {
       await supabaseService.from("debtors").update({
         name: body.debtorNameOrCompany || null,
         company_name: body.debtorNameOrCompany || null,
-        address_street: body.debtorStreet || null,
+        address_street: getFullStreet(),
         address_city: body.debtorCity || null,
         address_postal_code: body.debtorPostalCode || null,
         address_country: body.debtorCountry || "BE",
@@ -104,7 +111,7 @@ export async function POST(request: NextRequest) {
           name: body.debtorNameOrCompany || null,
           company_name: body.debtorNameOrCompany || null,
           email: body.debtorEmail,
-          address_street: body.debtorStreet || null,
+          address_street: getFullStreet(),
           address_city: body.debtorCity || null,
           address_postal_code: body.debtorPostalCode || null,
           address_country: body.debtorCountry || "BE",
@@ -152,7 +159,7 @@ export async function POST(request: NextRequest) {
           company_name: body.debtorType === "company" ? body.debtorNameOrCompany : null,
           email: body.debtorEmail,
           vat_number: body.debtorVatNumber || null,
-          address_street: body.debtorStreet || null,
+          address_street: getFullStreet(),
           address_city: body.debtorCity || null,
           address_postal_code: body.debtorPostalCode || null,
           address_country: body.debtorCountry || "BE",
@@ -168,7 +175,7 @@ export async function POST(request: NextRequest) {
           company_name: body.debtorType === "company" ? body.debtorNameOrCompany : null,
           email: body.debtorEmail,
           vat_number: body.debtorVatNumber || null,
-          address_street: body.debtorStreet || null,
+          address_street: getFullStreet(),
           address_city: body.debtorCity || null,
           address_postal_code: body.debtorPostalCode || null,
           address_country: body.debtorCountry || "BE",
@@ -341,6 +348,49 @@ export async function POST(request: NextRequest) {
         if (process.env.NODE_ENV === 'development') {
           console.log('✅ Attachment record created');
         }
+
+        // Save invoice to bibliotheek if it doesn't exist yet (after document upload)
+        if (body.invoiceNumber) {
+          // Check if invoice already exists in saved_invoices
+          const { data: existingInvoice } = await supabaseService
+            .from("saved_invoices")
+            .select("id")
+            .eq("organization_id", organizationId)
+            .eq("invoice_number", body.invoiceNumber)
+            .single();
+
+          if (!existingInvoice) {
+            // Create saved invoice entry with document path
+            const { error: savedInvoiceError } = await supabaseService
+              .from("saved_invoices")
+              .insert({
+                organization_id: organizationId,
+                created_by: user.id,
+                invoice_number: body.invoiceNumber,
+                invoice_date: body.invoiceDate || new Date().toISOString().split('T')[0],
+                due_date: body.dueDate || null,
+                amount: principalAmount,
+                currency: "EUR",
+                debtor_id: debtorId,
+                debtor_name: body.debtorNameOrCompany || null,
+                debtor_email: body.debtorEmail,
+                debtor_vat_number: body.debtorVatNumber || null,
+                debtor_address_street: getFullStreet(),
+                debtor_address_city: body.debtorCity || null,
+                debtor_address_postal_code: body.debtorPostalCode || null,
+                debtor_address_country: body.debtorCountry || "BE",
+                document_path: filePath,
+                document_name: document.name,
+              });
+
+            if (savedInvoiceError) {
+              console.error('⚠️ Could not save invoice to bibliotheek:', savedInvoiceError);
+              // Don't fail case creation if invoice save fails
+            } else {
+              console.log('✅ Invoice saved to bibliotheek');
+            }
+          }
+        }
       } catch (fileError: any) {
         console.error('❌ File processing error:', fileError);
         // Return error to user instead of silently failing
@@ -352,6 +402,50 @@ export async function POST(request: NextRequest) {
     } else {
       if (process.env.NODE_ENV === 'development') {
         console.log('⚠️ No document provided in request');
+      }
+
+      // Save invoice to bibliotheek even without document (if invoice number exists)
+      if (body.invoiceNumber) {
+        // Check if invoice already exists in saved_invoices
+        const { data: existingInvoice } = await supabaseService
+          .from("saved_invoices")
+          .select("id")
+          .eq("organization_id", organizationId)
+          .eq("invoice_number", body.invoiceNumber)
+          .single();
+
+        if (!existingInvoice) {
+          // Create saved invoice entry without document
+          const { error: savedInvoiceError } = await supabaseService
+            .from("saved_invoices")
+            .insert({
+              organization_id: organizationId,
+              created_by: user.id,
+              invoice_number: body.invoiceNumber,
+              invoice_date: body.invoiceDate || new Date().toISOString().split('T')[0],
+              due_date: body.dueDate || null,
+              amount: principalAmount,
+              currency: "EUR",
+              debtor_id: debtorId,
+              debtor_name: body.debtorType === "particular" ? body.debtorNameOrCompany : null,
+              debtor_company_name: body.debtorType === "company" ? body.debtorNameOrCompany : null,
+              debtor_email: body.debtorEmail,
+              debtor_vat_number: body.debtorVatNumber || null,
+              debtor_address_street: body.debtorStreet || null,
+              debtor_address_city: body.debtorCity || null,
+              debtor_address_postal_code: body.debtorPostalCode || null,
+              debtor_address_country: body.debtorCountry || "BE",
+              document_path: null,
+              document_name: null,
+            });
+
+          if (savedInvoiceError) {
+            console.error('⚠️ Could not save invoice to bibliotheek:', savedInvoiceError);
+            // Don't fail case creation if invoice save fails
+          } else {
+            console.log('✅ Invoice saved to bibliotheek (without document)');
+          }
+        }
       }
     }
 

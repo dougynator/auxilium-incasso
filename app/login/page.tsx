@@ -35,7 +35,8 @@ export default function LoginPage() {
         throw new Error(result.error || "Er is een fout opgetreden bij het inloggen");
       }
 
-      router.push("/otp");
+      // Pass email as URL parameter to persist across redirects
+      router.push(`/otp?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
       toast({
         title: "Fout",

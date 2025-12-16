@@ -28,6 +28,11 @@ export default async function PortalDashboard() {
     }
   }
 
+  // Redirect admin/staff users to admin portal
+  if (profile && (profile.role === "admin" || profile.role === "staff")) {
+    redirect("/admin");
+  }
+
   // Don't redirect if profile doesn't exist - show error instead
   // This allows users to complete their profile setup
   if (!profile) {

@@ -23,9 +23,14 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   const to = Array.isArray(options.to) ? options.to : [options.to];
   const cc = options.cc ? (Array.isArray(options.cc) ? options.cc : [options.cc]) : undefined;
 
+  // Use test domain in development, verified domain in production
+  const fromEmail = process.env.NODE_ENV === 'production' && process.env.RESEND_VERIFIED_DOMAIN
+    ? `Auxilium Incasso <noreply@${process.env.RESEND_VERIFIED_DOMAIN}>`
+    : process.env.RESEND_FROM_EMAIL || 'Auxilium Incasso <onboarding@resend.dev>';
+
   try {
     await resend.emails.send({
-      from: 'Auxilium Incasso <noreply@auxilium-incasso.be>',
+      from: fromEmail,
       to,
       cc,
       subject: options.subject,

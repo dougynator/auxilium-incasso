@@ -9,3 +9,4 @@ CREATE POLICY "Users can create debtors"
     auth.uid() IS NOT NULL
   );
 
+

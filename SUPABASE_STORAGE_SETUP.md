@@ -93,3 +93,4 @@ Na het aanmaken van de bucket:
 - Verhoog de `fileSizeLimit` in de bucket settings
 - Of verklein het bestand dat je probeert te uploaden
 
+

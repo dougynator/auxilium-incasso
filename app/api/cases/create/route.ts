@@ -6,6 +6,7 @@ import { logAuditEvent } from "@/lib/audit";
 import { sendEmail } from "@/lib/email/service";
 import { generatePaymentRequestPDF } from "@/lib/pdf/generator";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { generateDebtorEmail, generateClientEmail, generateInternalEmail } from "@/lib/email/templates";
 
 export async function POST(request: NextRequest) {
   try {
@@ -503,97 +504,44 @@ export async function POST(request: NextRequest) {
           dueDate: body.dueDate || undefined,
         });
 
-        // Generate payment URL
+        // Generate URLs
         const paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/pay/${newCase.id}?ref=${structuredReference}`;
+        const caseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portal/cases/${newCase.id}`;
+        const adminCaseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/admin/cases/${newCase.id}`;
 
-        // Generate payment request email HTML
-        const debtorName = debtor?.name || debtor?.company_name || "Debiteur";
-        const emailHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div>
-    <h1 style="color: #2563eb; margin-bottom: 20px;">
-      Auxilium Incasso
-    </h1>
-    
-    <p>Beste ${debtorName},</p>
-    
-    <p>
-      U ontvangt deze e-mail omdat er een betalingsverzoek is ingediend voor een openstaande factuur.
-    </p>
-    
-    <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0">
-      <h2 style="margin-top: 0">Betalingsverzoek</h2>
-      
-      ${body.invoiceNumber ? `<p><strong>Factuurnummer:</strong> ${body.invoiceNumber}</p>` : ''}
-      
-      ${body.invoiceDate ? `<p><strong>Factuurdatum:</strong> ${formatDate(body.invoiceDate)}</p>` : ''}
-      
-      ${body.dueDate ? `<p><strong>Vervaldatum:</strong> ${formatDate(body.dueDate)}</p>` : ''}
-      
-      <table style="width: 100%; margin-top: 15px; border-collapse: collapse">
-        <tr>
-          <td style="padding: 8px 0">Hoofdsom:</td>
-          <td style="text-align: right; padding: 8px 0">${formatCurrency(principalAmount)}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0">Bijkomende kosten:</td>
-          <td style="text-align: right; padding: 8px 0">${formatCurrency(additionalCosts)}</td>
-        </tr>
-        <tr style="border-top: 2px solid #333; font-weight: bold">
-          <td style="padding: 8px 0">Totaal te betalen:</td>
-          <td style="text-align: right; padding: 8px 0">${formatCurrency(totalAmount)}</td>
-        </tr>
-      </table>
-      
-      <p style="margin-top: 15px">
-        <strong>Structured reference:</strong> ${structuredReference}
-      </p>
-    </div>
-    
-    <div style="text-align: center; margin: 30px 0">
-      <a
-        href="${paymentUrl}"
-        style="display: inline-block; background: #2563eb; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold"
-      >
-        Betaal nu
-      </a>
-    </div>
-    
-    <p style="font-size: 14px; color: #666">
-      U kunt ook betalen via overschrijving met de structured reference hierboven.
-    </p>
-    
-    <p style="margin-top: 30px; font-size: 14px; color: #666">
-      Met vriendelijke groet,<br />
-      Auxilium Incasso
-    </p>
-  </div>
-</body>
-</html>`;
-
-        // Get organization billing email
+        // Get organization and profile data
         const { data: organization } = await asyncSupabase
           .from("organizations")
-          .select("billing_email")
+          .select("name, billing_email")
           .eq("id", organizationId)
           .single();
 
-        const ccEmails = [organization?.billing_email].filter(Boolean);
-        if (process.env.ADMIN_CC_EMAIL) {
-          ccEmails.push(process.env.ADMIN_CC_EMAIL);
-        }
+        const { data: clientProfile } = await asyncSupabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+
+        const debtorName = debtor?.name || debtor?.company_name || "Debiteur";
+        const clientName = clientProfile?.full_name || organization?.name || "Klant";
+
+        // 1. Email naar debiteur (met PDF attachment)
+        const debtorEmailHtml = generateDebtorEmail({
+          debtorName,
+          invoiceNumber: body.invoiceNumber,
+          invoiceDate: body.invoiceDate,
+          dueDate: body.dueDate,
+          principalAmount,
+          additionalCosts,
+          totalAmount,
+          structuredReference,
+          paymentUrl,
+        });
 
         await sendEmail({
           to: body.debtorEmail,
-          cc: ccEmails.length > 0 ? ccEmails : undefined,
           subject: `Betalingsverzoek – Auxilium Incasso – Referentie ${structuredReference}`,
-          html: emailHtml,
+          html: debtorEmailHtml,
           attachments: [
             {
               filename: `Betalingsverzoek_${structuredReference}.pdf`,
@@ -602,6 +550,60 @@ export async function POST(request: NextRequest) {
             },
           ],
         });
+
+        console.log('✅ Email sent to debtor');
+
+        // 2. Email naar klant (apart, zonder PDF)
+        if (organization?.billing_email) {
+          const clientEmailHtml = generateClientEmail({
+            clientName,
+            caseId: newCase.id,
+            debtorName,
+            invoiceNumber: body.invoiceNumber,
+            invoiceDate: body.invoiceDate,
+            dueDate: body.dueDate,
+            principalAmount,
+            additionalCosts,
+            totalAmount,
+            structuredReference,
+            caseUrl,
+          });
+
+          await sendEmail({
+            to: organization.billing_email,
+            subject: `Opdracht ontvangen – Opdrachtnummer ${newCase.id}`,
+            html: clientEmailHtml,
+          });
+
+          console.log('✅ Email sent to client');
+        }
+
+        // 3. Email intern naar ons (met alle details, CC)
+        const internalEmailHtml = generateInternalEmail({
+          caseId: newCase.id,
+          organizationName: organization?.name || "Onbekend",
+          clientName,
+          debtorName,
+          debtorEmail: body.debtorEmail,
+          invoiceNumber: body.invoiceNumber,
+          invoiceDate: body.invoiceDate,
+          dueDate: body.dueDate,
+          principalAmount,
+          additionalCosts,
+          totalAmount,
+          structuredReference,
+          caseUrl: adminCaseUrl,
+        });
+
+        const internalToEmail = process.env.ADMIN_CC_EMAIL || "admin@auxilium-incasso.be";
+        
+        await sendEmail({
+          to: internalToEmail,
+          subject: `Nieuwe opdracht aangemaakt – ${newCase.id}`,
+          html: internalEmailHtml,
+        });
+
+        console.log('✅ Email sent to internal team');
 
         // Update case status to "sent" and create event
         await asyncSupabase

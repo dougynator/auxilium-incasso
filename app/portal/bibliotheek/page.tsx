@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Building2, Plus, Trash2 } from "lucide-react";
+import { FileText, Building2, Plus, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -42,7 +42,7 @@ interface SavedDebtor {
   address_street?: string;
   address_city?: string;
   address_postal_code?: string;
-  phone?: string;
+  address_country?: string;
   created_at: string;
 }
 
@@ -55,6 +55,10 @@ export default function BibliotheekPage() {
   const [debtorModalOpen, setDebtorModalOpen] = useState(false);
   const { toast } = useToast();
   const supabase = createClient();
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -74,14 +78,15 @@ export default function BibliotheekPage() {
       }
     } catch (error) {
       console.error("Error loading data:", error);
+      toast({
+        title: "Fout",
+        description: "Kon gegevens niet laden",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const handleDeleteInvoice = async (id: string) => {
     if (!confirm("Weet je zeker dat je deze factuur wilt verwijderen?")) {
@@ -89,26 +94,23 @@ export default function BibliotheekPage() {
     }
 
     try {
-      const response = await fetch(`/api/bibliotheek/invoices/${id}`, { 
-        method: "DELETE" 
+      const response = await fetch(`/api/bibliotheek/invoices/${id}`, {
+        method: "DELETE",
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Kon factuur niet verwijderen");
+      if (response.ok) {
+        toast({
+          title: "Succes",
+          description: "Factuur verwijderd",
+        });
+        loadData();
+      } else {
+        throw new Error("Verwijderen mislukt");
       }
-
-      toast({
-        title: "Verwijderd",
-        description: "Factuur is succesvol verwijderd",
-      });
-
-      loadData();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Fout",
-        description: error.message || "Kon factuur niet verwijderen",
+        description: "Kon factuur niet verwijderen",
         variant: "destructive",
       });
     }
@@ -120,26 +122,23 @@ export default function BibliotheekPage() {
     }
 
     try {
-      const response = await fetch(`/api/bibliotheek/debtors/${id}`, { 
-        method: "DELETE" 
+      const response = await fetch(`/api/bibliotheek/debtors/${id}`, {
+        method: "DELETE",
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Kon relatie niet verwijderen");
+      if (response.ok) {
+        toast({
+          title: "Succes",
+          description: "Relatie verwijderd",
+        });
+        loadData();
+      } else {
+        throw new Error("Verwijderen mislukt");
       }
-
-      toast({
-        title: "Verwijderd",
-        description: "Relatie is succesvol verwijderd",
-      });
-
-      loadData();
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Fout",
-        description: error.message || "Kon relatie niet verwijderen",
+        description: "Kon relatie niet verwijderen",
         variant: "destructive",
       });
     }
@@ -156,9 +155,9 @@ export default function BibliotheekPage() {
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6 items-start">
+      <div className="flex flex-col md:flex-row items-start gap-6">
         {/* Facturen sectie */}
-        <Card className="flex-1 w-full md:w-1/2">
+        <Card className="flex-1 w-full">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -172,9 +171,9 @@ export default function BibliotheekPage() {
                   </CardDescription>
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
+              <Button 
+                size="sm" 
+                variant="outline" 
                 className="font-sans"
                 onClick={() => setInvoiceModalOpen(true)}
               >
@@ -202,11 +201,13 @@ export default function BibliotheekPage() {
                 {invoices.map((invoice) => (
                   <div
                     key={invoice.id}
-                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => router.push(`/portal/bibliotheek/invoices/${invoice.id}`)}
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex justify-between items-start">
-                      <div className="flex-1">
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => router.push(`/portal/bibliotheek/invoices/${invoice.id}`)}
+                      >
                         <p className="font-sans font-semibold">
                           {invoice.invoice_number || "Geen nummer"}
                         </p>
@@ -219,6 +220,14 @@ export default function BibliotheekPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => router.push(`/portal/bibliotheek/invoices/${invoice.id}`)}
+                          title="Bekijken/Bewerken"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -240,7 +249,7 @@ export default function BibliotheekPage() {
         </Card>
 
         {/* Relaties sectie */}
-        <Card className="flex-1 w-full md:w-1/2">
+        <Card className="flex-1 w-full">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -254,9 +263,9 @@ export default function BibliotheekPage() {
                   </CardDescription>
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
+              <Button 
+                size="sm" 
+                variant="outline" 
                 className="font-sans"
                 onClick={() => setDebtorModalOpen(true)}
               >
@@ -284,11 +293,13 @@ export default function BibliotheekPage() {
                 {debtors.map((debtor) => (
                   <div
                     key={debtor.id}
-                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => router.push(`/portal/bibliotheek/debtors/${debtor.id}`)}
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex justify-between items-start">
-                      <div className="flex-1">
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => router.push(`/portal/bibliotheek/debtors/${debtor.id}`)}
+                      >
                         <p className="font-sans font-semibold">
                           {debtor.company_name || debtor.name || "Geen naam"}
                         </p>
@@ -312,6 +323,14 @@ export default function BibliotheekPage() {
                         <Button
                           size="sm"
                           variant="ghost"
+                          onClick={() => router.push(`/portal/bibliotheek/debtors/${debtor.id}`)}
+                          title="Bekijken/Bewerken"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteDebtor(debtor.id);
@@ -330,17 +349,23 @@ export default function BibliotheekPage() {
         </Card>
       </div>
 
+      {/* Modals */}
       <AddInvoiceModal
         open={invoiceModalOpen}
         onOpenChange={setInvoiceModalOpen}
-        onSuccess={loadData}
+        onSuccess={() => {
+          loadData();
+          setInvoiceModalOpen(false);
+        }}
       />
       <AddDebtorModal
         open={debtorModalOpen}
         onOpenChange={setDebtorModalOpen}
-        onSuccess={loadData}
+        onSuccess={() => {
+          loadData();
+          setDebtorModalOpen(false);
+        }}
       />
     </div>
   );
 }
-

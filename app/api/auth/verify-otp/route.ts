@@ -1,91 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { verifyOTP } from "@/lib/auth/otp";
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
-    const { code, email } = await request.json();
-
-    if (!code || code.length !== 6) {
-      return NextResponse.json({ error: "Ongeldige OTP code" }, { status: 400 });
-    }
-
-    // Create response first so we can set cookies on it
-    const jsonResponse = NextResponse.json({ success: false }); // Temporary, will be replaced
+    const supabase = await createClient();
     
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return request.cookies.get(name)?.value;
-          },
-          set(name: string, value: string, options: CookieOptions) {
-            const host = request.headers.get('host') || '';
-            const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
-            
-            request.cookies.set({
-              name,
-              value,
-              ...options,
-            });
-            jsonResponse.cookies.set({
-              name,
-              value,
-              ...options,
-              httpOnly: false, // Allow browser client to read auth cookies
-              secure: process.env.NODE_ENV === 'production' && !isLocalhost,
-              sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
-              path: options.path || '/',
-            });
-          },
-          remove(name: string, options: CookieOptions) {
-            request.cookies.set({
-              name,
-              value: '',
-              ...options,
-            });
-            jsonResponse.cookies.set({
-              name,
-              value: '',
-              ...options,
-            });
-          },
-        },
-      }
-    );
-    
-    // Try to get user from session
-    let { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    // If no user but we have email, try to sign in again with email
-    // This handles the case where cookies weren't set properly during login
-    if (!user && email) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('⚠️ No user found, but email provided. Checking if we can verify OTP by email...');
-      }
-      
-      // We can't verify OTP without a user session, so we need to return an error
-      // But first, let's check if there's a session we can refresh
-      const { data: sessionData } = await supabase.auth.getSession();
-      
-      if (!sessionData?.session) {
-        return NextResponse.json({ 
-          error: "Sessie verlopen. Log opnieuw in." 
-        }, { status: 401 });
-      }
-      
-      // If we have a session, get user from it
-      user = sessionData.session.user;
-    }
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('❌ No user found in session');
-      }
       return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
     }
+
+    const { code } = await request.json();
 
     if (!code || code.length !== 6) {
       return NextResponse.json({ error: "Ongeldige OTP code" }, { status: 400 });
@@ -122,26 +50,63 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update response with success
-    const successResponse = NextResponse.json({ success: true });
+    // Create response with success
+    const response = NextResponse.json({ success: true });
     
-    // Copy all cookies from jsonResponse (which were set during Supabase operations)
-    jsonResponse.cookies.getAll().forEach(cookie => {
-      successResponse.cookies.set(cookie.name, cookie.value, {
-        httpOnly: false, // Allow browser client to read auth cookies
-        secure: process.env.NODE_ENV === 'production' && !request.headers.get('host')?.includes('localhost'),
-        sameSite: 'lax' as const,
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-      });
+    // Get all cookies from cookieStore AFTER getSession() - Supabase should have set them
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🍪 All cookies in cookieStore:', allCookies.map(c => c.name));
+    }
+    
+    // Copy all Supabase auth cookies to the response
+    const host = request.headers.get('host') || '';
+    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+    
+    allCookies.forEach(cookie => {
+      // Only copy auth-related cookies
+      if (cookie.name.includes('sb-') || cookie.name.includes('auth')) {
+        // Build cookie string manually to ensure it's set correctly
+        const cookieOptions = [
+          `Path=/`,
+          `SameSite=Lax`,
+          `HttpOnly`,
+          `Max-Age=${60 * 60 * 24 * 7}`, // 7 days
+        ];
+        
+        if (process.env.NODE_ENV === 'production' && !isLocalhost) {
+          cookieOptions.push(`Secure`);
+        }
+        
+        const cookieString = `${cookie.name}=${cookie.value}; ${cookieOptions.join('; ')}`;
+        
+        // Set cookie using both methods to ensure it works
+        response.cookies.set(cookie.name, cookie.value, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production' && !isLocalhost,
+          sameSite: 'lax' as const,
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+        });
+        
+        // Also set in response headers directly
+        response.headers.append('Set-Cookie', cookieString);
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🍪 Setting cookie in response:', cookie.name, 'for host:', host, 'isLocalhost:', isLocalhost);
+          console.log('🍪 Cookie string:', cookieString.substring(0, 100) + '...');
+        }
+      }
     });
     
     if (process.env.NODE_ENV === 'development') {
-      console.log('🍪 Cookies in success response:', successResponse.cookies.getAll().map(c => c.name));
+      console.log('🍪 Cookies in response:', response.cookies.getAll().map(c => c.name));
       console.log('✅ Response cookies set, returning response');
     }
 
-    return successResponse;
+    return response;
   } catch (error: any) {
     console.error("OTP verification error:", error);
     return NextResponse.json(

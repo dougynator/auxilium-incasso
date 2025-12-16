@@ -30,10 +30,8 @@
 - **Allowed operation**: `INSERT`
 - **Policy definition**:
 ```sql
-(bucket_id = 'case-attachments' AND auth.uid() IS NOT NULL)
+(authenticated() AND (bucket_id = 'case-attachments'))
 ```
-
-**BELANGRIJK:** Gebruik `auth.uid() IS NOT NULL` in plaats van `authenticated()` voor Storage policies!
 
 #### Policy 2: Read (voor gebruikers die de case hebben aangemaakt)
 - **Policy name**: `Users can read their own attachments`
@@ -41,8 +39,8 @@
 - **Policy definition**:
 ```sql
 (
-  bucket_id = 'case-attachments' AND 
-  auth.uid() IS NOT NULL AND
+  authenticated() AND 
+  (bucket_id = 'case-attachments') AND
   (auth.uid() IN (
     SELECT uploaded_by FROM case_attachments 
     WHERE file_path = (storage.foldername(name))[1] || '/' || (storage.foldername(name))[2]
@@ -56,8 +54,8 @@
 - **Policy definition**:
 ```sql
 (
-  bucket_id = 'case-attachments' AND 
-  auth.uid() IS NOT NULL AND
+  authenticated() AND 
+  (bucket_id = 'case-attachments') AND
   (EXISTS (
     SELECT 1 FROM profiles 
     WHERE id = auth.uid() 

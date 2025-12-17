@@ -36,14 +36,13 @@ export default async function CaseDetailPage({
   let caseQuery = supabase
     .from("cases")
     .select("*, debtors(*), organizations(*), case_events(*, profiles(full_name)), case_attachments(*)")
-    .eq("id", id)
-    .single();
+    .eq("id", id);
 
   if (profile.role === "client") {
     caseQuery = caseQuery.eq("organization_id", profile.organization_id);
   }
 
-  const { data: caseItem, error } = await caseQuery;
+  const { data: caseItem, error } = await caseQuery.single();
 
   if (error || !caseItem) {
     return (

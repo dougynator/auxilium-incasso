@@ -211,7 +211,7 @@ export default async function AdminCaseDetailPage({
             <CardTitle>Timeline</CardTitle>
           </CardHeader>
           <CardContent>
-            <CaseTimeline caseId={id} events={caseItem.case_events || []} />
+            <CaseTimeline events={caseItem.case_events || []} isStaffOrAdmin={true} />
           </CardContent>
         </Card>
 

@@ -863,7 +863,7 @@ export default function NewCasePage() {
       console.log('📦 FormData created');
       // Log FormData entries safely
       const entries: Array<[string, any]> = [];
-      for (const [key, value] of formData.entries()) {
+      for (const [key, value] of Array.from(formData.entries())) {
         if (value && typeof value === 'object' && 'name' in value && 'size' in value) {
           entries.push([key, `${(value as File).name} (${(value as File).size} bytes)`]);
         } else {

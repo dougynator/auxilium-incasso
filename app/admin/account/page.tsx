@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from 'next-intl';
 
 const profileSchema = z.object({
   fullName: z.string().min(1, "Naam is verplicht"),
@@ -30,6 +31,8 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function AdminAccountPage() {
+  const t = useTranslations('admin.account');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClient();
@@ -111,16 +114,16 @@ export default function AdminAccountPage() {
       if (profileError) throw profileError;
 
       toast({
-        title: "Profiel bijgewerkt",
-        description: "Je profielgegevens zijn succesvol bijgewerkt",
+        title: t('saved'),
+        description: t('profileUpdated'),
       });
 
       loadProfile();
     } catch (error: any) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Fout",
-        description: error.message || "Kon profiel niet bijwerken",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -155,16 +158,16 @@ export default function AdminAccountPage() {
       if (updateError) throw updateError;
 
       toast({
-        title: "Wachtwoord gewijzigd",
-        description: "Je wachtwoord is succesvol gewijzigd",
+        title: t('saved'),
+        description: t('passwordChanged'),
       });
 
       resetPassword();
     } catch (error: any) {
       console.error("Error changing password:", error);
       toast({
-        title: "Fout",
-        description: error.message || "Kon wachtwoord niet wijzigen",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -174,13 +177,13 @@ export default function AdminAccountPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Account</h1>
+      <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
       <div className="space-y-6">
         {/* Profile Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Profielgegevens</CardTitle>
+            <CardTitle>{t('profile')}</CardTitle>
             <CardDescription>
               Wijzig je naam en e-mailadres
             </CardDescription>
@@ -188,7 +191,7 @@ export default function AdminAccountPage() {
           <CardContent>
             <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Volledige naam *</Label>
+                <Label htmlFor="fullName">{t('fullName')} *</Label>
                 <Input
                   id="fullName"
                   {...registerProfile("fullName")}
@@ -200,7 +203,7 @@ export default function AdminAccountPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">E-mailadres *</Label>
+                <Label htmlFor="email">{t('email')} *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -213,7 +216,7 @@ export default function AdminAccountPage() {
               </div>
 
               <Button type="submit" disabled={loading}>
-                {loading ? "Opslaan..." : "Opslaan"}
+                {loading ? t('saving') : t('save')}
               </Button>
             </form>
           </CardContent>
@@ -222,7 +225,7 @@ export default function AdminAccountPage() {
         {/* Password Change */}
         <Card>
           <CardHeader>
-            <CardTitle>Wachtwoord wijzigen</CardTitle>
+            <CardTitle>{t('changePassword')}</CardTitle>
             <CardDescription>
               Wijzig je wachtwoord
             </CardDescription>
@@ -230,7 +233,7 @@ export default function AdminAccountPage() {
           <CardContent>
             <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Huidig wachtwoord *</Label>
+                <Label htmlFor="currentPassword">{t('currentPassword')} *</Label>
                 <Input
                   id="currentPassword"
                   type="password"
@@ -243,7 +246,7 @@ export default function AdminAccountPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword">Nieuw wachtwoord *</Label>
+                <Label htmlFor="newPassword">{t('newPassword')} *</Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -256,7 +259,7 @@ export default function AdminAccountPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Bevestig nieuw wachtwoord *</Label>
+                <Label htmlFor="confirmPassword">{t('confirmPassword')} *</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -269,7 +272,7 @@ export default function AdminAccountPage() {
               </div>
 
               <Button type="submit" disabled={changingPassword}>
-                {changingPassword ? "Wijzigen..." : "Wachtwoord wijzigen"}
+                {changingPassword ? "Wijzigen..." : t('changePassword')}
               </Button>
             </form>
           </CardContent>

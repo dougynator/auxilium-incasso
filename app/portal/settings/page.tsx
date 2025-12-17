@@ -13,46 +13,50 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 import { Upload, X } from "lucide-react";
-
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, "Huidig wachtwoord is verplicht"),
-  newPassword: z.string().min(8, "Nieuw wachtwoord moet minimaal 8 tekens lang zijn"),
-  confirmPassword: z.string().min(1, "Bevestig wachtwoord is verplicht"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Wachtwoorden komen niet overeen",
-  path: ["confirmPassword"],
-});
-
-const profileSchema = z.object({
-  fullName: z.string().min(1, "Naam is verplicht"),
-  phone: z.string().optional(),
-});
-
-const organizationSchema = z.object({
-  name: z.string().min(1, "Bedrijfsnaam is verplicht"),
-  vatNumber: z.string().optional(),
-  email: z.string().email("Ongeldig e-mailadres"),
-  addressStreet: z.string().optional(),
-  addressHouseNumber: z.string().optional(),
-  addressCity: z.string().optional(),
-  addressPostalCode: z.string().optional(),
-  addressCountry: z.string().default("BE"),
-  bankAccountNumber: z.string().optional(),
-  hasInvoiceTerms: z.enum(["yes", "no"]).optional(),
-  invoiceTermsFile: z.any().optional(),
-  hasDamageClause: z.enum(["yes", "no"]).optional(),
-  damageClausePercentage: z.string().optional(),
-  hasMinimumDamageClause: z.enum(["yes", "no"]).optional(),
-  minimumDamageClauseAmount: z.string().optional(),
-  delayInterestType: z.enum(["no", "law_2002", "fixed"]).optional(),
-  delayInterestPercentage: z.string().optional(),
-});
-
-type PasswordFormData = z.infer<typeof passwordSchema>;
-type ProfileFormData = z.infer<typeof profileSchema>;
-type OrganizationFormData = z.infer<typeof organizationSchema>;
+import { useTranslations } from 'next-intl';
 
 export default function SettingsPage() {
+  const t = useTranslations('portal.settings');
+  const tCommon = useTranslations('common');
+  
+  const passwordSchema = z.object({
+    currentPassword: z.string().min(1, t('password.required')),
+    newPassword: z.string().min(8, t('password.minLength')),
+    confirmPassword: z.string().min(1, t('password.confirmRequired')),
+  }).refine((data) => data.newPassword === data.confirmPassword, {
+    message: t('password.mismatch'),
+    path: ["confirmPassword"],
+  });
+
+  const profileSchema = z.object({
+    fullName: z.string().min(1, t('profile.fullName')),
+    phone: z.string().optional(),
+  });
+
+  const organizationSchema = z.object({
+    name: z.string().min(1, t('organization.nameRequired')),
+    vatNumber: z.string().optional(),
+    email: z.string().email(t('organization.emailInvalid')),
+    addressStreet: z.string().optional(),
+    addressHouseNumber: z.string().optional(),
+    addressCity: z.string().optional(),
+    addressPostalCode: z.string().optional(),
+    addressCountry: z.string().default("BE"),
+    bankAccountNumber: z.string().optional(),
+    hasInvoiceTerms: z.enum(["yes", "no"]).optional(),
+    invoiceTermsFile: z.any().optional(),
+    hasDamageClause: z.enum(["yes", "no"]).optional(),
+    damageClausePercentage: z.string().optional(),
+    hasMinimumDamageClause: z.enum(["yes", "no"]).optional(),
+    minimumDamageClauseAmount: z.string().optional(),
+    delayInterestType: z.enum(["no", "law_2002", "fixed"]).optional(),
+    delayInterestPercentage: z.string().optional(),
+  });
+
+  type PasswordFormData = z.infer<typeof passwordSchema>;
+  type ProfileFormData = z.infer<typeof profileSchema>;
+  type OrganizationFormData = z.infer<typeof organizationSchema>;
+  
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClient();
@@ -146,16 +150,16 @@ export default function SettingsPage() {
       if (error) throw error;
 
       toast({
-        title: "Wachtwoord gewijzigd",
-        description: "Uw wachtwoord is succesvol gewijzigd",
+        title: t('password.changed'),
+        description: t('password.changedDesc'),
       });
 
       passwordForm.reset();
       setShowPasswordForm(false);
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden bij het wijzigen van het wachtwoord",
+        title: tCommon('error'),
+        description: error.message || t('password.error'),
         variant: "destructive",
       });
     }
@@ -174,13 +178,13 @@ export default function SettingsPage() {
       if (error) throw error;
 
       toast({
-        title: "Profiel bijgewerkt",
-        description: "Uw profielgegevens zijn succesvol bijgewerkt",
+        title: t('profile.saved'),
+        description: t('profile.savedDesc'),
       });
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden",
+        title: tCommon('error'),
+        description: error.message || t('profile.error'),
         variant: "destructive",
       });
     }
@@ -222,7 +226,7 @@ export default function SettingsPage() {
 
         if (uploadError) {
           if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('does not exist')) {
-            throw new Error('De storage bucket "organization-documents" bestaat nog niet. Maak deze eerst aan in Supabase Storage.');
+            throw new Error(t('organization.storageError'));
           }
           throw uploadError;
         }
@@ -254,23 +258,23 @@ export default function SettingsPage() {
       if (error) throw error;
 
       toast({
-        title: "Organisatie bijgewerkt",
-        description: "De organisatiegegevens zijn succesvol bijgewerkt",
+        title: t('organization.saved'),
+        description: t('organization.savedDesc'),
       });
 
       // Reload data to get updated file path
       await loadData();
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden",
+        title: tCommon('error'),
+        description: error.message || t('organization.error'),
         variant: "destructive",
       });
     }
   };
 
   if (loading) {
-    return <div>Laden...</div>;
+    return <div>{tCommon('loading')}</div>;
   }
 
   const hasInvoiceTerms = organizationForm.watch("hasInvoiceTerms");
@@ -280,18 +284,18 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Instellingen</h1>
+      <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Profielgegevens</CardTitle>
-            <CardDescription>Uw persoonlijke gegevens</CardDescription>
+            <CardTitle>{t('profile.title')}</CardTitle>
+            <CardDescription>{t('profile.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Volledige naam</Label>
+                <Label htmlFor="fullName">{t('profile.fullName')}</Label>
                 <Input
                   id="fullName"
                   {...profileForm.register("fullName")}
@@ -303,35 +307,35 @@ export default function SettingsPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefoonnummer</Label>
+                <Label htmlFor="phone">{t('profile.phone')}</Label>
                 <Input
                   id="phone"
                   {...profileForm.register("phone")}
                 />
               </div>
-              <Button type="submit">Opslaan</Button>
+              <Button type="submit">{t('profile.save')}</Button>
             </form>
 
             <div className="border-t pt-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold">Wachtwoord</h3>
-                    <p className="text-sm text-muted-foreground">Wijzig uw wachtwoord</p>
+                    <h3 className="font-semibold">{t('password.title')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('password.description')}</p>
                   </div>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setShowPasswordForm(!showPasswordForm)}
                   >
-                    {showPasswordForm ? "Annuleren" : "Wachtwoord wijzigen"}
+                    {showPasswordForm ? t('password.cancel') : t('password.change')}
                   </Button>
                 </div>
 
                 {showPasswordForm && (
                   <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Huidig wachtwoord</Label>
+                      <Label htmlFor="currentPassword">{t('password.current')}</Label>
                       <Input
                         id="currentPassword"
                         type="password"
@@ -344,7 +348,7 @@ export default function SettingsPage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword">Nieuw wachtwoord</Label>
+                      <Label htmlFor="newPassword">{t('password.new')}</Label>
                       <Input
                         id="newPassword"
                         type="password"
@@ -357,7 +361,7 @@ export default function SettingsPage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Bevestig nieuw wachtwoord</Label>
+                      <Label htmlFor="confirmPassword">{t('password.confirm')}</Label>
                       <Input
                         id="confirmPassword"
                         type="password"
@@ -369,7 +373,7 @@ export default function SettingsPage() {
                         </p>
                       )}
                     </div>
-                    <Button type="submit">Wachtwoord wijzigen</Button>
+                    <Button type="submit">{t('password.change')}</Button>
                   </form>
                 )}
               </div>
@@ -380,13 +384,13 @@ export default function SettingsPage() {
         {organizationData && (
           <Card>
             <CardHeader>
-              <CardTitle>Organisatiegegevens</CardTitle>
-              <CardDescription>Gegevens van uw organisatie</CardDescription>
+              <CardTitle>{t('organization.title')}</CardTitle>
+              <CardDescription>{t('organization.description')}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={organizationForm.handleSubmit(onOrganizationSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="orgName">Bedrijfsnaam</Label>
+                  <Label htmlFor="orgName">{t('organization.name')}</Label>
                   <Input
                     id="orgName"
                     {...organizationForm.register("name")}
@@ -399,14 +403,14 @@ export default function SettingsPage() {
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="vatNumber">BTW-nummer</Label>
+                    <Label htmlFor="vatNumber">{t('organization.vatNumber')}</Label>
                     <Input
                       id="vatNumber"
                       {...organizationForm.register("vatNumber")}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
+                    <Label htmlFor="email">{t('organization.email')}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -422,7 +426,7 @@ export default function SettingsPage() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="addressStreet">Straat</Label>
+                    <Label htmlFor="addressStreet">{t('organization.street')}</Label>
                     <Input
                       id="addressStreet"
                       {...organizationForm.register("addressStreet")}
@@ -430,7 +434,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="addressHouseNumber">Huisnummer</Label>
+                    <Label htmlFor="addressHouseNumber">{t('organization.houseNumber')}</Label>
                     <Input
                       id="addressHouseNumber"
                       {...organizationForm.register("addressHouseNumber")}
@@ -441,21 +445,21 @@ export default function SettingsPage() {
 
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="addressPostalCode">Postcode</Label>
+                    <Label htmlFor="addressPostalCode">{t('organization.postalCode')}</Label>
                     <Input
                       id="addressPostalCode"
                       {...organizationForm.register("addressPostalCode")}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="addressCity">Stad</Label>
+                    <Label htmlFor="addressCity">{t('organization.city')}</Label>
                     <Input
                       id="addressCity"
                       {...organizationForm.register("addressCity")}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="addressCountry">Land</Label>
+                    <Label htmlFor="addressCountry">{t('organization.country')}</Label>
                     <Input
                       id="addressCountry"
                       {...organizationForm.register("addressCountry")}
@@ -465,20 +469,20 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bankAccountNumber">Bankrekeningnummer</Label>
+                  <Label htmlFor="bankAccountNumber">{t('organization.bankAccount')}</Label>
                   <Input
                     id="bankAccountNumber"
                     {...organizationForm.register("bankAccountNumber")}
                     placeholder="BE68 5390 0754 7034"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Dit hebben we nodig om gelden over te maken.
+                    {t('organization.bankAccountDesc')}
                   </p>
                 </div>
 
                 <div className="border-t pt-4 space-y-4">
                   <div className="space-y-2">
-                    <Label>Heb je algemene voorwaarden?</Label>
+                    <Label>{t('organization.hasInvoiceTerms')}</Label>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-2">
                         <input
@@ -494,7 +498,7 @@ export default function SettingsPage() {
                           })}
                           className="w-4 h-4"
                         />
-                        <span>Nee</span>
+                        <span>{t('organization.no')}</span>
                       </label>
                       <label className="flex items-center gap-2">
                         <input
@@ -503,14 +507,14 @@ export default function SettingsPage() {
                           {...organizationForm.register("hasInvoiceTerms")}
                           className="w-4 h-4"
                         />
-                        <span>Ja</span>
+                        <span>{t('organization.yes')}</span>
                       </label>
                     </div>
                   </div>
 
                   {hasInvoiceTerms === "yes" && (
                     <div className="space-y-2">
-                      <Label>Algemene voorwaarden uploaden</Label>
+                      <Label>{t('organization.uploadTerms')}</Label>
                       {invoiceTermsFile ? (
                         <div className="flex items-center gap-2 p-3 border rounded-lg">
                           <span className="flex-1">{invoiceTermsFile.name}</span>
@@ -539,7 +543,7 @@ export default function SettingsPage() {
                           >
                             <Upload className="w-8 h-8 text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">
-                              Klik om te uploaden of sleep bestand hierheen
+                              {t('organization.uploadClick')}
                             </span>
                           </label>
                         </div>
@@ -550,7 +554,7 @@ export default function SettingsPage() {
                   {hasInvoiceTerms === "yes" && (
                     <>
                       <div className="space-y-2">
-                        <Label>Heb je een schadebeding voorzien?</Label>
+                        <Label>{t('organization.hasDamageClause')}</Label>
                         <div className="flex gap-4">
                           <label className="flex items-center gap-2">
                             <input
@@ -559,7 +563,7 @@ export default function SettingsPage() {
                               {...organizationForm.register("hasDamageClause")}
                               className="w-4 h-4"
                             />
-                            <span>Nee</span>
+                            <span>{t('organization.no')}</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input
@@ -568,18 +572,18 @@ export default function SettingsPage() {
                               {...organizationForm.register("hasDamageClause")}
                               className="w-4 h-4"
                             />
-                            <span>Ja</span>
+                            <span>{t('organization.yes')}</span>
                           </label>
                         </div>
                         <p className="text-xs text-muted-foreground ml-6">
-                          Dit is het forfaitaire schadebeding dat verschuldigd is bij laattijdige betaling. Het gaat om een percentage. Bijvoorbeeld: "In geval van laattijdige betaling zal een forfaitaire schadevergoeding van 10 % van het factuurbedrag verschuldigd zijn. Indien er ook een vast bedrag bepaald is kun je dat hieronder invullen".
+                          {t('organization.damageClauseDesc')}
                         </p>
                       </div>
 
                       {hasDamageClause === "yes" && (
                         <div className="space-y-4 pl-4 border-l-2">
                           <div className="space-y-2">
-                            <Label htmlFor="damageClausePercentage">Percentage</Label>
+                            <Label htmlFor="damageClausePercentage">{t('organization.percentage')}</Label>
                             <Input
                               id="damageClausePercentage"
                               type="number"
@@ -590,7 +594,7 @@ export default function SettingsPage() {
                           </div>
 
                           <div className="space-y-2">
-                            <Label>Is er een minimum schadebeding voorzien per factuur?</Label>
+                            <Label>{t('organization.hasMinimumDamageClause')}</Label>
                             <div className="flex gap-4">
                               <label className="flex items-center gap-2">
                                 <input
@@ -599,7 +603,7 @@ export default function SettingsPage() {
                                   {...organizationForm.register("hasMinimumDamageClause")}
                                   className="w-4 h-4"
                                 />
-                                <span>Nee</span>
+                                <span>{t('organization.no')}</span>
                               </label>
                               <label className="flex items-center gap-2">
                                 <input
@@ -608,14 +612,14 @@ export default function SettingsPage() {
                                   {...organizationForm.register("hasMinimumDamageClause")}
                                   className="w-4 h-4"
                                 />
-                                <span>Ja</span>
+                                <span>{t('organization.yes')}</span>
                               </label>
                             </div>
                           </div>
 
                           {hasMinimumDamageClause === "yes" && (
                             <div className="space-y-2">
-                              <Label htmlFor="minimumDamageClauseAmount">Minimum schadebeding bedrag</Label>
+                              <Label htmlFor="minimumDamageClauseAmount">{t('organization.minimumAmount')}</Label>
                               <Input
                                 id="minimumDamageClauseAmount"
                                 type="number"
@@ -629,7 +633,7 @@ export default function SettingsPage() {
                       )}
 
                       <div className="space-y-2">
-                        <Label>Zijn er verwijlinterest voorzien?</Label>
+                        <Label>{t('organization.delayInterest')}</Label>
                         <div className="flex flex-col gap-2">
                           <label className="flex items-center gap-2">
                             <input
@@ -638,7 +642,7 @@ export default function SettingsPage() {
                               {...organizationForm.register("delayInterestType")}
                               className="w-4 h-4"
                             />
-                            <span>Nee</span>
+                            <span>{t('organization.no')}</span>
                           </label>
                           <label className="flex items-start gap-2">
                             <input
@@ -648,9 +652,9 @@ export default function SettingsPage() {
                               className="w-4 h-4 mt-1"
                             />
                             <div className="flex flex-col">
-                              <span>Ja (wet van 2002)</span>
+                              <span>{t('organization.delayInterestLaw2002')}</span>
                               <span className="text-xs text-muted-foreground">
-                                In te vullen als toepassing wordt gemaakt van de wet ter bestrijding van betalingsachterstand bij handelstransacties van 02/08/2002.
+                                {t('organization.delayInterestLaw2002Desc')}
                               </span>
                             </div>
                           </label>
@@ -662,9 +666,9 @@ export default function SettingsPage() {
                               className="w-4 h-4 mt-1"
                             />
                             <div className="flex flex-col">
-                              <span>Ja (vaste interest)</span>
+                              <span>{t('organization.delayInterestFixed')}</span>
                               <span className="text-xs text-muted-foreground">
-                                Kruis dit aan als er een vaste intrestvoet voorzien is in je algemene voorwaarden. (op jaarbasis)
+                                {t('organization.delayInterestFixedDesc')}
                               </span>
                             </div>
                           </label>
@@ -673,7 +677,7 @@ export default function SettingsPage() {
 
                       {delayInterestType === "fixed" && (
                         <div className="space-y-2">
-                          <Label htmlFor="delayInterestPercentage">Percentage</Label>
+                          <Label htmlFor="delayInterestPercentage">{t('organization.delayInterestPercentage')}</Label>
                           <Input
                             id="delayInterestPercentage"
                             type="number"
@@ -687,7 +691,7 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                <Button type="submit">Opslaan</Button>
+                <Button type="submit">{t('organization.save')}</Button>
               </form>
             </CardContent>
           </Card>

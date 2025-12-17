@@ -1,20 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from '@/i18n/routing';
+import { Link } from '@/i18n/routing';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslations } from 'next-intl';
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const t = useTranslations('login');
+  const tCommon = useTranslations('common');
+  const router = useRouter();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
   const supabase = createClient();
 
@@ -32,15 +36,15 @@ export default function LoginPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Er is een fout opgetreden bij het inloggen");
+        throw new Error(result.error || t('loginError'));
       }
 
       // Pass email as URL parameter to persist across redirects
       router.push(`/otp?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden bij het inloggen",
+        title: tCommon('error'),
+        description: error.message || t('loginError'),
         variant: "destructive",
       });
     } finally {
@@ -54,16 +58,16 @@ export default function LoginPage() {
         <Card className="shadow-xl border-2 border-primary/10">
           <CardHeader className="space-y-2">
             <CardTitle className="font-display text-3xl md:text-4xl font-bold text-primary text-center">
-              Inloggen
+              {t('title')}
             </CardTitle>
             <CardDescription className="font-sans text-center text-muted-foreground">
-              Log in op uw klantenportaal
+              {t('subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email" className="font-sans font-medium">E-mailadres</Label>
+                <Label htmlFor="email" className="font-sans font-medium">{t('email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -72,11 +76,11 @@ export default function LoginPage() {
                   required
                   disabled={loading}
                   className="font-sans h-11"
-                  placeholder="uw@email.be"
+                  placeholder={t('emailPlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="font-sans font-medium">Wachtwoord</Label>
+                <Label htmlFor="password" className="font-sans font-medium">{t('password')}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -85,7 +89,7 @@ export default function LoginPage() {
                   required
                   disabled={loading}
                   className="font-sans h-11"
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                 />
               </div>
               <Button 
@@ -93,7 +97,7 @@ export default function LoginPage() {
                 className="w-full font-display bg-primary hover:bg-primary/90 text-white h-11 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300" 
                 disabled={loading}
               >
-                {loading ? "Inloggen..." : "Inloggen"}
+                {loading ? t('loggingIn') : t('login')}
               </Button>
             </form>
             <div className="mt-6 text-center">
@@ -101,7 +105,7 @@ export default function LoginPage() {
                 href="/" 
                 className="font-sans text-sm text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
               >
-                Terug naar homepage
+                {t('backToHome')}
               </Link>
             </div>
           </CardContent>

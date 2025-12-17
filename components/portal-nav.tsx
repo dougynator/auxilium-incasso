@@ -3,15 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, FileText, Library, User, Plug, Users } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 interface NavItem {
-  name: string;
+  nameKey?: string; // Translation key instead of name
+  name?: string; // Fallback to direct name
   href: string;
   iconName: string;
 }
 
 interface PortalNavProps {
   items: NavItem[];
+  namespace?: 'portal.nav' | 'admin.nav'; // Which translation namespace to use
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -23,8 +26,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Users,
 };
 
-export default function PortalNav({ items }: PortalNavProps) {
+export default function PortalNav({ items, namespace = 'portal.nav' }: PortalNavProps) {
   const pathname = usePathname();
+  const t = useTranslations(namespace);
 
   return (
     <nav className="p-4 pt-8 space-y-2">
@@ -35,6 +39,8 @@ export default function PortalNav({ items }: PortalNavProps) {
         const isActive = item.href === "/portal" || item.href === "/admin"
           ? pathname === item.href
           : pathname === item.href || pathname.startsWith(item.href + "/");
+        
+        const displayName = item.nameKey ? t(item.nameKey) : (item.name || '');
         
         return (
           <Link
@@ -49,7 +55,7 @@ export default function PortalNav({ items }: PortalNavProps) {
             `}
           >
             <Icon className="w-5 h-5 mr-3" />
-            <span className="font-sans">{item.name}</span>
+            <span className="font-sans">{displayName}</span>
           </Link>
         );
       })}

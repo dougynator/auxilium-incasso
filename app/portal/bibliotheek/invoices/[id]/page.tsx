@@ -13,29 +13,33 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Trash2, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrency, formatDate } from "@/lib/utils";
-
-const invoiceSchema = z.object({
-  invoice_number: z.string().min(1, "Factuurnummer is verplicht"),
-  invoice_date: z.string().min(1, "Factuurdatum is verplicht"),
-  due_date: z.string().optional(),
-  amount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-    message: "Bedrag moet een positief getal zijn",
-  }),
-  currency: z.string().default("EUR"),
-  debtor_name: z.string().optional(),
-  debtor_email: z.string().email("Ongeldig e-mailadres").optional().or(z.literal("")),
-  debtor_vat_number: z.string().optional(),
-  debtor_address_street: z.string().optional(),
-  debtor_address_house_number: z.string().optional(),
-  debtor_address_city: z.string().optional(),
-  debtor_address_postal_code: z.string().optional(),
-  debtor_address_country: z.string().default("BE"),
-  debtor_type: z.enum(["particular", "company"]).default("particular"),
-});
-
-type InvoiceFormData = z.infer<typeof invoiceSchema>;
+import { useTranslations } from 'next-intl';
 
 export default function InvoiceDetailPage() {
+  const t = useTranslations('portal.library.invoiceDetail');
+  const tCommon = useTranslations('common');
+  
+  const invoiceSchema = z.object({
+    invoice_number: z.string().min(1, t('invoiceNumberRequired')),
+    invoice_date: z.string().min(1, t('invoiceDateRequired')),
+    due_date: z.string().optional(),
+    amount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+      message: t('amountInvalid'),
+    }),
+    currency: z.string().default("EUR"),
+    debtor_name: z.string().optional(),
+    debtor_email: z.string().email(t('emailInvalid')).optional().or(z.literal("")),
+    debtor_vat_number: z.string().optional(),
+    debtor_address_street: z.string().optional(),
+    debtor_address_house_number: z.string().optional(),
+    debtor_address_city: z.string().optional(),
+    debtor_address_postal_code: z.string().optional(),
+    debtor_address_country: z.string().default("BE"),
+    debtor_type: z.enum(["particular", "company"]).default("particular"),
+  });
+
+  type InvoiceFormData = z.infer<typeof invoiceSchema>;
+  
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -73,7 +77,7 @@ export default function InvoiceDetailPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Kon factuur niet laden");
+        throw new Error(result.error || t('loadingError'));
       }
 
       const invoice = result.invoice;
@@ -112,8 +116,8 @@ export default function InvoiceDetailPage() {
       }
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Kon factuur niet laden",
+        title: tCommon('error'),
+        description: error.message || t('loadingError'),
         variant: "destructive",
       });
       router.push("/portal/bibliotheek");
@@ -147,19 +151,19 @@ export default function InvoiceDetailPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Kon factuur niet bijwerken");
+        throw new Error(result.error || t('error'));
       }
 
       toast({
-        title: "Factuur bijgewerkt",
-        description: "De factuur is succesvol bijgewerkt",
+        title: t('saved'),
+        description: t('savedDesc'),
       });
 
       router.push("/portal/bibliotheek");
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -168,7 +172,7 @@ export default function InvoiceDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Weet je zeker dat je deze factuur wilt verwijderen?")) {
+    if (!confirm(t('deleteConfirm'))) {
       return;
     }
 
@@ -182,19 +186,19 @@ export default function InvoiceDetailPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Kon factuur niet verwijderen");
+        throw new Error(result.error || t('error'));
       }
 
       toast({
-        title: "Factuur verwijderd",
-        description: "De factuur is succesvol verwijderd",
+        title: t('saved'),
+        description: t('savedDesc'),
       });
 
       router.push("/portal/bibliotheek");
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -219,13 +223,13 @@ export default function InvoiceDetailPage() {
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Terug naar bibliotheek
+          {t('backToLibrary')}
         </Button>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-          Factuur bewerken
+          {t('title')}
         </h1>
         <p className="font-sans text-muted-foreground">
-          Bewerk de gegevens van deze factuur
+          {t('description')}
         </p>
       </div>
 
@@ -235,14 +239,14 @@ export default function InvoiceDetailPage() {
           {documentUrl && (
             <Card>
               <CardHeader>
-                <CardTitle>Factuur preview</CardTitle>
+                <CardTitle>{t('preview')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="border rounded-lg overflow-hidden bg-gray-50" style={{ height: 'calc(90vh - 200px)', minHeight: '600px' }}>
                   <iframe
                     src={`${documentUrl}#toolbar=1&navpanes=0&scrollbar=1&zoom=page-width`}
                     className="w-full h-full"
-                    title="Factuur Preview"
+                    title={t('preview')}
                     style={{ border: 'none' }}
                   />
                 </div>
@@ -254,14 +258,14 @@ export default function InvoiceDetailPage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Factuurgegevens</CardTitle>
+                <CardTitle>{t('invoiceData')}</CardTitle>
                 <CardDescription>
-                  Bewerk de gegevens van de factuur
+                  {t('invoiceDataDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="invoice_number">Factuurnummer *</Label>
+                  <Label htmlFor="invoice_number">{t('invoiceNumber')}</Label>
                   <Input
                     id="invoice_number"
                     {...register("invoice_number")}
@@ -274,7 +278,7 @@ export default function InvoiceDetailPage() {
 
                 <div className="grid md:grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="invoice_date">Factuurdatum *</Label>
+                    <Label htmlFor="invoice_date">{t('invoiceDate')}</Label>
                     <Input
                       id="invoice_date"
                       type="date"
@@ -285,7 +289,7 @@ export default function InvoiceDetailPage() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="due_date">Vervaldatum</Label>
+                    <Label htmlFor="due_date">{t('dueDate')}</Label>
                     <Input
                       id="due_date"
                       type="date"
@@ -296,7 +300,7 @@ export default function InvoiceDetailPage() {
 
                 <div className="grid md:grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Bedrag *</Label>
+                    <Label htmlFor="amount">{t('amount')}</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -309,7 +313,7 @@ export default function InvoiceDetailPage() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="currency">Valuta</Label>
+                    <Label htmlFor="currency">{t('currency')}</Label>
                     <Input
                       id="currency"
                       {...register("currency")}
@@ -320,10 +324,10 @@ export default function InvoiceDetailPage() {
 
                 {/* Debiteur informatie */}
                 <div className="space-y-3 border-t pt-4">
-                  <Label className="text-base font-semibold">Debiteur informatie</Label>
+                  <Label className="text-base font-semibold">{t('debtorInfo')}</Label>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="debtor_type">Type *</Label>
+                    <Label htmlFor="debtor_type">{t('type')}</Label>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -338,7 +342,7 @@ export default function InvoiceDetailPage() {
                           }}
                           className="w-4 h-4"
                         />
-                        <span className="font-sans">Particulier</span>
+                        <span className="font-sans">{t('particular')}</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -350,13 +354,13 @@ export default function InvoiceDetailPage() {
                           }}
                           className="w-4 h-4"
                         />
-                        <span className="font-sans">Bedrijf</span>
+                        <span className="font-sans">{t('company')}</span>
                       </label>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="debtor_name">Naam/Bedrijfsnaam</Label>
+                    <Label htmlFor="debtor_name">{t('name')}</Label>
                     <Input
                       id="debtor_name"
                       {...register("debtor_name")}
@@ -366,7 +370,7 @@ export default function InvoiceDetailPage() {
 
                   <div className={`grid gap-3 ${debtorType === "company" ? "md:grid-cols-2" : ""}`}>
                     <div className="space-y-2">
-                      <Label htmlFor="debtor_email">E-mailadres</Label>
+                      <Label htmlFor="debtor_email">{t('email')}</Label>
                       <Input
                         id="debtor_email"
                         type="email"
@@ -379,7 +383,7 @@ export default function InvoiceDetailPage() {
                     </div>
                     {debtorType === "company" && (
                       <div className="space-y-2">
-                        <Label htmlFor="debtor_vat_number">BTW nummer</Label>
+                        <Label htmlFor="debtor_vat_number">{t('vatNumber')}</Label>
                         <Input
                           id="debtor_vat_number"
                           {...register("debtor_vat_number")}
@@ -391,7 +395,7 @@ export default function InvoiceDetailPage() {
 
                   <div className="grid md:grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label htmlFor="debtor_address_street">Straat</Label>
+                      <Label htmlFor="debtor_address_street">{t('street')}</Label>
                       <Input
                         id="debtor_address_street"
                         {...register("debtor_address_street")}
@@ -399,7 +403,7 @@ export default function InvoiceDetailPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="debtor_address_house_number">Huisnummer</Label>
+                      <Label htmlFor="debtor_address_house_number">{t('houseNumber')}</Label>
                       <Input
                         id="debtor_address_house_number"
                         {...register("debtor_address_house_number")}
@@ -410,7 +414,7 @@ export default function InvoiceDetailPage() {
 
                   <div className="grid md:grid-cols-3 gap-3">
                     <div className="space-y-2">
-                      <Label htmlFor="debtor_address_postal_code">Postcode</Label>
+                      <Label htmlFor="debtor_address_postal_code">{t('postalCode')}</Label>
                       <Input
                         id="debtor_address_postal_code"
                         {...register("debtor_address_postal_code")}
@@ -418,7 +422,7 @@ export default function InvoiceDetailPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="debtor_address_city">Stad</Label>
+                      <Label htmlFor="debtor_address_city">{t('city')}</Label>
                       <Input
                         id="debtor_address_city"
                         {...register("debtor_address_city")}
@@ -426,7 +430,7 @@ export default function InvoiceDetailPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="debtor_address_country">Land</Label>
+                      <Label htmlFor="debtor_address_country">{t('country')}</Label>
                       <Input
                         id="debtor_address_country"
                         {...register("debtor_address_country")}
@@ -446,12 +450,12 @@ export default function InvoiceDetailPage() {
                     {deleting ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Verwijderen...
+                        {t('deleting')}
                       </>
                     ) : (
                       <>
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Verwijderen
+                        {t('delete')}
                       </>
                     )}
                   </Button>
@@ -461,18 +465,18 @@ export default function InvoiceDetailPage() {
                       variant="outline"
                       onClick={() => router.push("/portal/bibliotheek")}
                     >
-                      Annuleren
+                      {t('cancel')}
                     </Button>
                     <Button type="submit" disabled={saving}>
                       {saving ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Opslaan...
+                          {t('saving')}
                         </>
                       ) : (
                         <>
                           <Save className="w-4 h-4 mr-2" />
-                          Opslaan
+                          {t('save')}
                         </>
                       )}
                     </Button>

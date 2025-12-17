@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 
 const userSchema = z.object({
   email: z.string().email("Ongeldig e-mailadres"),
@@ -23,6 +24,9 @@ const userSchema = z.object({
 type UserFormData = z.infer<typeof userSchema>;
 
 export default function EditUserPage() {
+  const t = useTranslations('admin.users.edit');
+  const tCommon = useTranslations('common');
+  const tRoles = useTranslations('admin.users.roles');
   const router = useRouter();
   const params = useParams();
   const userId = params.id as string;
@@ -55,8 +59,8 @@ export default function EditUserPage() {
 
       if (!profile) {
         toast({
-          title: "Fout",
-          description: "Gebruiker niet gevonden",
+          title: tCommon('error'),
+          description: t('notFound'),
           variant: "destructive",
         });
         router.push("/admin/users");
@@ -75,8 +79,8 @@ export default function EditUserPage() {
     } catch (error: any) {
       console.error("Error loading user:", error);
       toast({
-        title: "Fout",
-        description: "Kon gebruiker niet laden",
+        title: tCommon('error'),
+        description: t('loadingError'),
         variant: "destructive",
       });
     } finally {
@@ -110,16 +114,16 @@ export default function EditUserPage() {
       if (profileError) throw profileError;
 
       toast({
-        title: "Gebruiker bijgewerkt",
-        description: `${data.fullName} is succesvol bijgewerkt`,
+        title: t('saved'),
+        description: `${data.fullName} ${t('savedDesc')}`,
       });
 
       router.push("/admin/users");
     } catch (error: any) {
       console.error("Error updating user:", error);
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden bij het bijwerken van de gebruiker",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -130,7 +134,7 @@ export default function EditUserPage() {
   if (loadingUser) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div>Laden...</div>
+        <div>{tCommon('loading')}</div>
       </div>
     );
   }
@@ -141,23 +145,20 @@ export default function EditUserPage() {
         <Link href="/admin/users">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Terug naar gebruikers
+            {t('backToUsers')}
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Gebruiker bewerken</h1>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Gebruikersgegevens</CardTitle>
-          <CardDescription>
-            Wijzig de gegevens van de gebruiker
-          </CardDescription>
+          <CardTitle>{tCommon('userData')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">E-mailadres *</Label>
+              <Label htmlFor="email">{t('email')} *</Label>
               <Input
                 id="email"
                 type="email"
@@ -170,7 +171,7 @@ export default function EditUserPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">Volledige naam *</Label>
+              <Label htmlFor="fullName">{t('fullName')} *</Label>
               <Input
                 id="fullName"
                 {...register("fullName")}
@@ -182,15 +183,15 @@ export default function EditUserPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="role">Rol *</Label>
+              <Label htmlFor="role">{t('role')} *</Label>
               <select
                 id="role"
                 {...register("role")}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option value="client">Klant</option>
-                <option value="staff">Medewerker</option>
-                <option value="admin">Beheerder</option>
+                <option value="client">{tRoles('client')}</option>
+                <option value="staff">{tRoles('staff')}</option>
+                <option value="admin">{tRoles('admin')}</option>
               </select>
               {errors.role && (
                 <p className="text-sm text-destructive">{errors.role.message}</p>
@@ -199,11 +200,11 @@ export default function EditUserPage() {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={loading}>
-                {loading ? "Opslaan..." : "Opslaan"}
+                {loading ? t('saving') : t('save')}
               </Button>
               <Link href="/admin/users">
                 <Button type="button" variant="outline">
-                  Annuleren
+                  {tCommon('cancel')}
                 </Button>
               </Link>
             </div>

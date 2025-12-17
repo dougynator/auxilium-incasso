@@ -1,45 +1,48 @@
-import Link from "next/link";
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
 import { Button } from "@/components/ui/button";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Search, MessageSquare, Mail, Phone, FileText, AlertTriangle, CheckCircle2, Clock, Send, Scale, ArrowRight } from "lucide-react";
 
-const werkwijzeSteps = [
-  {
-    number: 1,
-    title: "Gevoeligheidsscan",
-    description: "Na het ontvangen van ieder dossier laten wij eerst de gevoeligheid hiervan scannen. Zijn het vaste klanten waar men goede relaties mee heeft? Is de factuur recent vervallen? Aan de hand van deze factoren kan ons systeem uitmaken of we beginnen met een reminder zonder bijkomende kosten of niet.",
-    icon: Search,
-    color: "bg-blue-50 text-blue-700 border-blue-200",
-    illustration: "scan",
-  },
-  {
-    number: 2,
-    title: "Eerste aanspreking",
-    description: "Nadat ons systeem de gevoeligheid heeft bepaald, gaan we de klant voor de eerste keer aanspreken. Dit gebeurt op een vriendelijke en professionele manier, afgestemd op de relatie en situatie.",
-    icon: MessageSquare,
-    color: "bg-green-50 text-green-700 border-green-200",
-    illustration: "contact",
-  },
-  {
-    number: 3,
-    title: "Intensieve opvolging",
-    description: "Nog steeds geen betaling na 3-5 werkdagen? Dan gaan we over tot een intensievere opvolging: we sturen een reminder, een aangetekende zending en voeren een persoonlijke call uit. We blijven professioneel maar maken duidelijk dat betaling verwacht wordt.",
-    icon: Phone,
-    color: "bg-orange-50 text-orange-700 border-orange-200",
-    illustration: "followup",
-  },
-  {
-    number: 4,
-    title: "Ultimatum en juridische stappen",
-    description: "Nog steeds geen betaling? Dan gaan we over tot een ultimatum waarbij we duidelijk maken dat de volgende stappen juridisch zullen zijn. We geven een laatste kans, maar maken ook duidelijk dat we niet aarzelen om juridische stappen te ondernemen indien nodig.",
-    icon: Scale,
-    color: "bg-red-50 text-red-700 border-red-200",
-    illustration: "ultimatum",
-  },
-];
+export default async function WerkwijzePage() {
+  const t = await getTranslations('howItWorks');
 
-export default function WerkwijzePage() {
+  const werkwijzeSteps = [
+    {
+      number: 1,
+      title: t('sensitivityScan.title'),
+      description: t('sensitivityScan.description'),
+      icon: Search,
+      color: "bg-blue-50 text-blue-700 border-blue-200",
+      illustration: "scan",
+    },
+    {
+      number: 2,
+      title: t('firstContact.title'),
+      description: t('firstContact.description'),
+      icon: MessageSquare,
+      color: "bg-green-50 text-green-700 border-green-200",
+      illustration: "contact",
+    },
+    {
+      number: 3,
+      title: t('intensiveFollowup.title'),
+      description: t('intensiveFollowup.description'),
+      icon: Phone,
+      color: "bg-orange-50 text-orange-700 border-orange-200",
+      illustration: "followup",
+    },
+    {
+      number: 4,
+      title: t('ultimatum.title'),
+      description: t('ultimatum.description'),
+      icon: Scale,
+      color: "bg-red-50 text-red-700 border-red-200",
+      illustration: "ultimatum",
+    },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header currentPage="werkwijze" />
@@ -50,10 +53,10 @@ export default function WerkwijzePage() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="font-display text-4xl md:text-5xl font-bold text-primary mb-3">
-                Onze werkwijze
+                {t('title')}
               </h1>
               <p className="font-sans text-lg text-muted-foreground">
-                Een transparant en professioneel proces voor het innen van uw onbetaalde facturen
+                {t('subtitle')}
               </p>
             </div>
           </div>
@@ -82,7 +85,7 @@ export default function WerkwijzePage() {
                             </div>
                             <div>
                               <div className="text-xs font-semibold text-muted-foreground mb-0.5">
-                                Stap {step.number}
+                                {t('step')} {step.number}
                               </div>
                               <h2 className="font-display text-xl md:text-2xl font-bold text-foreground">
                                 {step.title}
@@ -165,7 +168,7 @@ export default function WerkwijzePage() {
                                   </div>
                                   <div className="flex items-center justify-center gap-2 mt-4">
                                     <Clock className="w-5 h-5 text-orange-600" />
-                                    <span className="text-xs font-semibold text-orange-700">3-5 werkdagen</span>
+                                    <span className="text-xs font-semibold text-orange-700">{t('intensiveFollowup.days')}</span>
                                   </div>
                                 </div>
                               </div>
@@ -212,10 +215,10 @@ export default function WerkwijzePage() {
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center">
               <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-                Klaar om te starten?
+                {t('cta.title')}
               </h2>
               <p className="font-sans text-base md:text-lg text-muted-foreground mb-6">
-                Dien nu uw opdracht in en laat ons professioneel te werk gaan
+                {t('cta.description')}
               </p>
               <Link href="/login" className="group inline-block">
                 <div className="relative">
@@ -231,7 +234,7 @@ export default function WerkwijzePage() {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                     
                     <span className="relative flex items-center gap-3 z-10">
-                      <span className="font-bold">Dien nu je opdracht in</span>
+                      <span className="font-bold">{t('cta.button')}</span>
                       <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300 group-hover:scale-110" />
                     </span>
                   </Button>

@@ -1,10 +1,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
-import { LogOut } from "lucide-react";
 import PortalNav from "@/components/portal-nav";
+import { getMessages } from 'next-intl/server';
+import { routing } from '@/i18n/routing';
+import PortalLanguageSwitcher from "@/components/portal-language-switcher";
+import PortalLanguageProvider from "@/components/portal-language-provider";
+import PortalLogoutButton from "@/components/portal-logout-button";
 
 export default async function PortalLayout({
   children,
@@ -70,66 +73,69 @@ export default async function PortalLayout({
 
   const navigationItems = [
     {
-      name: "Dashboard",
+      nameKey: "dashboard",
       href: "/portal",
       iconName: "Home",
     },
     {
-      name: "Jouw opdrachten",
+      nameKey: "assignments",
       href: "/portal/cases",
       iconName: "FileText",
     },
     {
-      name: "Bibliotheek",
+      nameKey: "library",
       href: "/portal/bibliotheek",
       iconName: "Library",
     },
     {
-      name: "Account",
+      nameKey: "account",
       href: "/portal/settings",
       iconName: "User",
     },
     {
-      name: "Integraties",
+      nameKey: "integrations",
       href: "/portal/integraties",
       iconName: "Plug",
     },
   ];
 
+  // Get messages for all locales so users can switch languages
+  const nlMessages = await getMessages({ locale: 'nl' });
+  const enMessages = await getMessages({ locale: 'en' });
+  const frMessages = await getMessages({ locale: 'fr' });
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top header */}
-      <header className="bg-white border-b sticky top-0 z-50">
-        <div className="px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <Logo href="/portal" />
+    <PortalLanguageProvider nlMessages={nlMessages} enMessages={enMessages} frMessages={frMessages}>
+      <div className="min-h-screen bg-gray-50">
+        {/* Top header */}
+        <header className="bg-white border-b sticky top-0 z-50">
+          <div className="px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center">
+              <Logo href="/portal" />
+            </div>
+            <div className="flex items-center gap-4">
+              <PortalLanguageSwitcher />
+              {profile?.role === "admin" || profile?.role === "staff" ? (
+                <Link href="/admin" className="font-sans text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Admin
+                </Link>
+              ) : null}
+              <PortalLogoutButton onSignOut={handleSignOut} />
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            {profile?.role === "admin" || profile?.role === "staff" ? (
-              <Link href="/admin" className="font-sans text-sm text-muted-foreground hover:text-primary transition-colors">
-                Admin
-              </Link>
-            ) : null}
-            <form action={handleSignOut}>
-              <Button type="submit" variant="outline" size="sm" className="font-sans">
-                <LogOut className="w-4 h-4 mr-2" />
-                Uitloggen
-              </Button>
-            </form>
-          </div>
+        </header>
+
+        <div className="flex">
+          {/* Sidebar navigation */}
+          <aside className="w-64 bg-white border-r fixed top-[73px] left-0 bottom-0 overflow-y-auto">
+            <PortalNav items={navigationItems} namespace="portal.nav" />
+          </aside>
+
+          {/* Main content */}
+          <main className="flex-1 p-8 ml-64">{children}</main>
         </div>
-      </header>
-
-      <div className="flex">
-        {/* Sidebar navigation */}
-        <aside className="w-64 bg-white border-r fixed top-[73px] left-0 bottom-0 overflow-y-auto">
-          <PortalNav items={navigationItems} />
-        </aside>
-
-        {/* Main content */}
-        <main className="flex-1 p-8 ml-64">{children}</main>
       </div>
-    </div>
+    </PortalLanguageProvider>
   );
 }
 

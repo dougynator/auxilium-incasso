@@ -1,53 +1,56 @@
-import Link from "next/link";
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
 import { Button } from "@/components/ui/button";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Calendar, Award, Heart, Users, TrendingUp, ArrowRight, ArrowDown } from "lucide-react";
 
-const timelineEvents = [
-  {
-    year: "Oprichting",
-    title: "De start van Auxilium",
-    description: "Auxilium Incasso wordt opgericht met de visie om bedrijven te helpen bij het efficiënt innen van onbetaalde facturen. Met jarenlange ervaring in de financiële sector wordt de basis gelegd voor een betrouwbaar incassobureau.",
-    icon: Calendar,
-    color: "bg-blue-50 text-blue-700 border-blue-200",
-    side: "left",
-  },
-  {
-    year: "Vaste waarde",
-    title: "Consultant en vertrouwenspersoon",
-    description: "Als consultant en vertrouwenspersoon wordt er een solide reputatie opgebouwd. Klanten waarderen de persoonlijke aanpak en de expertise in incasso en debiteurenbeheer.",
-    icon: Award,
-    color: "bg-green-50 text-green-700 border-green-200",
-    side: "right",
-  },
-  {
-    year: "Jubileum",
-    title: "Jaren van groei en succes",
-    description: "Door de jaren heen groeit Auxilium uit tot een betrouwbare partner voor vele bedrijven. Het jubileum markeert jaren van succesvolle incasso's en tevreden klanten.",
-    icon: Heart,
-    color: "bg-orange-50 text-orange-700 border-orange-200",
-    side: "left",
-  },
-  {
-    year: "Overname",
-    title: "Een nieuw hoofdstuk",
-    description: "Na het overlijden nemen de kinderen het bedrijf over. Met respect voor de opgebouwde waarden en expertise wordt de erfenis voortgezet en het bedrijf naar de toekomst gebracht.",
-    icon: Users,
-    color: "bg-purple-50 text-purple-700 border-purple-200",
-    side: "right",
-  },
-  {
-    year: "2025",
-    title: "Moderne aanpak met financiële expertise",
-    description: "Met een sterke financiële achtergrond wordt er een nieuwe stap gezet. Moderne technologie en geavanceerde systemen worden geïntegreerd, terwijl de persoonlijke aanpak en betrouwbaarheid behouden blijven.",
-    icon: TrendingUp,
-    color: "bg-indigo-50 text-indigo-700 border-indigo-200",
-    side: "left",
-  },
-];
+export default async function OverOnsPage() {
+  const t = await getTranslations('about');
 
-export default function OverOnsPage() {
+  const timelineEvents = [
+    {
+      year: t('timeline.founding.year'),
+      title: t('timeline.founding.title'),
+      description: t('timeline.founding.description'),
+      icon: Calendar,
+      color: "bg-blue-50 text-blue-700 border-blue-200",
+      side: "left",
+    },
+    {
+      year: t('timeline.trusted.year'),
+      title: t('timeline.trusted.title'),
+      description: t('timeline.trusted.description'),
+      icon: Award,
+      color: "bg-green-50 text-green-700 border-green-200",
+      side: "right",
+    },
+    {
+      year: t('timeline.anniversary.year'),
+      title: t('timeline.anniversary.title'),
+      description: t('timeline.anniversary.description'),
+      icon: Heart,
+      color: "bg-orange-50 text-orange-700 border-orange-200",
+      side: "left",
+    },
+    {
+      year: t('timeline.takeover.year'),
+      title: t('timeline.takeover.title'),
+      description: t('timeline.takeover.description'),
+      icon: Users,
+      color: "bg-purple-50 text-purple-700 border-purple-200",
+      side: "right",
+    },
+    {
+      year: t('timeline.modern.year'),
+      title: t('timeline.modern.title'),
+      description: t('timeline.modern.description'),
+      icon: TrendingUp,
+      color: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      side: "left",
+    },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header currentPage="over-ons" />
@@ -58,10 +61,10 @@ export default function OverOnsPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="font-display text-4xl md:text-5xl font-bold text-primary mb-3">
-                Over ons
+                {t('title')}
               </h1>
               <p className="font-sans text-lg text-muted-foreground">
-                Ons verhaal, onze waarden en onze missie
+                {t('subtitle')}
               </p>
             </div>
           </div>
@@ -149,7 +152,7 @@ export default function OverOnsPage() {
                               <div className="text-center">
                                 <div className="w-24 h-24 bg-white rounded-lg mx-auto mb-4 shadow-inner" />
                                 <p className="font-sans text-xs text-gray-500">
-                                  Illustratie/Foto
+                                  {t('illustration')}
                                 </p>
                               </div>
                             </div>
@@ -169,10 +172,10 @@ export default function OverOnsPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center">
               <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-4">
-                Klaar om samen te werken?
+                {t('cta.title')}
               </h2>
               <p className="font-sans text-base md:text-lg text-muted-foreground mb-8">
-                Neem contact met ons op en ontdek hoe wij u kunnen helpen
+                {t('cta.description')}
               </p>
               <Link href="/contact" className="group inline-block">
                 <div className="relative">
@@ -188,7 +191,7 @@ export default function OverOnsPage() {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                     
                     <span className="relative flex items-center gap-3 z-10">
-                      <span className="font-bold">Neem contact op</span>
+                      <span className="font-bold">{t('cta.button')}</span>
                       <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300 group-hover:scale-110" />
                     </span>
                   </Button>
@@ -203,3 +206,4 @@ export default function OverOnsPage() {
     </div>
   );
 }
+

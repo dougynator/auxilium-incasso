@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import Logo from "@/components/logo";
 import { Mail, Phone, MapPin, Linkedin, Facebook, Instagram, Twitter } from "lucide-react";
+import { useTranslations } from 'next-intl';
+import { Link as I18nLink } from '@/i18n/routing';
 
 export default function Footer() {
+  const t = useTranslations('footer');
   return (
     <footer className="mt-20 bg-gradient-to-b from-primary/95 via-primary to-primary/90 text-white rounded-t-3xl flex flex-col min-h-[200px]">
       <div className="container mx-auto px-4 py-12 md:py-16 flex-1">
@@ -38,52 +43,52 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <h3 className="font-display font-semibold text-lg mb-4 text-white">Links</h3>
+            <h3 className="font-display font-semibold text-lg mb-4 text-white">{t('links')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/faq" className="text-white/90 hover:text-white transition-colors">
+                <I18nLink href="/faq" className="text-white/90 hover:text-white transition-colors">
                   FAQ
-                </Link>
+                </I18nLink>
               </li>
               <li>
-                <Link href="/privacy" className="text-white/90 hover:text-white transition-colors">
-                  Privacy
-                </Link>
+                <I18nLink href="/privacy" className="text-white/90 hover:text-white transition-colors">
+                  {t('privacy')}
+                </I18nLink>
               </li>
               <li>
-                <Link href="/voorwaarden" className="text-white/90 hover:text-white transition-colors">
-                  Voorwaarden
-                </Link>
+                <I18nLink href="/voorwaarden" className="text-white/90 hover:text-white transition-colors">
+                  {t('terms')}
+                </I18nLink>
               </li>
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h3 className="font-display font-semibold text-lg mb-4 text-white">Contact</h3>
+            <h3 className="font-display font-semibold text-lg mb-4 text-white">{t('contact')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/contact" className="text-white/90 hover:text-white transition-colors">
-                  Contact opnemen
-                </Link>
+                <I18nLink href="/contact" className="text-white/90 hover:text-white transition-colors">
+                  {t('contactUs')}
+                </I18nLink>
               </li>
             </ul>
           </div>
 
           {/* Klantenportaal en Social Media */}
           <div>
-            <h3 className="font-display font-semibold text-lg mb-4 text-white">Klantenportaal</h3>
+            <h3 className="font-display font-semibold text-lg mb-4 text-white">{t('clientPortal')}</h3>
             <ul className="space-y-2 text-sm mb-6">
               <li>
-                <Link href="/login" className="text-white/90 hover:text-white transition-colors">
-                  Inloggen
-                </Link>
+                <I18nLink href="/login" className="text-white/90 hover:text-white transition-colors">
+                  {t('login')}
+                </I18nLink>
               </li>
             </ul>
             
             {/* Social Media */}
             <div>
-              <h3 className="font-display font-semibold text-lg mb-4 text-white">Volg ons</h3>
+              <h3 className="font-display font-semibold text-lg mb-4 text-white">{t('followUs')}</h3>
               <div className="flex gap-4">
                 <a
                   href="https://linkedin.com/company/auxilium-incasso"
@@ -128,7 +133,7 @@ export default function Footer() {
       </div>
       <div className="pt-1 border-t border-white/20 pb-1 mt-auto">
         <div className="max-w-fit mx-auto text-center text-xs text-white/80 px-4">
-          © {new Date().getFullYear()} Auxilium Incasso. Alle rechten voorbehouden.
+          © {new Date().getFullYear()} Auxilium Incasso. {t('allRightsReserved')}.
         </div>
       </div>
     </footer>

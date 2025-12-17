@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 
 const userSchema = z.object({
   email: z.string().email("Ongeldig e-mailadres"),
@@ -24,6 +25,9 @@ const userSchema = z.object({
 type UserFormData = z.infer<typeof userSchema>;
 
 export default function NewUserPage() {
+  const t = useTranslations('admin.users.new');
+  const tCommon = useTranslations('common');
+  const tRoles = useTranslations('admin.users.roles');
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClient();
@@ -74,16 +78,16 @@ export default function NewUserPage() {
       }
 
       toast({
-        title: "Gebruiker aangemaakt",
-        description: `${data.fullName} is succesvol toegevoegd als ${data.role === "admin" ? "beheerder" : "medewerker"}`,
+        title: t('created'),
+        description: `${data.fullName} ${t('createdDesc')} ${tRoles(data.role)}`,
       });
 
       router.push("/admin/users");
     } catch (error: any) {
       console.error("Error creating user:", error);
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden bij het aanmaken van de gebruiker",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -97,26 +101,20 @@ export default function NewUserPage() {
         <Link href="/admin/users">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Terug naar gebruikers
+            {t('backToUsers')}
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Nieuwe gebruiker toevoegen</h1>
-        <p className="text-muted-foreground mt-2">
-          Voeg een nieuwe beheerder of medewerker toe aan het systeem
-        </p>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Gebruikersgegevens</CardTitle>
-          <CardDescription>
-            Vul de gegevens in voor de nieuwe gebruiker
-          </CardDescription>
+          <CardTitle>{tCommon('userData')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">E-mailadres *</Label>
+              <Label htmlFor="email">{t('email')} *</Label>
               <Input
                 id="email"
                 type="email"
@@ -129,7 +127,7 @@ export default function NewUserPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Wachtwoord *</Label>
+              <Label htmlFor="password">{t('password')} *</Label>
               <Input
                 id="password"
                 type="password"
@@ -142,7 +140,7 @@ export default function NewUserPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">Volledige naam *</Label>
+              <Label htmlFor="fullName">{t('fullName')} *</Label>
               <Input
                 id="fullName"
                 {...register("fullName")}
@@ -154,14 +152,14 @@ export default function NewUserPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="role">Rol *</Label>
+              <Label htmlFor="role">{t('role')} *</Label>
               <select
                 id="role"
                 {...register("role")}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option value="staff">Medewerker</option>
-                <option value="admin">Beheerder</option>
+                <option value="staff">{tRoles('staff')}</option>
+                <option value="admin">{tRoles('admin')}</option>
               </select>
               {errors.role && (
                 <p className="text-sm text-destructive">{errors.role.message}</p>
@@ -170,11 +168,11 @@ export default function NewUserPage() {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={loading}>
-                {loading ? "Aanmaken..." : "Gebruiker aanmaken"}
+                {loading ? t('creating') : t('create')}
               </Button>
               <Link href="/admin/users">
                 <Button type="button" variant="outline">
-                  Annuleren
+                  {tCommon('cancel')}
                 </Button>
               </Link>
             </div>

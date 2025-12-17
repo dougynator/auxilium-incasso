@@ -7,12 +7,15 @@ import Link from "next/link";
 import CaseTimeline from "@/components/cases/case-timeline";
 import CaseActions from "@/components/cases/case-actions";
 import CaseAttachments from "@/components/cases/case-attachments";
+import { getTranslations } from 'next-intl/server';
 
 export default async function CaseDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = await getTranslations('portal.caseDetail');
+  const tStatus = await getTranslations('portal.cases.status');
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -47,9 +50,9 @@ export default async function CaseDetailPage({
   if (error || !caseItem) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-4">Opdracht niet gevonden</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('notFound')}</h2>
         <Link href="/portal">
-          <Button>Terug naar dashboard</Button>
+          <Button>{t('backToDashboard')}</Button>
         </Link>
       </div>
     );
@@ -73,14 +76,11 @@ export default async function CaseDetailPage({
   };
 
   const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      draft: "Concept",
-      sent: "Verzonden",
-      in_progress: "In behandeling",
-      paid: "Betaald",
-      closed: "Afgesloten",
-    };
-    return labels[status] || status;
+    try {
+      return tStatus(status);
+    } catch {
+      return status;
+    }
   };
 
   const isStaffOrAdmin = profile.role === "admin" || profile.role === "staff";
@@ -90,9 +90,9 @@ export default async function CaseDetailPage({
       <div className="flex justify-between items-center mb-8">
         <div>
           <Link href="/portal" className="text-muted-foreground hover:text-primary mb-2 inline-block">
-            ← Terug naar dashboard
+            ← {t('backToDashboard')}
           </Link>
-          <h1 className="text-3xl font-bold">Opdracht details</h1>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
         </div>
         {isStaffOrAdmin && <CaseActions caseId={id} currentStatus={caseItem.status} />}
       </div>
@@ -100,11 +100,11 @@ export default async function CaseDetailPage({
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader>
-            <CardTitle>Overzicht</CardTitle>
+            <CardTitle>{t('overview')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <div className="text-sm text-muted-foreground">Status</div>
+              <div className="text-sm text-muted-foreground">{t('status')}</div>
               <span
                 className={`inline-block px-3 py-1 rounded text-sm font-semibold mt-1 ${getStatusColor(
                   caseItem.status
@@ -114,7 +114,7 @@ export default async function CaseDetailPage({
               </span>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Debiteur</div>
+              <div className="text-sm text-muted-foreground">{t('debtor')}</div>
               <div className="font-semibold mt-1">
                 {caseItem.debtors?.name || caseItem.debtors?.company_name || "Onbekend"}
               </div>
@@ -124,13 +124,13 @@ export default async function CaseDetailPage({
             </div>
             {caseItem.invoice_number && (
               <div>
-                <div className="text-sm text-muted-foreground">Factuurnummer</div>
+                <div className="text-sm text-muted-foreground">{t('invoiceNumber')}</div>
                 <div className="font-semibold mt-1">{caseItem.invoice_number}</div>
               </div>
             )}
             {caseItem.structured_reference && (
               <div>
-                <div className="text-sm text-muted-foreground">Structured reference</div>
+                <div className="text-sm text-muted-foreground">{t('structuredReference')}</div>
                 <div className="font-mono mt-1">{caseItem.structured_reference}</div>
               </div>
             )}
@@ -139,19 +139,19 @@ export default async function CaseDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Bedrag</CardTitle>
+            <CardTitle>{t('amount')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Hoofdsom:</span>
+              <span className="text-muted-foreground">{t('principalAmount')}:</span>
               <span className="font-semibold">{formatCurrency(caseItem.principal_amount)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Bijkomende kosten:</span>
+              <span className="text-muted-foreground">{t('additionalCosts')}:</span>
               <span className="font-semibold">{formatCurrency(caseItem.additional_costs)}</span>
             </div>
             <div className="flex justify-between text-lg font-bold border-t pt-2">
-              <span>Totaal:</span>
+              <span>{t('total')}:</span>
               <span>{formatCurrency(caseItem.total_amount)}</span>
             </div>
           </CardContent>
@@ -162,8 +162,8 @@ export default async function CaseDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Timeline</CardTitle>
-          <CardDescription>Activiteiten en gebeurtenissen</CardDescription>
+          <CardTitle>{t('timeline')}</CardTitle>
+          <CardDescription>{t('timelineDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <CaseTimeline

@@ -12,25 +12,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Trash2, Loader2 } from "lucide-react";
-
-const debtorSchema = z.object({
-  name: z.string().optional(),
-  company_name: z.string().optional(),
-  email: z.string().email("Ongeldig e-mailadres"),
-  vat_number: z.string().optional(),
-  address_street: z.string().optional(),
-  address_house_number: z.string().optional(),
-  address_city: z.string().optional(),
-  address_postal_code: z.string().optional(),
-  address_country: z.string().default("BE"),
-  phone: z.string().optional(),
-  notes: z.string().optional(),
-  debtor_type: z.enum(["particular", "company"]).default("particular"),
-});
-
-type DebtorFormData = z.infer<typeof debtorSchema>;
+import { useTranslations } from 'next-intl';
 
 export default function DebtorDetailPage() {
+  const t = useTranslations('portal.library.debtorDetail');
+  const tCommon = useTranslations('common');
+  
+  const debtorSchema = z.object({
+    name: z.string().optional(),
+    company_name: z.string().optional(),
+    email: z.string().email(t('emailInvalid')),
+    vat_number: z.string().optional(),
+    address_street: z.string().optional(),
+    address_house_number: z.string().optional(),
+    address_city: z.string().optional(),
+    address_postal_code: z.string().optional(),
+    address_country: z.string().default("BE"),
+    phone: z.string().optional(),
+    notes: z.string().optional(),
+    debtor_type: z.enum(["particular", "company"]).default("particular"),
+  });
+
+  type DebtorFormData = z.infer<typeof debtorSchema>;
+  
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -65,7 +69,7 @@ export default function DebtorDetailPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Kon relatie niet laden");
+        throw new Error(result.error || t('loadingError'));
       }
 
       const debtor = result.debtor;
@@ -83,8 +87,8 @@ export default function DebtorDetailPage() {
       setValue("debtor_type", debtor.debtor_type || "particular");
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Kon relatie niet laden",
+        title: tCommon('error'),
+        description: error.message || t('loadingError'),
         variant: "destructive",
       });
       router.push("/portal/bibliotheek");
@@ -117,19 +121,19 @@ export default function DebtorDetailPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Kon relatie niet bijwerken");
+        throw new Error(result.error || t('updateError'));
       }
 
       toast({
-        title: "Relatie bijgewerkt",
-        description: "De relatie is succesvol bijgewerkt",
+        title: t('saved'),
+        description: t('savedDesc'),
       });
 
       router.push("/portal/bibliotheek");
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -138,7 +142,7 @@ export default function DebtorDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Weet je zeker dat je deze relatie wilt verwijderen?")) {
+    if (!confirm(t('deleteConfirm'))) {
       return;
     }
 
@@ -152,19 +156,19 @@ export default function DebtorDetailPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Kon relatie niet verwijderen");
+        throw new Error(result.error || t('deleteError'));
       }
 
       toast({
-        title: "Relatie verwijderd",
-        description: "De relatie is succesvol verwijderd",
+        title: t('saved'),
+        description: t('savedDesc'),
       });
 
       router.push("/portal/bibliotheek");
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -189,27 +193,27 @@ export default function DebtorDetailPage() {
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Terug naar bibliotheek
+          {t('backToLibrary')}
         </Button>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-          Relatie bewerken
+          {t('title')}
         </h1>
         <p className="font-sans text-muted-foreground">
-          Bewerk de gegevens van deze relatie
+          {t('description')}
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle>Relatiegegevens</CardTitle>
+            <CardTitle>{t('debtorData')}</CardTitle>
             <CardDescription>
-              Bewerk de gegevens van de relatie
+              {t('debtorDataDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="debtor_type">Type *</Label>
+              <Label htmlFor="debtor_type">{t('type')}</Label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -225,7 +229,7 @@ export default function DebtorDetailPage() {
                     }}
                     className="w-4 h-4"
                   />
-                  <span className="font-sans">Particulier</span>
+                  <span className="font-sans">{t('particular')}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -237,19 +241,19 @@ export default function DebtorDetailPage() {
                     }}
                     className="w-4 h-4"
                   />
-                  <span className="font-sans">Bedrijf</span>
+                  <span className="font-sans">{t('company')}</span>
                 </label>
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Naam</Label>
+                <Label htmlFor="name">{t('name')}</Label>
                 <Input id="name" {...register("name")} placeholder="Jan Janssen" />
               </div>
               {debtorType === "company" && (
                 <div className="space-y-2">
-                  <Label htmlFor="company_name">Bedrijfsnaam</Label>
+                  <Label htmlFor="company_name">{t('companyName')}</Label>
                   <Input id="company_name" {...register("company_name")} placeholder="BVBA Example" />
                 </div>
               )}
@@ -257,7 +261,7 @@ export default function DebtorDetailPage() {
 
             <div className={`grid gap-4 ${debtorType === "company" ? "md:grid-cols-2" : ""}`}>
               <div className="space-y-2">
-                <Label htmlFor="email">E-mailadres *</Label>
+                <Label htmlFor="email">{t('email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -270,7 +274,7 @@ export default function DebtorDetailPage() {
               </div>
               {debtorType === "company" && (
                 <div className="space-y-2">
-                  <Label htmlFor="vat_number">BTW nummer</Label>
+                  <Label htmlFor="vat_number">{t('vatNumber')}</Label>
                   <Input id="vat_number" {...register("vat_number")} placeholder="BE0123456789" />
                 </div>
               )}
@@ -278,43 +282,43 @@ export default function DebtorDetailPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefoon</Label>
+                <Label htmlFor="phone">{t('phone')}</Label>
                 <Input id="phone" {...register("phone")} placeholder="+32 12 34 56 789" />
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="address_street">Straat</Label>
+                <Label htmlFor="address_street">{t('street')}</Label>
                 <Input id="address_street" {...register("address_street")} placeholder="Kerkstraat" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address_house_number">Huisnummer</Label>
+                <Label htmlFor="address_house_number">{t('houseNumber')}</Label>
                 <Input id="address_house_number" {...register("address_house_number")} placeholder="123" />
               </div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="address_postal_code">Postcode</Label>
+                <Label htmlFor="address_postal_code">{t('postalCode')}</Label>
                 <Input id="address_postal_code" {...register("address_postal_code")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address_city">Stad</Label>
+                <Label htmlFor="address_city">{t('city')}</Label>
                 <Input id="address_city" {...register("address_city")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address_country">Land</Label>
+                <Label htmlFor="address_country">{t('country')}</Label>
                 <Input id="address_country" {...register("address_country")} defaultValue="BE" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Notities</Label>
+              <Label htmlFor="notes">{t('notes')}</Label>
               <Textarea
                 id="notes"
                 {...register("notes")}
-                placeholder="Optionele notities over deze relatie"
+                placeholder={t('notesPlaceholder')}
                 rows={3}
               />
             </div>
@@ -329,12 +333,12 @@ export default function DebtorDetailPage() {
                 {deleting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Verwijderen...
+                    {t('deleting')}
                   </>
                 ) : (
                   <>
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Verwijderen
+                    {t('delete')}
                   </>
                 )}
               </Button>
@@ -344,18 +348,18 @@ export default function DebtorDetailPage() {
                   variant="outline"
                   onClick={() => router.push("/portal/bibliotheek")}
                 >
-                  Annuleren
+                  {t('cancel')}
                 </Button>
                 <Button type="submit" disabled={saving}>
                   {saving ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Opslaan...
+                      {t('saving')}
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
-                      Opslaan
+                      {t('save')}
                     </>
                   )}
                 </Button>

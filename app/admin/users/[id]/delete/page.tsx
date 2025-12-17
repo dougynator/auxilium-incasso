@@ -8,8 +8,12 @@ import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 
 export default function DeleteUserPage() {
+  const t = useTranslations('admin.users.delete');
+  const tCommon = useTranslations('common');
+  const tRoles = useTranslations('admin.users.roles');
   const router = useRouter();
   const params = useParams();
   const userId = params.id as string;
@@ -34,8 +38,8 @@ export default function DeleteUserPage() {
 
       if (!profile) {
         toast({
-          title: "Fout",
-          description: "Gebruiker niet gevonden",
+          title: tCommon('error'),
+          description: t('notFound'),
           variant: "destructive",
         });
         router.push("/admin/users");
@@ -48,13 +52,13 @@ export default function DeleteUserPage() {
 
       setUserData({
         ...profile,
-        email: user?.email || "Geen email",
+        email: user?.email || t('noEmail'),
       });
     } catch (error: any) {
       console.error("Error loading user:", error);
       toast({
-        title: "Fout",
-        description: "Kon gebruiker niet laden",
+        title: tCommon('error'),
+        description: t('loadingError'),
         variant: "destructive",
       });
     } finally {
@@ -63,7 +67,7 @@ export default function DeleteUserPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Weet je zeker dat je deze gebruiker wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.")) {
+    if (!confirm(t('confirm'))) {
       return;
     }
 
@@ -75,16 +79,16 @@ export default function DeleteUserPage() {
       if (deleteError) throw deleteError;
 
       toast({
-        title: "Gebruiker verwijderd",
-        description: `${userData?.full_name || "Gebruiker"} is succesvol verwijderd`,
+        title: t('deleted'),
+        description: `${userData?.full_name || tCommon('user')} ${t('deletedDesc')}`,
       });
 
       router.push("/admin/users");
     } catch (error: any) {
       console.error("Error deleting user:", error);
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden bij het verwijderen van de gebruiker",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     } finally {
@@ -95,7 +99,7 @@ export default function DeleteUserPage() {
   if (loadingUser) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div>Laden...</div>
+        <div>{tCommon('loading')}</div>
       </div>
     );
   }
@@ -103,9 +107,9 @@ export default function DeleteUserPage() {
   if (!userData) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-4">Gebruiker niet gevonden</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('notFound')}</h2>
         <Link href="/admin/users">
-          <Button variant="outline">Terug naar gebruikers</Button>
+          <Button variant="outline">{t('backToUsers')}</Button>
         </Link>
       </div>
     );
@@ -117,38 +121,38 @@ export default function DeleteUserPage() {
         <Link href="/admin/users">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Terug naar gebruikers
+            {t('backToUsers')}
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Gebruiker verwijderen</h1>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="w-5 h-5" />
-            Waarschuwing
+            {t('warning')}
           </CardTitle>
           <CardDescription>
-            Je staat op het punt om een gebruiker permanent te verwijderen
+            {t('warningDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-muted p-4 rounded-lg">
-            <div className="font-semibold mb-2">Gebruikersgegevens:</div>
+            <div className="font-semibold mb-2">{t('userData')}:</div>
             <div className="space-y-1 text-sm">
-              <div><span className="font-medium">Naam:</span> {userData.full_name || "Geen naam"}</div>
-              <div><span className="font-medium">Email:</span> {userData.email}</div>
-              <div><span className="font-medium">Rol:</span> {userData.role === "admin" ? "Beheerder" : userData.role === "staff" ? "Medewerker" : "Klant"}</div>
+              <div><span className="font-medium">{t('name')}:</span> {userData.full_name || t('name')}</div>
+              <div><span className="font-medium">{t('email')}:</span> {userData.email}</div>
+              <div><span className="font-medium">{t('role')}:</span> {tRoles(userData.role)}</div>
               {userData.organizations && (
-                <div><span className="font-medium">Organisatie:</span> {userData.organizations.name}</div>
+                <div><span className="font-medium">{t('organization')}:</span> {userData.organizations.name}</div>
               )}
             </div>
           </div>
 
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <p className="text-sm text-amber-800">
-              <strong>Let op:</strong> Deze actie kan niet ongedaan worden gemaakt. Alle gegevens van deze gebruiker zullen permanent worden verwijderd.
+              <strong>{tCommon('note')}:</strong> {t('note')}
             </p>
           </div>
 
@@ -158,11 +162,11 @@ export default function DeleteUserPage() {
               onClick={handleDelete}
               disabled={loading}
             >
-              {loading ? "Verwijderen..." : "Gebruiker verwijderen"}
+              {loading ? t('deleting') : t('delete')}
             </Button>
             <Link href="/admin/users">
               <Button type="button" variant="outline">
-                Annuleren
+                {tCommon('cancel')}
               </Button>
             </Link>
           </div>

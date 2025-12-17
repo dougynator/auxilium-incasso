@@ -1,0 +1,870 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "actions": "Actions",
+    "details": "Détails",
+    "yes": "Oui",
+    "no": "Non",
+    "name": "Nom",
+    "email": "Adresse e-mail",
+    "message": "Message",
+    "sending": "Envoi...",
+    "send": "Envoyer",
+    "address": "Adresse",
+    "phone": "Téléphone",
+    "contact": "Contact",
+    "readyToStart": "Prêt à commencer ?",
+    "submitNow": "Soumettez votre mission maintenant",
+    "contactUs": "Contactez-nous",
+    "lastUpdated": "Dernière mise à jour",
+    "questions": "Avez-vous des questions ? Contactez-nous.",
+    "contactForm": "le formulaire de contact",
+    "illustration": "Illustration/Photo",
+    "user": "Utilisateur",
+    "userData": "Données utilisateur",
+    "note": "Note",
+    "optional": "optionnel"
+  },
+  "nav": {
+    "services": "Services",
+    "howItWorks": "Comment ça marche",
+    "pricing": "Tarifs",
+    "about": "À propos",
+    "contact": "Contact",
+    "login": "Connexion",
+    "logout": "Déconnexion"
+  },
+  "home": {
+    "comingSoon": "Bientôt disponible",
+    "workingHard": "Nous travaillons dur sur quelque chose de génial !",
+    "description": "Auxilium Incasso lancera bientôt une plateforme de recouvrement moderne qui vous permet de recouvrer les factures impayées rapidement et efficacement.",
+    "noCureNoPay": "No cure no pay",
+    "onlyPayOnSuccess": "- vous ne payez qu'en cas de succès.",
+    "stayInformed": "Restez informé de notre lancement",
+    "expected": "Prévu : Q1 2025",
+    "fastEfficient": "Rapide et efficace",
+    "fastEfficientDesc": "Les missions sont traitées dans les 24 heures",
+    "transparent": "Transparent",
+    "transparentDesc": "Pas de frais cachés, tarifs clairs",
+    "modernPlatform": "Plateforme moderne",
+    "modernPlatformDesc": "Soumettez et suivez facilement les missions en ligne"
+  },
+  "services": {
+    "title": "Recouvrement",
+    "subtitle": "Services de recouvrement professionnels pour recouvrer efficacement vos factures impayées. Transparent, rapide et fiable.",
+    "easySubmission": {
+      "title": "Soumission facile de mission",
+      "description": "Soumettez votre mission de recouvrement facilement via notre portail en ligne. Téléchargez les documents requis et fournissez toutes les informations pertinentes. Votre mission est enregistrée en quelques minutes."
+    },
+    "autoCheck": {
+      "title": "Vérification automatique",
+      "description": "Notre système avancé vérifie automatiquement toutes les informations soumises pour leur exhaustivité et leur exactitude. Nous vérifions les données du débiteur et vérifions la validité de la créance."
+    },
+    "professionalContact": {
+      "title": "Contact professionnel",
+      "description": "Nous contactons immédiatement le débiteur par différents canaux. Notre personnel expérimenté travaille à une solution rapide et amicale pour votre créance."
+    },
+    "noCureNoPay": {
+      "title": "No cure - no pay",
+      "description": "Vous ne payez que lorsque le recouvrement est réussi. Pas de résultat, pas de frais. Notre structure tarifaire transparente signifie que vous savez toujours où vous en êtes."
+    },
+    "fastTreatment": {
+      "title": "Traitement rapide",
+      "description": "Dans les 24 heures suivant la soumission de votre mission, les premières étapes sont entreprises. Pas d'attente, pas de retard - résultats immédiats."
+    },
+    "allAmounts": {
+      "title": "Pour tous les montants",
+      "description": "Qu'il s'agisse de petits ou de grands montants, nous vous aidons à recouvrer vos factures impayées. Pas de montant minimum ou maximum."
+    },
+    "debtorManagement": {
+      "title": "Gestion des débiteurs",
+      "subtitle": "Gestion automatique complète des factures",
+      "description": "Chez Auxilium, nous veillons à ce que toutes les factures d'achat de votre système soient automatiquement maintenues et suivies. Nous surveillons vos factures en souffrance et assurons un paiement rapide, afin que vous n'ayez pas à vous inquiéter.",
+      "autoFollowup": "Suivi automatique de toutes les factures d'achat",
+      "proactiveMonitoring": "Surveillance proactive et paiement rapide",
+      "noWorries": "Plus de soucis concernant les paiements manqués",
+      "contactUs": "Contactez-nous",
+      "outstandingInvoices": "Factures en souffrance",
+      "customer": "Client",
+      "inProgress": "En cours",
+      "paid": "Payé",
+      "systemMonitors": "Le système surveille et suit"
+    },
+    "cta": {
+      "title": "Prêt à commencer ?",
+      "description": "Soumettez votre mission maintenant et laissez-nous travailler professionnellement",
+      "button": "Soumettez votre mission maintenant"
+    }
+  },
+  "howItWorks": {
+    "title": "Notre approche",
+    "subtitle": "Un processus transparent et professionnel pour recouvrer vos factures impayées",
+    "step": "Étape",
+    "sensitivityScan": {
+      "title": "Scan de sensibilité",
+      "description": "Après réception de chaque dossier, nous scannons d'abord sa sensibilité. S'agit-il de clients réguliers avec de bonnes relations ? La facture a-t-elle récemment expiré ? Sur la base de ces facteurs, notre système peut déterminer si nous commençons par un rappel sans frais supplémentaires ou non."
+    },
+    "firstContact": {
+      "title": "Premier contact",
+      "description": "Après que notre système ait déterminé la sensibilité, nous contactons le client pour la première fois. Cela se fait de manière amicale et professionnelle, adaptée à la relation et à la situation."
+    },
+    "intensiveFollowup": {
+      "title": "Suivi intensif",
+      "description": "Toujours pas de paiement après 3-5 jours ouvrables ? Nous procédons alors à un suivi plus intensif : nous envoyons un rappel, un envoi recommandé et effectuons un appel personnel. Nous restons professionnels mais faisons comprendre que le paiement est attendu.",
+      "days": "3-5 jours ouvrables"
+    },
+    "ultimatum": {
+      "title": "Ultimatum et mesures juridiques",
+      "description": "Toujours pas de paiement ? Nous procédons alors à un ultimatum où nous faisons comprendre que les prochaines étapes seront juridiques. Nous donnons une dernière chance, mais faisons également comprendre que nous n'hésiterons pas à prendre des mesures juridiques si nécessaire."
+    },
+    "cta": {
+      "title": "Prêt à commencer ?",
+      "description": "Soumettez votre mission maintenant et laissez-nous travailler professionnellement",
+      "button": "Soumettez votre mission maintenant"
+    }
+  },
+  "pricing": {
+    "title": "Nos prix",
+    "subtitle": "Prix transparents et équitables - payez uniquement en cas de succès",
+    "noResultNoCommission": "Pas de résultat, pas de commission",
+    "ourRates": "Nos tarifs",
+    "ratesDescription": "Nous travaillons avec un tarif progressif. Plus le montant de la facture est élevé, plus le pourcentage est faible. Cela rend notre service avantageux pour les petits et grands montants.",
+    "upTo": "Jusqu'à",
+    "above": "Au-dessus de",
+    "ranges": {
+      "upTo500": "Jusqu'à 500 €",
+      "500to5000": "500 € - 5 000 €",
+      "5000to15000": "5 000 € - 15 000 €",
+      "15000to25000": "15 000 € - 25 000 €",
+      "above25000": "Au-dessus de 25 000 €"
+    },
+    "noCureNoPay": {
+      "title": "No cure - no pay",
+      "description": "Chez Auxilium, vous ne payez que lorsque le recouvrement est réussi. Pas de résultat, pas de frais. Cela signifie que vous ne prenez aucun risque - nous partageons le risque avec vous.",
+      "noAdvance": "Pas de paiements anticipés ou de frais mensuels",
+      "transparent": "Prix transparents sans frais cachés",
+      "progressive": "Tarif progressif - plus avantageux pour les montants plus élevés"
+    },
+    "cta": {
+      "title": "Prêt à commencer ?",
+      "description": "Soumettez votre mission maintenant et payez uniquement en cas de succès",
+      "button": "Soumettez votre mission maintenant"
+    }
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "contactDetails": "Coordonnées",
+    "sendMessage": "Envoyez-nous un message",
+    "messageSent": "Message envoyé",
+    "messageSentDesc": "Nous vous contacterons dans les plus brefs délais",
+    "couldNotSend": "Impossible d'envoyer le message",
+    "errorOccurred": "Une erreur s'est produite",
+    "ourTeam": "Notre équipe",
+    "generalManager": "Directeur général / Co-propriétaire",
+    "coOwner": "Co-propriétaire",
+    "address": "Kerkstraat 15\n2000 Anvers\nBelgique"
+  },
+  "about": {
+    "title": "À propos de nous",
+    "subtitle": "Notre histoire, nos valeurs et notre mission",
+    "timeline": {
+      "founding": {
+        "year": "Fondation",
+        "title": "Le début d'Auxilium",
+        "description": "Auxilium Incasso est fondé avec la vision d'aider les entreprises à recouvrer efficacement les factures impayées. Avec des années d'expérience dans le secteur financier, les bases sont posées pour une agence de recouvrement fiable."
+      },
+      "trusted": {
+        "year": "Valeur de confiance",
+        "title": "Consultant et conseiller de confiance",
+        "description": "En tant que consultant et conseiller de confiance, une solide réputation est construite. Les clients apprécient l'approche personnelle et l'expertise en recouvrement et gestion des débiteurs."
+      },
+      "anniversary": {
+        "year": "Anniversaire",
+        "title": "Années de croissance et de succès",
+        "description": "Au fil des ans, Auxilium devient un partenaire fiable pour de nombreuses entreprises. L'anniversaire marque des années de recouvrements réussis et de clients satisfaits."
+      },
+      "takeover": {
+        "year": "Reprise",
+        "title": "Un nouveau chapitre",
+        "description": "Après le décès, les enfants reprennent l'entreprise. Avec le respect des valeurs construites et de l'expertise, l'héritage est poursuivi et l'entreprise est amenée vers l'avenir."
+      },
+      "modern": {
+        "year": "2025",
+        "title": "Approche moderne avec expertise financière",
+        "description": "Avec une solide formation financière, une nouvelle étape est franchie. La technologie moderne et les systèmes avancés sont intégrés, tout en maintenant l'approche personnelle et la fiabilité."
+      }
+    },
+    "cta": {
+      "title": "Prêt à travailler ensemble ?",
+      "description": "Contactez-nous et découvrez comment nous pouvons vous aider",
+      "button": "Contactez-nous"
+    }
+  },
+  "faq": {
+    "title": "Questions fréquemment posées",
+    "questions": [
+      {
+        "question": "Comment fonctionne no cure no pay ?",
+        "answer": "Avec no cure no pay, vous ne payez que lorsque le recouvrement est réussi. Si le débiteur ne paie pas, vous ne payez rien."
+      },
+      {
+        "question": "À quelle vitesse une mission est-elle traitée ?",
+        "answer": "Les missions sont traitées dans les 24 heures. Le débiteur reçoit immédiatement une demande de paiement par e-mail."
+      },
+      {
+        "question": "Quels sont les coûts ?",
+        "answer": "Les coûts consistent en un pourcentage du montant recouvré ou un montant fixe, selon le montant de la créance. Contactez-nous pour un devis détaillé."
+      },
+      {
+        "question": "Puis-je suivre le statut de mes missions ?",
+        "answer": "Oui, via le portail client, vous avez toujours un aperçu du statut de vos dossiers de recouvrement."
+      }
+    ],
+    "moreQuestions": "Avez-vous des questions ? Contactez-nous.",
+    "contactButton": "Contactez-nous"
+  },
+  "terms": {
+    "title": "Conditions générales",
+    "applicability": {
+      "title": "1. Applicabilité",
+      "content": "Ces conditions générales s'appliquent à tous les services d'Auxilium Incasso."
+    },
+    "services": {
+      "title": "2. Services",
+      "content": "Auxilium Incasso propose des services de recouvrement selon le principe no cure no pay. Cela signifie que vous ne payez que lorsque le recouvrement est réussi."
+    },
+    "responsibilities": {
+      "title": "3. Responsabilités",
+      "content": "Le client est responsable de fournir des données correctes et complètes. Auxilium Incasso n'est pas responsable des dommages résultant de données incorrectes."
+    },
+    "payment": {
+      "title": "4. Paiement",
+      "content": "Le paiement a lieu après un recouvrement réussi. Les coûts sont facturés selon les tarifs convenus."
+    },
+    "contact": {
+      "title": "5. Contact",
+      "content": "Pour des questions sur ces conditions, vous pouvez nous contacter via"
+    }
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "introduction": {
+      "title": "1. Introduction",
+      "content": "Auxilium Incasso respecte votre vie privée et s'engage à protéger vos données personnelles. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos données."
+    },
+    "dataCollection": {
+      "title": "2. Données que nous collectons",
+      "content": "Nous collectons les données que vous nous fournissez lorsque vous :",
+      "items": [
+        "Créez un compte",
+        "Soumettez une mission",
+        "Nous contactez",
+        "Visitez notre site web"
+      ]
+    },
+    "dataUsage": {
+      "title": "3. Comment nous utilisons vos données",
+      "content": "Nous utilisons vos données pour :",
+      "items": [
+        "Fournir nos services",
+        "Communiquer avec vous",
+        "Améliorer nos services",
+        "Respecter les obligations légales"
+      ]
+    },
+    "rights": {
+      "title": "4. Vos droits",
+      "content": "Vous avez le droit de :",
+      "items": [
+        "Accéder à vos données",
+        "Corriger vos données",
+        "Supprimer vos données",
+        "Vous opposer au traitement"
+      ]
+    },
+    "contact": {
+      "title": "5. Contact",
+      "content": "Pour des questions sur cette politique de confidentialité, vous pouvez nous contacter via"
+    }
+  },
+  "login": {
+    "title": "Connexion",
+    "subtitle": "Connectez-vous à votre portail client",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "loggingIn": "Connexion...",
+    "login": "Connexion",
+    "backToHome": "Retour à la page d'accueil",
+    "loginError": "Une erreur s'est produite lors de la connexion",
+    "emailPlaceholder": "votre@email.com",
+    "passwordPlaceholder": "••••••••"
+  },
+  "otp": {
+    "title": "Code de vérification",
+    "subtitle": "Entrez le code de vérification que nous avons envoyé à votre e-mail",
+    "code": "Code de vérification",
+    "verify": "Vérifier",
+    "verifying": "Vérification...",
+    "resend": "Renvoyer le code",
+    "resending": "Envoi...",
+    "resendCooldown": "Renvoyer dans {seconds} secondes",
+    "invalidCode": "Code OTP invalide",
+    "notLoggedIn": "Non connecté. Veuillez réessayer de vous connecter.",
+    "error": "Une erreur s'est produite",
+    "codePlaceholder": "000000"
+  },
+  "portal": {
+    "dashboard": {
+      "title": "Tableau de bord",
+      "welcomeBack": "Bon retour",
+      "newAssignment": "Nouvelle mission",
+      "totalAssignments": "Total des missions",
+      "outstanding": "En attente",
+      "totalAmount": "Montant total",
+      "recentAssignments": "Missions récentes",
+      "recentAssignmentsDesc": "Aperçu de vos dossiers de recouvrement récents",
+      "noAssignments": "Aucune mission pour le moment",
+      "createFirstAssignment": "Créer votre première mission",
+      "profileNotFound": "Profil introuvable",
+      "profileNotFoundDesc": "Votre profil n'a pas pu être trouvé. Veuillez contacter l'administrateur.",
+      "goToSettings": "Aller aux paramètres"
+    },
+    "cases": {
+      "title": "Vos missions",
+      "subtitle": "Aperçu de toutes vos missions de recouvrement soumises",
+      "newAssignment": "Nouvelle mission",
+      "overview": "Aperçu",
+      "noAssignments": "Vous n'avez pas encore soumis de missions.",
+      "submitFirstAssignment": "Soumettre la première mission",
+      "status": {
+        "draft": "Brouillon",
+        "sent": "Envoyé",
+        "in_progress": "En cours",
+        "paid": "Payé",
+        "closed": "Fermé",
+        "open": "Ouvert",
+        "bailiff": "Huissier"
+      },
+      "new": {
+        "title": "Soumettre une nouvelle mission",
+        "debtorInfo": "Informations du débiteur",
+        "debtorInfoDesc": "Remplissez les informations du débiteur",
+        "debtorNameOrCompany": "Nom/Nom de l'entreprise *",
+        "debtorNameOrCompanyRequired": "Le nom/Nom de l'entreprise est requis",
+        "debtorEmail": "Adresse e-mail *",
+        "debtorEmailInvalid": "Adresse e-mail invalide",
+        "debtorVatNumber": "Numéro de TVA",
+        "debtorStreet": "Rue",
+        "debtorHouseNumber": "Numéro de maison",
+        "debtorCity": "Ville",
+        "debtorPostalCode": "Code postal",
+        "debtorCountry": "Pays",
+        "debtorType": "Type *",
+        "particular": "Particulier",
+        "company": "Entreprise",
+        "searchDebtor": "Rechercher le débiteur dans la bibliothèque",
+        "selectDebtor": "Sélectionner le débiteur",
+        "noDebtorsFound": "Aucun débiteur trouvé",
+        "invoiceInfo": "Informations de la facture",
+        "invoiceInfoDesc": "Remplissez les informations de la facture",
+        "invoiceNumber": "Numéro de facture *",
+        "invoiceNumberRequired": "Le numéro de facture est requis",
+        "invoiceDate": "Date de facture *",
+        "invoiceDateRequired": "La date de facture est requise",
+        "dueDate": "Date d'échéance *",
+        "dueDateRequired": "La date d'échéance est requise",
+        "principalAmount": "Montant principal",
+        "principalAmountInvalid": "Le montant doit être un nombre positif",
+        "selectInvoiceFromLibrary": "Sélectionnez une facture de votre bibliothèque pour remplir automatiquement les données",
+        "invoiceLibrary": "Bibliothèque de factures",
+        "selectInvoice": "Sélectionner cette facture",
+        "noInvoicesFound": "Aucune facture dans votre bibliothèque pour le moment",
+        "loadingInvoices": "Chargement des factures...",
+        "preview": "Aperçu",
+        "loadPreview": "Charger l'aperçu",
+        "noNumber": "Aucun numéro",
+        "unknownDebtor": "Débiteur inconnu",
+        "date": "Date",
+        "amount": "Montant",
+        "additionalCosts": "Coûts supplémentaires",
+        "additionalCostsDesc": "Calcul des coûts supplémentaires",
+        "firstReminderSent": "Premier rappel envoyé",
+        "firstReminderDate": "Date du premier rappel",
+        "companyInterestRate": "Pourcentage d'intérêt",
+        "companyCompensationAmount": "Montant de compensation",
+        "documentUpload": "Télécharger le document",
+        "documentUploadDesc": "Glissez un fichier ici ou cliquez sur le bouton ci-dessous",
+        "uploadFile": "Télécharger le fichier",
+        "removeFile": "Supprimer le fichier",
+        "fileUploaded": "Fichier téléchargé",
+        "fileRemoved": "Fichier supprimé",
+        "warning": "Avertissement",
+        "documentLoadError": "Impossible de charger le document depuis la bibliothèque. Téléchargez-le manuellement.",
+        "documentLoaded": "Document chargé",
+        "documentLoadedDesc": "Le document \"{name}\" a été automatiquement chargé depuis votre bibliothèque",
+        "noInvoiceTerms": "Conditions générales non définies",
+        "noInvoiceTermsDesc": "Vous devez d'abord définir vos conditions générales dans le portail Compte avant de pouvoir créer une mission.",
+        "goToSettings": "Aller aux paramètres du compte",
+        "checkingSettings": "Vérification des paramètres du compte...",
+        "searchInLibrary": "Rechercher dans la bibliothèque",
+        "validationError": "Vérifiez tous les champs et réessayez",
+        "documentRequired": "Le téléchargement de document est requis",
+        "uploadDocumentToContinue": "Téléchargez un document pour continuer",
+        "step2": "Étape 2 : Informations de la facture",
+        "step3": "Étape 3 : Aperçu",
+        "step4": "Étape 4 : Télécharger le document",
+        "createAssignment": "Créer une mission",
+        "creating": "Création...",
+        "assignmentCreated": "Mission créée",
+        "assignmentCreatedDesc": "La mission a été créée avec succès et le débiteur a été contacté",
+        "createError": "Une erreur s'est produite lors de la création de la mission",
+        "type": "Type *",
+        "searchDebtorPlaceholder": "Rechercher par nom ou e-mail...",
+        "selectDebtorPlaceholder": "Sélectionner un débiteur ou remplir manuellement",
+        "principalAmountLabel": "Montant principal (EUR) *",
+        "particularCostsTitle": "Calcul des coûts supplémentaires (Particulier)",
+        "particularCostsDesc": "Remplissez les champs ci-dessous pour calculer automatiquement les intérêts et la compensation conformément à la législation belge.",
+        "firstReminderCheckbox": "Un 1er rappel gratuit a-t-il été envoyé ?",
+        "firstReminderDesc": "Ceci est requis avant que des coûts supplémentaires puissent être facturés.",
+        "firstReminderDateLabel": "Date du premier rappel gratuit *",
+        "firstReminderDateDesc": "La date à laquelle le premier rappel gratuit a été envoyé",
+        "additionalCostsNotYet": "Les coûts supplémentaires ne peuvent pas encore être facturés",
+        "additionalCostsNotYetDesc": "Le premier rappel gratuit a été envoyé il y a {days} jour{daysPlural}. Les coûts supplémentaires ne peuvent être facturés qu'après 14 jours après le premier rappel gratuit.",
+        "daysRemaining": "{days} jour{daysPlural} restant{s}.",
+        "interest": "Intérêt",
+        "compensation": "Compensation",
+        "totalAdditionalCosts": "Total des coûts supplémentaires",
+        "daysLate": "{days} jours de retard",
+        "perYear": "{rate}% par an",
+        "start": "Début",
+        "firstTier": "Premier palier (jusqu'à €150)",
+        "secondTier": "Deuxième palier (€150-€500)",
+        "thirdTier": "Troisième palier (au-dessus de €500)",
+        "maxReached": "Maximum de €2000 atteint",
+        "checkDates": "Vérifiez si toutes les dates sont correctement remplies. Le premier rappel doit être après la date d'échéance.",
+        "companyCostsTitle": "Calcul des coûts supplémentaires (Entreprise)",
+        "companyCostsNoTerms": "⚠️ Aucune condition générale définie",
+        "companyCostsNoTermsDesc": "Les coûts supplémentaires ne peuvent actuellement pas être calculés car aucune condition générale n'a été définie dans vos paramètres de compte.",
+        "companyCostsNoTermsAction": "Ajoutez des conditions générales à vos paramètres de compte pour avoir droit de percevoir des coûts supplémentaires pour la facturation future.",
+        "companyCostsHelp": "Pour de l'aide, contactez-nous.",
+        "companyCostsAutoDesc": "Les coûts supplémentaires sont automatiquement calculés en fonction de vos paramètres de compte.",
+        "interestRateLabel": "Pourcentage d'intérêt par an",
+        "legalRate": "{rate}% (légal)",
+        "legalRate2002": "Taux légal (Loi de 2002) : 10,5% par an",
+        "fixedRateFromTerms": "Taux fixe des conditions : {rate}% par an",
+        "legalRateDefault": "Taux légal : 10,5% par an",
+        "fromTerms": "Selon les conditions",
+        "legal": "Légal",
+        "legalRate": "Taux légal",
+        "legalAmount": "Montant légal (€40)",
+        "legalAmountPerInvoice": "Montant légal : €40 par facture",
+        "autoCalculated": "calculé automatiquement",
+        "compensationMinAndPercentage": "Minimum : {min}, Pourcentage : {percentage}",
+        "compensationPercentage": "Pourcentage : {percentage}%",
+        "compensationBreakdown": "Minimum : {min}, Pourcentage : {percentage} → Utilisé : {used}",
+        "particularCostsCalculated": "Calculé sur la base des intérêts et de la compensation conformément à la législation belge.",
+        "companyCostsCalculated": "Calculé sur la base des intérêts et de la compensation à partir de la date d'échéance.",
+        "fillDates": "Remplissez les dates ci-dessus pour calculer automatiquement les coûts supplémentaires.",
+        "fillCalculationDate": "Remplissez la date de calcul ci-dessus pour calculer automatiquement les coûts supplémentaires.",
+        "vatNumber": "TVA",
+        "invoice": "Facture",
+        "debtor": "Débiteur",
+        "attachedDocument": "Document joint",
+        "reviewBeforeSubmit": "Vérifiez les informations avant de créer la mission"
+      }
+    },
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "assignments": "Vos missions",
+      "library": "Bibliothèque",
+      "account": "Compte",
+      "integrations": "Intégrations"
+    },
+    "library": {
+      "title": "Bibliothèque",
+      "subtitle": "Gérez vos factures et contacts enregistrés pour une soumission rapide de mission",
+      "invoices": {
+        "title": "Factures",
+        "description": "Factures enregistrées pour réutilisation rapide",
+        "add": "Ajouter",
+        "noInvoices": "Aucune facture enregistrée",
+        "invoiceNumber": "Numéro de facture",
+        "date": "Date",
+        "amount": "Montant",
+        "debtor": "Débiteur",
+        "actions": "Actions",
+        "view": "Voir",
+        "delete": "Supprimer",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette facture ?",
+        "deleted": "Facture supprimée",
+        "error": "Erreur lors de la suppression"
+      },
+      "debtors": {
+        "title": "Contacts",
+        "description": "Débiteurs enregistrés pour réutilisation rapide",
+        "add": "Ajouter",
+        "noDebtors": "Aucun contact enregistré",
+        "name": "Nom",
+        "email": "E-mail",
+        "company": "Entreprise",
+        "actions": "Actions",
+        "view": "Voir",
+        "delete": "Supprimer",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce contact ?",
+        "deleted": "Contact supprimé",
+        "error": "Erreur lors de la suppression"
+      }
+    },
+    "integrations": {
+      "title": "Intégrations",
+      "subtitle": "Connectez vos systèmes à Auxilium pour une soumission automatisée de mission",
+      "available": "Disponible",
+      "comingSoon": "Bientôt disponible",
+      "activate": "Activer",
+      "soon": "Bientôt",
+      "apiIntegration": "Intégration API",
+      "apiDescription": "Connectez votre propre système via notre API",
+      "webhookIntegration": "Intégration Webhook",
+      "webhookDescription": "Recevez des mises à jour en temps réel via webhooks",
+      "csvImport": "Import CSV",
+      "csvDescription": "Importez plusieurs missions via un fichier CSV"
+    },
+    "settings": {
+      "title": "Paramètres",
+      "profile": {
+        "title": "Informations du profil",
+        "description": "Vos informations personnelles",
+        "fullName": "Nom complet",
+        "phone": "Numéro de téléphone",
+        "save": "Enregistrer",
+        "saved": "Profil mis à jour",
+        "savedDesc": "Vos informations de profil ont été mises à jour avec succès",
+        "error": "Une erreur s'est produite"
+      },
+      "password": {
+        "title": "Mot de passe",
+        "description": "Changer votre mot de passe",
+        "change": "Changer le mot de passe",
+        "cancel": "Annuler",
+        "current": "Mot de passe actuel",
+        "new": "Nouveau mot de passe",
+        "confirm": "Confirmer le nouveau mot de passe",
+        "changed": "Mot de passe modifié",
+        "changedDesc": "Votre mot de passe a été modifié avec succès",
+        "error": "Une erreur s'est produite lors de la modification du mot de passe",
+        "required": "Le mot de passe actuel est requis",
+        "minLength": "Le nouveau mot de passe doit contenir au moins 8 caractères",
+        "confirmRequired": "La confirmation du mot de passe est requise",
+        "mismatch": "Les mots de passe ne correspondent pas"
+      },
+      "organization": {
+        "title": "Informations de l'organisation",
+        "description": "Informations de votre organisation",
+        "name": "Nom de l'entreprise",
+        "nameRequired": "Le nom de l'entreprise est requis",
+        "vatNumber": "Numéro de TVA",
+        "email": "E-mail",
+        "emailInvalid": "Adresse e-mail invalide",
+        "street": "Rue",
+        "houseNumber": "Numéro de maison",
+        "postalCode": "Code postal",
+        "city": "Ville",
+        "country": "Pays",
+        "bankAccount": "Numéro de compte bancaire",
+        "bankAccountDesc": "Nous en avons besoin pour transférer les fonds.",
+        "hasInvoiceTerms": "Avez-vous des conditions générales ?",
+        "yes": "Oui",
+        "no": "Non",
+        "uploadTerms": "Télécharger les conditions générales",
+        "uploadClick": "Cliquez pour télécharger ou glissez le fichier ici",
+        "hasDamageClause": "Avez-vous prévu une clause de dommages ?",
+        "damageClauseDesc": "Il s'agit de la clause de dommages forfaitaires due en cas de paiement tardif. Il s'agit d'un pourcentage. Par exemple : \"En cas de paiement tardif, une indemnité forfaitaire de 10% du montant de la facture sera due. Si un montant fixe est également déterminé, vous pouvez le remplir ci-dessous\".",
+        "percentage": "Pourcentage",
+        "hasMinimumDamageClause": "Y a-t-il une clause de dommages minimum par facture ?",
+        "minimumAmount": "Montant minimum de la clause de dommages",
+        "delayInterest": "Y a-t-il des intérêts de retard prévus ?",
+        "delayInterestLaw2002": "Oui (Loi de 2002)",
+        "delayInterestLaw2002Desc": "À remplir si application est faite de la loi de lutte contre les retards de paiement dans les transactions commerciales du 02/08/2002.",
+        "delayInterestFixed": "Oui (intérêt fixe)",
+        "delayInterestFixedDesc": "Cochez cette case s'il y a un taux d'intérêt fixe prévu dans vos conditions générales. (base annuelle)",
+        "delayInterestPercentage": "Pourcentage",
+        "save": "Enregistrer",
+        "saved": "Organisation mise à jour",
+        "savedDesc": "Les informations de l'organisation ont été mises à jour avec succès",
+        "error": "Une erreur s'est produite",
+        "storageError": "Le bucket de stockage \"organization-documents\" n'existe pas encore. Créez-le d'abord dans Supabase Storage."
+      }
+    },
+    "caseDetail": {
+      "notFound": "Mission introuvable",
+      "backToDashboard": "Retour au tableau de bord",
+      "title": "Détails de la mission",
+      "overview": "Aperçu",
+      "status": "Statut",
+      "debtor": "Débiteur",
+      "invoiceNumber": "Numéro de facture",
+      "structuredReference": "Référence structurée",
+      "amount": "Montant",
+      "principalAmount": "Montant principal",
+      "additionalCosts": "Coûts supplémentaires",
+      "total": "Total",
+      "timeline": "Chronologie",
+      "timelineDesc": "Activités et événements"
+    },
+    "library": {
+      "invoiceDetail": {
+        "backToLibrary": "Retour à la bibliothèque",
+        "title": "Modifier la facture",
+        "description": "Modifier les informations de cette facture",
+        "preview": "Aperçu de la facture",
+        "invoiceData": "Informations de la facture",
+        "invoiceDataDesc": "Modifier les informations de la facture",
+        "invoiceNumber": "Numéro de facture *",
+        "invoiceNumberRequired": "Le numéro de facture est requis",
+        "invoiceDate": "Date de facture *",
+        "invoiceDateRequired": "La date de facture est requise",
+        "dueDate": "Date d'échéance",
+        "amount": "Montant *",
+        "amountInvalid": "Le montant doit être un nombre positif",
+        "currency": "Devise",
+        "debtorInfo": "Informations du débiteur",
+        "type": "Type *",
+        "particular": "Particulier",
+        "company": "Entreprise",
+        "name": "Nom/Nom de l'entreprise",
+        "email": "Adresse e-mail",
+        "emailInvalid": "Adresse e-mail invalide",
+        "vatNumber": "Numéro de TVA",
+        "street": "Rue",
+        "houseNumber": "Numéro de maison",
+        "postalCode": "Code postal",
+        "city": "Ville",
+        "country": "Pays",
+        "delete": "Supprimer",
+        "deleting": "Suppression...",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette facture ?",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "saved": "Facture mise à jour",
+        "savedDesc": "La facture a été mise à jour avec succès",
+        "error": "Une erreur s'est produite",
+        "loadingError": "Impossible de charger la facture"
+      },
+      "debtorDetail": {
+        "backToLibrary": "Retour à la bibliothèque",
+        "title": "Modifier la relation",
+        "description": "Modifier les informations de cette relation",
+        "debtorData": "Informations de la relation",
+        "debtorDataDesc": "Modifier les informations de la relation",
+        "type": "Type *",
+        "particular": "Particulier",
+        "company": "Entreprise",
+        "name": "Nom",
+        "companyName": "Nom de l'entreprise",
+        "email": "Adresse e-mail *",
+        "emailInvalid": "Adresse e-mail invalide",
+        "vatNumber": "Numéro de TVA",
+        "phone": "Téléphone",
+        "street": "Rue",
+        "houseNumber": "Numéro de maison",
+        "postalCode": "Code postal",
+        "city": "Ville",
+        "country": "Pays",
+        "notes": "Notes",
+        "notesPlaceholder": "Notes optionnelles sur cette relation",
+        "delete": "Supprimer",
+        "deleting": "Suppression...",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette relation ?",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "saved": "Relation mise à jour",
+        "savedDesc": "La relation a été mise à jour avec succès",
+        "error": "Une erreur s'est produite",
+        "loadingError": "Impossible de charger la relation",
+        "updateError": "Impossible de mettre à jour la relation",
+        "deleteError": "Impossible de supprimer la relation"
+      }
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Tableau de bord",
+      "welcomeBack": "Bon retour",
+      "totalAssignments": "Total des missions",
+      "outstanding": "En attente",
+      "totalAmount": "Montant total",
+      "recentAssignments": "Missions récentes",
+      "recentAssignmentsDesc": "Aperçu des dossiers de recouvrement récents",
+      "noAssignments": "Aucune mission trouvée",
+      "status": {
+        "open": "Ouvert",
+        "paid": "Reçu",
+        "bailiff": "Huissier"
+      }
+    },
+    "cases": {
+      "title": "Dossiers",
+      "overview": "Aperçu",
+      "loading": "Chargement..."
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "subtitle": "Gérer tous les utilisateurs de la plateforme",
+      "addUser": "Ajouter un utilisateur",
+      "email": "Adresse e-mail",
+      "fullName": "Nom complet",
+      "role": "Rôle",
+      "organization": "Organisation",
+      "createdAt": "Créé",
+      "noEmail": "Aucun e-mail",
+      "roles": {
+        "admin": "Administrateur",
+        "staff": "Personnel",
+        "client": "Client"
+      }
+    },
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "cases": "Dossiers",
+      "users": "Utilisateurs",
+      "account": "Compte"
+    },
+    "account": {
+      "title": "Paramètres du compte",
+      "profile": "Profil",
+      "changePassword": "Changer le mot de passe",
+      "fullName": "Nom complet",
+      "email": "Adresse e-mail",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "save": "Enregistrer",
+      "saved": "Enregistré",
+      "error": "Erreur",
+      "passwordChanged": "Mot de passe modifié avec succès",
+      "profileUpdated": "Profil mis à jour avec succès"
+    },
+    "caseDetail": {
+      "notFound": "Dossier introuvable",
+      "backToCases": "Retour aux dossiers",
+      "title": "Détails du dossier",
+      "statusAndCommission": "Statut et facture de commission",
+      "status": "Statut",
+      "commissionInvoiceSent": "Facture de commission envoyée",
+      "caseInfo": "Informations du dossier",
+      "caseId": "ID du dossier",
+      "submittedOn": "Soumis le",
+      "invoiceNumber": "Numéro de facture",
+      "invoiceDate": "Date de facture",
+      "dueDate": "Date d'échéance",
+      "structuredReference": "Référence structurée",
+      "financial": "Informations financières",
+      "principalAmount": "Montant principal",
+      "additionalCosts": "Coûts supplémentaires",
+      "totalAmount": "Montant total",
+      "debtor": "Informations du débiteur",
+      "name": "Nom",
+      "email": "E-mail",
+      "address": "Adresse",
+      "vatNumber": "Numéro de TVA",
+      "client": "Informations du client",
+      "organization": "Organisation",
+      "timeline": "Chronologie",
+      "attachments": "Pièces jointes"
+    },
+    "users": {
+      "new": {
+        "title": "Nouvel utilisateur",
+        "backToUsers": "Retour aux utilisateurs",
+        "email": "Adresse e-mail",
+        "password": "Mot de passe",
+        "fullName": "Nom complet",
+        "role": "Rôle",
+        "create": "Créer un utilisateur",
+        "creating": "Création...",
+        "created": "Utilisateur créé",
+        "createdDesc": "a été ajouté avec succès en tant que",
+        "error": "Une erreur s'est produite lors de la création de l'utilisateur"
+      },
+      "edit": {
+        "title": "Modifier l'utilisateur",
+        "backToUsers": "Retour aux utilisateurs",
+        "email": "Adresse e-mail",
+        "fullName": "Nom complet",
+        "role": "Rôle",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "saved": "Utilisateur mis à jour",
+        "savedDesc": "a été mis à jour avec succès",
+        "error": "Une erreur s'est produite lors de la mise à jour de l'utilisateur",
+        "notFound": "Utilisateur introuvable",
+        "loadingError": "Impossible de charger l'utilisateur"
+      },
+      "delete": {
+        "title": "Supprimer l'utilisateur",
+        "backToUsers": "Retour aux utilisateurs",
+        "warning": "Avertissement",
+        "warningDesc": "Vous êtes sur le point de supprimer définitivement un utilisateur",
+        "userData": "Données utilisateur :",
+        "name": "Nom",
+        "email": "E-mail",
+        "role": "Rôle",
+        "organization": "Organisation",
+        "note": "Note : Cette action ne peut pas être annulée. Toutes les données de cet utilisateur seront définitivement supprimées.",
+        "delete": "Supprimer l'utilisateur",
+        "deleting": "Suppression...",
+        "deleted": "Utilisateur supprimé",
+        "deletedDesc": "a été supprimé avec succès",
+        "error": "Une erreur s'est produite lors de la suppression de l'utilisateur",
+        "notFound": "Utilisateur introuvable",
+        "loadingError": "Impossible de charger l'utilisateur",
+        "confirm": "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action ne peut pas être annulée.",
+        "noEmail": "Aucun e-mail"
+      },
+      "noUsers": "Aucun utilisateur trouvé"
+    },
+    "account": {
+      "title": "Compte",
+      "profile": "Informations du profil",
+      "fullName": "Nom complet",
+      "email": "Adresse e-mail",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "saved": "Profil mis à jour",
+      "profileUpdated": "Vos informations de profil ont été mises à jour avec succès",
+      "error": "Impossible de mettre à jour le profil",
+      "changePassword": "Changer le mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "passwordChanged": "Votre mot de passe a été modifié avec succès"
+    }
+  },
+  "footer": {
+    "links": "Liens",
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "contact": "Contact",
+    "contactUs": "Nous contacter",
+    "clientPortal": "Portail client",
+    "login": "Connexion",
+    "followUs": "Suivez-nous",
+    "allRightsReserved": "Tous droits réservés"
+  }
+}

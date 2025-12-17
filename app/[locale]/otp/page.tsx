@@ -1,20 +1,23 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslations } from 'next-intl';
 import { createClient } from "@/lib/supabase/client";
 
 function OTPPageContent() {
+  const t = useTranslations('otp');
+  const tCommon = useTranslations('common');
+  
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase = createClient();
@@ -47,7 +50,7 @@ function OTPPageContent() {
           
           // If no user and no email param, redirect to login
           if (!user && !email) {
-            router.push("/login");
+            window.location.href = "/login";
             return;
           }
           
@@ -77,7 +80,7 @@ function OTPPageContent() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [router, supabase, email]);
+  }, [supabase, email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +105,7 @@ function OTPPageContent() {
       }
       
       if (!user) {
-        throw new Error("Niet ingelogd. Probeer opnieuw in te loggen.");
+        throw new Error(t('notLoggedIn'));
       }
 
       const response = await fetch("/api/auth/verify-otp", {
@@ -115,7 +118,7 @@ function OTPPageContent() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "OTP code ongeldig");
+        throw new Error(result.error || t('invalidCode'));
       }
 
       // The cookies are set by the server in the response headers
@@ -152,23 +155,12 @@ function OTPPageContent() {
         console.log('🔄 Redirecting to', redirectPath);
       }
       
-      // Use router.push first to let Next.js handle it, then fallback to window.location
-      try {
-        router.push(redirectPath);
-        // Give router.push a moment, then force reload if needed
-        setTimeout(() => {
-          if (window.location.pathname !== redirectPath) {
-            window.location.href = redirectPath;
-          }
-        }, 500);
-      } catch (error) {
-        // Fallback to hard redirect
-        window.location.href = redirectPath;
-      }
+      // Use window.location.href for portal/admin routes (they don't have locale prefix)
+      window.location.href = redirectPath;
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "OTP code ongeldig",
+        title: tCommon('error'),
+        description: error.message || t('invalidCode'),
         variant: "destructive",
       });
     } finally {
@@ -198,7 +190,7 @@ function OTPPageContent() {
       }
       
       if (!user) {
-        throw new Error("Niet ingelogd. Probeer opnieuw in te loggen.");
+        throw new Error(t('notLoggedIn'));
       }
 
       const response = await fetch("/api/auth/resend-otp", {
@@ -207,18 +199,18 @@ function OTPPageContent() {
       });
 
       if (!response.ok) {
-        throw new Error("Kon OTP niet opnieuw verzenden");
+        throw new Error("Could not resend OTP");
       }
 
       setResendCooldown(60); // 1 minute cooldown
       toast({
-        title: "OTP verzonden",
-        description: "Er is een nieuwe OTP code naar uw e-mailadres verzonden",
+        title: tCommon('success'),
+        description: "A new OTP code has been sent to your email address",
       });
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Kon OTP niet opnieuw verzenden",
+        title: tCommon('error'),
+        description: error.message || t('error'),
         variant: "destructive",
       });
     }
@@ -230,7 +222,7 @@ function OTPPageContent() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="font-sans text-muted-foreground">Laden...</p>
+              <p className="font-sans text-muted-foreground">{tCommon('loading')}</p>
             </div>
           </CardContent>
         </Card>
@@ -242,22 +234,22 @@ function OTPPageContent() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">OTP Verificatie</CardTitle>
+          <CardTitle className="text-2xl text-center">{t('title')}</CardTitle>
           <CardDescription className="text-center">
-            Voer de 6-cijferige code in die naar uw e-mailadres is verzonden
+            {t('subtitle')}
             {email && <span className="block mt-2 text-sm">({email})</span>}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="code">OTP Code</Label>
+              <Label htmlFor="code">{t('code')}</Label>
               <Input
                 id="code"
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="000000"
+                placeholder={t('codePlaceholder')}
                 maxLength={6}
                 required
                 disabled={loading}
@@ -265,7 +257,7 @@ function OTPPageContent() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Verifiëren..." : "Verifiëren"}
+              {loading ? t('verifying') : t('verify')}
             </Button>
           </form>
           <div className="mt-4 text-center">
@@ -275,9 +267,23 @@ function OTPPageContent() {
               disabled={resendCooldown > 0 || loading}
             >
               {resendCooldown > 0
-                ? `Opnieuw verzenden (${resendCooldown}s)`
-                : "Code opnieuw verzenden"}
+                ? t('resendCooldown', { seconds: resendCooldown })
+                : t('resend')}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+      <Card className="w-full max-w-md">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="font-sans text-muted-foreground">Loading...</p>
           </div>
         </CardContent>
       </Card>
@@ -287,17 +293,7 @@ function OTPPageContent() {
 
 export default function OTPPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="font-sans text-muted-foreground">Laden...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    }>
+    <Suspense fallback={<LoadingFallback />}>
       <OTPPageContent />
     </Suspense>
   );

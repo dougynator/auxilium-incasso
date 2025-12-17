@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslations } from 'next-intl';
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { MapPin, Phone, Mail } from "lucide-react";
 
 export default function ContactPage() {
+  const t = useTranslations('contact');
+  const tCommon = useTranslations('common');
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -32,19 +36,19 @@ export default function ContactPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Kon bericht niet verzenden");
+        throw new Error(t('couldNotSend'));
       }
 
       toast({
-        title: "Bericht verzonden",
-        description: "We nemen zo snel mogelijk contact met u op",
+        title: t('messageSent'),
+        description: t('messageSentDesc'),
       });
 
       setFormData({ name: "", email: "", message: "" });
     } catch (error: any) {
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden",
+        title: tCommon('error'),
+        description: error.message || t('errorOccurred'),
         variant: "destructive",
       });
     } finally {
@@ -62,7 +66,7 @@ export default function ContactPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="font-display text-4xl md:text-5xl font-bold text-primary mb-3">
-                Contacteer ons
+                {t('title')}
               </h1>
             </div>
           </div>
@@ -91,7 +95,7 @@ export default function ContactPage() {
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-display text-2xl md:text-3xl font-bold text-primary mb-6">
-                      Contactgegevens
+                      {t('contactDetails')}
                     </h2>
                     <div className="space-y-4">
                       <div className="flex items-start gap-4">
@@ -99,11 +103,9 @@ export default function ContactPage() {
                           <MapPin className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-display font-semibold text-lg mb-1">Adres</h3>
-                          <p className="font-sans text-muted-foreground">
-                            Kerkstraat 15<br />
-                            2000 Antwerpen<br />
-                            België
+                          <h3 className="font-display font-semibold text-lg mb-1">{tCommon('address')}</h3>
+                          <p className="font-sans text-muted-foreground whitespace-pre-line">
+                            {t('address')}
                           </p>
                         </div>
                       </div>
@@ -112,7 +114,7 @@ export default function ContactPage() {
                           <Phone className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-display font-semibold text-lg mb-1">Telefoon</h3>
+                          <h3 className="font-display font-semibold text-lg mb-1">{tCommon('phone')}</h3>
                           <p className="font-sans text-muted-foreground">
                             <a href="tel:+3231234567" className="hover:text-primary transition-colors">
                               +32 3 123 45 67
@@ -125,7 +127,7 @@ export default function ContactPage() {
                           <Mail className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-display font-semibold text-lg mb-1">E-mail</h3>
+                          <h3 className="font-display font-semibold text-lg mb-1">{tCommon('email')}</h3>
                           <p className="font-sans text-muted-foreground">
                             <a href="mailto:info@auxiliumincasso.com" className="hover:text-primary transition-colors">
                               info@auxiliumincasso.com
@@ -139,11 +141,11 @@ export default function ContactPage() {
                   {/* Contactformulier */}
                   <div className="mt-8 pt-8 border-t border-primary/10">
                     <h3 className="font-display text-xl md:text-2xl font-bold text-primary mb-4">
-                      Stuur ons een bericht
+                      {t('sendMessage')}
                     </h3>
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="name" className="font-sans">Naam</Label>
+                        <Label htmlFor="name" className="font-sans">{tCommon('name')}</Label>
                         <Input
                           id="name"
                           value={formData.name}
@@ -154,7 +156,7 @@ export default function ContactPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="email" className="font-sans">E-mailadres</Label>
+                        <Label htmlFor="email" className="font-sans">{tCommon('email')}</Label>
                         <Input
                           id="email"
                           type="email"
@@ -166,7 +168,7 @@ export default function ContactPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="message" className="font-sans">Bericht</Label>
+                        <Label htmlFor="message" className="font-sans">{tCommon('message')}</Label>
                         <Textarea
                           id="message"
                           value={formData.message}
@@ -182,7 +184,7 @@ export default function ContactPage() {
                         disabled={loading}
                         className="font-display bg-primary hover:bg-primary/90 text-white"
                       >
-                        {loading ? "Verzenden..." : "Verzenden"}
+                        {loading ? tCommon('sending') : tCommon('send')}
                       </Button>
                     </form>
                   </div>
@@ -197,7 +199,7 @@ export default function ContactPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary text-center mb-12">
-                Ons team
+                {t('ourTeam')}
               </h2>
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Profiel 1 - Gebruiker */}
@@ -217,7 +219,7 @@ export default function ContactPage() {
                         Douglas Laureys
                       </h3>
                       <p className="font-sans text-sm text-muted-foreground mb-4">
-                        General Manager / Co-Owner
+                        {t('generalManager')}
                       </p>
                       <div className="space-y-2.5">
                         <a href="tel:+32470123456" className="flex items-center gap-2 font-sans text-sm text-primary hover:text-primary/80 transition-colors">
@@ -250,7 +252,7 @@ export default function ContactPage() {
                         Deborah Laureys
                       </h3>
                       <p className="font-sans text-sm text-muted-foreground mb-4">
-                        Co-Owner
+                        {t('coOwner')}
                       </p>
                       <div className="space-y-2.5">
                         <a href="tel:+32470123457" className="flex items-center gap-2 font-sans text-sm text-primary hover:text-primary/80 transition-colors">

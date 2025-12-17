@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Inter, Poppins, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -23,11 +22,6 @@ const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   display: "swap",
 });
-
-export const metadata: Metadata = {
-  title: "Auxilium Incasso - Professioneel incassobureau",
-  description: "Professioneel incassobureau voor snelle en efficiënte incasso",
-};
 
 export default function RootLayout({
   children,

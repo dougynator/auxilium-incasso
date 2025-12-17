@@ -16,47 +16,52 @@ import { Upload, File as FileIcon, X, Search, Loader2, Check, Eye } from "lucide
 import { createClient } from "@/lib/supabase/client";
 import { calculateParticularCosts } from "@/lib/calculations/particular-costs";
 import { calculateCompanyCosts } from "@/lib/calculations/company-costs";
+import { useTranslations } from 'next-intl';
 // Removed Dialog imports - using simple div-based modal instead to avoid Radix UI conflicts
 
-const caseSchema = z.object({
-  // Debtor info
-  debtorNameOrCompany: z.string().min(1, "Naam/bedrijfsnaam is verplicht"),
-  debtorEmail: z.string().email("Ongeldig e-mailadres"),
-  debtorVatNumber: z.string().optional(),
-  debtorStreet: z.string().optional(),
-  debtorHouseNumber: z.string().optional(),
-  debtorCity: z.string().optional(),
-  debtorPostalCode: z.string().optional(),
-  debtorCountry: z.string().default("BE"),
-  debtorType: z.enum(["particular", "company"]).default("particular"),
-
-  // Invoice info
-  invoiceNumber: z.string().min(1, "Factuurnummer is verplicht"),
-  invoiceDate: z.string().min(1, "Factuurdatum is verplicht"),
-  dueDate: z.string().min(1, "Vervaldatum is verplicht"),
-  principalAmount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-    message: "Bedrag moet een positief getal zijn",
-  }),
-
-  // Additional costs
-  additionalCosts: z.string().default("0"),
+export default function NewCasePage() {
+  const t = useTranslations('portal.cases.new');
+  const tCommon = useTranslations('common');
   
-  // Particular costs calculation (only for particular debtors)
-  firstReminderSent: z.boolean().default(false),
-  firstReminderDate: z.string().optional(),
-  
-  // Company costs calculation (only for companies)
-  companyInterestRate: z.string().optional(), // Percentage per jaar (bijv. "10.5")
-  companyCompensationAmount: z.string().optional(), // Vast bedrag (bijv. "40")
-  
-  // Document upload - validation is handled manually in the component
-  document: z.any().optional(),
-});
+  const caseSchema = z.object({
+    // Debtor info
+    debtorNameOrCompany: z.string().min(1, t('debtorNameOrCompanyRequired')),
+    debtorEmail: z.string().email(t('debtorEmailInvalid')),
+    debtorVatNumber: z.string().optional(),
+    debtorStreet: z.string().optional(),
+    debtorHouseNumber: z.string().optional(),
+    debtorCity: z.string().optional(),
+    debtorPostalCode: z.string().optional(),
+    debtorCountry: z.string().default("BE"),
+    debtorType: z.enum(["particular", "company"]).default("particular"),
 
-type CaseFormData = z.infer<typeof caseSchema>;
+    // Invoice info
+    invoiceNumber: z.string().min(1, t('invoiceNumberRequired')),
+    invoiceDate: z.string().min(1, t('invoiceDateRequired')),
+    dueDate: z.string().min(1, t('dueDateRequired')),
+    principalAmount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+      message: t('principalAmountInvalid'),
+    }),
+
+    // Additional costs
+    additionalCosts: z.string().default("0"),
+    
+    // Particular costs calculation (only for particular debtors)
+    firstReminderSent: z.boolean().default(false),
+    firstReminderDate: z.string().optional(),
+    
+    // Company costs calculation (only for companies)
+    companyInterestRate: z.string().optional(), // Percentage per jaar (bijv. "10.5")
+    companyCompensationAmount: z.string().optional(), // Vast bedrag (bijv. "40")
+    
+    // Document upload - validation is handled manually in the component
+    document: z.any().optional(),
+  });
+
+  type CaseFormData = z.infer<typeof caseSchema>;
 
 // Invoice Card Component for Modal
-function InvoiceCard({ invoice, onSelect, supabase }: { invoice: any; onSelect: () => void; supabase: any }) {
+function InvoiceCard({ invoice, onSelect, supabase, t }: { invoice: any; onSelect: () => void; supabase: any; t: any }) {
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [loadingDoc, setLoadingDoc] = useState(false);
   
@@ -84,29 +89,29 @@ function InvoiceCard({ invoice, onSelect, supabase }: { invoice: any; onSelect: 
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <div>
-              <p className="font-semibold font-sans">{invoice.invoice_number || "Geen nummer"}</p>
+              <p className="font-semibold font-sans">{invoice.invoice_number || t('noNumber')}</p>
               <p className="text-sm text-muted-foreground font-sans">
-                {invoice.debtor_name || invoice.debtor_email || "Onbekende debiteur"}
+                {invoice.debtor_name || invoice.debtor_email || t('unknownDebtor')}
               </p>
             </div>
             <div className="text-sm space-y-1 font-sans">
-              <p><strong>Datum:</strong> {formatDate(invoice.invoice_date)}</p>
+              <p><strong>{t('date')}:</strong> {formatDate(invoice.invoice_date)}</p>
               {invoice.due_date && (
-                <p><strong>Vervaldatum:</strong> {formatDate(invoice.due_date)}</p>
+                <p><strong>{t('dueDate')}:</strong> {formatDate(invoice.due_date)}</p>
               )}
-              <p><strong>Bedrag:</strong> {formatCurrency(invoice.amount, invoice.currency)}</p>
+              <p><strong>{t('amount')}:</strong> {formatCurrency(invoice.amount, invoice.currency)}</p>
             </div>
             <Button
               type="button"
               onClick={onSelect}
               className="w-full mt-4"
             >
-              Selecteer deze factuur
+              {t('selectInvoice')}
             </Button>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="font-sans">Preview</Label>
+              <Label className="font-sans">{t('preview')}</Label>
               {invoice.document_path && (
                 <Button
                   type="button"
@@ -120,7 +125,7 @@ function InvoiceCard({ invoice, onSelect, supabase }: { invoice: any; onSelect: 
                   ) : documentUrl ? (
                     <Eye className="w-4 h-4" />
                   ) : (
-                    "Laad preview"
+                    t('loadPreview')
                   )}
                 </Button>
               )}
@@ -130,7 +135,7 @@ function InvoiceCard({ invoice, onSelect, supabase }: { invoice: any; onSelect: 
                 <iframe
                   src={`${documentUrl}#toolbar=0&navpanes=0&scrollbar=1&zoom=page-width`}
                   className="w-full h-full"
-                  title="Factuur Preview"
+                  title={t('preview')}
                   style={{ border: 'none' }}
                 />
               </div>
@@ -155,7 +160,6 @@ interface DebtorOption {
   address_country?: string;
 }
 
-export default function NewCasePage() {
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClient();
@@ -430,8 +434,8 @@ export default function NewCasePage() {
           if (urlError || !signedUrlData?.signedUrl) {
             console.error('Error creating signed URL:', urlError);
             toast({
-              title: "Waarschuwing",
-              description: "Kon document niet laden uit bibliotheek. Upload het handmatig.",
+              title: t('warning'),
+              description: t('documentLoadError'),
               variant: "destructive",
             });
           } else {
@@ -472,15 +476,15 @@ export default function NewCasePage() {
             }
             
             toast({
-              title: "Document geladen",
-              description: `Document "${invoice.document_name}" is automatisch geladen uit je bibliotheek`,
+              title: t('documentLoaded'),
+              description: t('documentLoadedDesc', { name: invoice.document_name }),
             });
           }
         } catch (error: any) {
           console.error('Error loading document from bibliotheek:', error);
           toast({
-            title: "Waarschuwing",
-            description: "Kon document niet laden uit bibliotheek. Upload het handmatig.",
+            title: t('warning'),
+            description: t('documentLoadError'),
             variant: "destructive",
           });
         }
@@ -816,8 +820,8 @@ export default function NewCasePage() {
     // Check if organization settings are configured
     if (!organizationSettings || organizationSettings.has_invoice_terms === null || organizationSettings.has_invoice_terms === undefined) {
       toast({
-        title: "Algemene voorwaarden niet ingesteld",
-        description: "Je moet eerst je algemene voorwaarden instellen in het Account portaal voordat je een opdracht kunt aanmaken.",
+        title: t('noInvoiceTerms'),
+        description: t('noInvoiceTermsDesc'),
         variant: "destructive",
       });
       router.push("/portal/settings");
@@ -828,8 +832,8 @@ export default function NewCasePage() {
     if (Object.keys(errors).length > 0) {
       console.error('❌ Form validation errors:', errors);
       toast({
-        title: "Validatiefout",
-        description: "Controleer alle velden en probeer opnieuw",
+        title: tCommon('error'),
+        description: t('validationError'),
         variant: "destructive",
       });
       return;
@@ -838,8 +842,8 @@ export default function NewCasePage() {
     if (!uploadedFile) {
       console.error('❌ No file uploaded!');
       toast({
-        title: "Fout",
-        description: "Document upload is verplicht",
+        title: tCommon('error'),
+        description: t('documentRequired'),
         variant: "destructive",
       });
       return;
@@ -909,8 +913,8 @@ export default function NewCasePage() {
       setInvoiceModalOpen(false);
 
       toast({
-        title: "Opdracht aangemaakt",
-        description: "De opdracht is succesvol aangemaakt en de debiteur is gecontacteerd",
+        title: t('assignmentCreated'),
+        description: t('assignmentCreatedDesc'),
       });
 
       router.push(`/portal/cases/${result.caseId}`);
@@ -919,8 +923,8 @@ export default function NewCasePage() {
       // Close modal on error too
       setInvoiceModalOpen(false);
       toast({
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden bij het aanmaken van de opdracht",
+        title: tCommon('error'),
+        description: error.message || t('createError'),
         variant: "destructive",
       });
     } finally {
@@ -933,7 +937,7 @@ export default function NewCasePage() {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="text-center py-12">
-          <p>Controleren van account instellingen...</p>
+          <p>{t('checkingSettings')}</p>
         </div>
       </div>
     );
@@ -941,7 +945,7 @@ export default function NewCasePage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Nieuwe opdracht aanmaken</h1>
+      <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
       
       {(!organizationSettings || organizationSettings.has_invoice_terms === null || organizationSettings.has_invoice_terms === undefined) && (
         <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -949,17 +953,17 @@ export default function NewCasePage() {
             <div className="text-amber-600 font-semibold">⚠️</div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-amber-800 mb-1">
-                Algemene voorwaarden niet ingesteld
+                {t('noInvoiceTerms')}
               </p>
               <p className="text-sm text-amber-700 mb-3">
-                Je moet eerst je algemene voorwaarden instellen in het Account portaal voordat je een opdracht kunt aanmaken.
+                {t('noInvoiceTermsDesc')}
               </p>
               <Button
                 onClick={() => router.push("/portal/settings")}
                 variant="outline"
                 size="sm"
               >
-                Naar Account instellingen
+                {t('goToSettings')}
               </Button>
             </div>
           </div>
@@ -970,8 +974,8 @@ export default function NewCasePage() {
         {step === 1 && (
           <Card>
             <CardHeader>
-              <CardTitle>Stap 1: Debiteurgegevens</CardTitle>
-              <CardDescription>Gegevens van de debiteur</CardDescription>
+              <CardTitle>{t('debtorInfo')}</CardTitle>
+              <CardDescription>{t('debtorInfoDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -990,7 +994,7 @@ export default function NewCasePage() {
                       }}
                       className="w-4 h-4"
                     />
-                    <span className="font-sans">Particulier</span>
+                    <span className="font-sans">{t('particular')}</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -1002,13 +1006,13 @@ export default function NewCasePage() {
                       }}
                       className="w-4 h-4"
                     />
-                    <span className="font-sans">Bedrijf</span>
+                    <span className="font-sans">{t('company')}</span>
                   </label>
                 </div>
               </div>
               
               <div className="space-y-2 relative" ref={debtorInputRef}>
-                <Label htmlFor="debtorNameOrCompany">Naam/bedrijfsnaam *</Label>
+                <Label htmlFor="debtorNameOrCompany">{t('debtorNameOrCompany')}</Label>
                 <div className="relative">
                   <Input
                     id="debtorNameOrCompany"
@@ -1023,7 +1027,7 @@ export default function NewCasePage() {
                         setShowDebtorDropdown(true);
                       }
                     }}
-                    placeholder="Typ naam of bedrijfsnaam..."
+                    placeholder={t('searchDebtorPlaceholder')}
                   />
                   {isSearchingDebtors && (
                     <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
@@ -1034,11 +1038,11 @@ export default function NewCasePage() {
                     <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
                       {isSearchingDebtors && debtorOptions.length === 0 && (
                         <div className="px-4 py-2 text-sm text-muted-foreground flex items-center">
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Zoeken...
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {tCommon('search')}...
                         </div>
                       )}
                       {!isSearchingDebtors && debtorOptions.length === 0 && debtorSearchQuery.length >= 2 && (
-                        <div className="px-4 py-2 text-sm text-muted-foreground">Geen debiteuren gevonden.</div>
+                        <div className="px-4 py-2 text-sm text-muted-foreground">{t('noDebtorsFound')}</div>
                       )}
                       {debtorOptions.map((debtor, index) => (
                         <button
@@ -1049,7 +1053,7 @@ export default function NewCasePage() {
                         >
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-sm truncate">
-                              {debtor.name || debtor.company_name || "Geen naam"}
+                              {debtor.name || debtor.company_name || tCommon('name')}
                             </div>
                             {debtor.company_name && debtor.name && (
                               <div className="text-xs text-muted-foreground truncate">
@@ -1075,7 +1079,7 @@ export default function NewCasePage() {
 
               <div className={`grid gap-4 ${debtorType === "company" ? "md:grid-cols-2" : ""}`}>
                 <div className="space-y-2">
-                  <Label htmlFor="debtorEmail">E-mailadres *</Label>
+                  <Label htmlFor="debtorEmail">{t('debtorEmail')}</Label>
                   <Input
                     id="debtorEmail"
                     type="email"
@@ -1088,7 +1092,7 @@ export default function NewCasePage() {
                 </div>
                 {debtorType === "company" && (
                   <div className="space-y-2">
-                    <Label htmlFor="debtorVatNumber">BTW nummer (optioneel)</Label>
+                    <Label htmlFor="debtorVatNumber">{t('debtorVatNumber')} ({tCommon('optional')})</Label>
                     <Input
                       id="debtorVatNumber"
                       {...register("debtorVatNumber")}
@@ -1100,26 +1104,26 @@ export default function NewCasePage() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="debtorStreet">Straat</Label>
+                  <Label htmlFor="debtorStreet">{t('debtorStreet')}</Label>
                   <Input id="debtorStreet" {...register("debtorStreet")} placeholder="Kerkstraat" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="debtorHouseNumber">Huisnummer</Label>
+                  <Label htmlFor="debtorHouseNumber">{t('debtorHouseNumber')}</Label>
                   <Input id="debtorHouseNumber" {...register("debtorHouseNumber")} placeholder="123" />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="debtorPostalCode">Postcode</Label>
+                  <Label htmlFor="debtorPostalCode">{t('debtorPostalCode')}</Label>
                   <Input id="debtorPostalCode" {...register("debtorPostalCode")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="debtorCity">Stad</Label>
+                  <Label htmlFor="debtorCity">{t('debtorCity')}</Label>
                   <Input id="debtorCity" {...register("debtorCity")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="debtorCountry">Land</Label>
+                  <Label htmlFor="debtorCountry">{t('debtorCountry')}</Label>
                   <Input id="debtorCountry" {...register("debtorCountry")} defaultValue="BE" />
                 </div>
               </div>
@@ -1130,7 +1134,7 @@ export default function NewCasePage() {
                   onClick={() => setStep(2)}
                   disabled={!organizationSettings || organizationSettings.has_invoice_terms === null || organizationSettings.has_invoice_terms === undefined}
                 >
-                  Volgende
+                  {t('next')}
                 </Button>
               </div>
             </CardContent>
@@ -1140,12 +1144,12 @@ export default function NewCasePage() {
         {step === 2 && (
           <Card>
             <CardHeader>
-              <CardTitle>Stap 2: Factuurgegevens</CardTitle>
-              <CardDescription>Gegevens van de factuur</CardDescription>
+              <CardTitle>{t('step2')}</CardTitle>
+              <CardDescription>{t('invoiceInfoDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="invoiceNumber">Factuurnummer *</Label>
+                <Label htmlFor="invoiceNumber">{t('invoiceNumber')}</Label>
                 <div className="relative">
                   <Input
                     id="invoiceNumber"
@@ -1159,7 +1163,7 @@ export default function NewCasePage() {
                     size="sm"
                     className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
                     onClick={() => setInvoiceModalOpen(true)}
-                    title="Zoek in bibliotheek"
+                    title={t('searchInLibrary')}
                   >
                     <Search className="w-4 h-4" />
                   </Button>
@@ -1171,7 +1175,7 @@ export default function NewCasePage() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="invoiceDate">Factuurdatum *</Label>
+                  <Label htmlFor="invoiceDate">{t('invoiceDate')}</Label>
                   <Input
                     id="invoiceDate"
                     type="date"
@@ -1182,7 +1186,7 @@ export default function NewCasePage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dueDate">Vervaldatum *</Label>
+                  <Label htmlFor="dueDate">{t('dueDate')}</Label>
                   <Input 
                     id="dueDate" 
                     type="date" 
@@ -1195,7 +1199,7 @@ export default function NewCasePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="principalAmount">Hoofdsom (EUR) *</Label>
+                <Label htmlFor="principalAmount">{t('principalAmountLabel')}</Label>
                 <Input
                   id="principalAmount"
                   type="number"
@@ -1212,9 +1216,9 @@ export default function NewCasePage() {
               {debtorType === "particular" && (
                 <div className="space-y-4 border-t pt-4">
                   <div>
-                    <h3 className="font-semibold mb-3">Berekening bijkomende kosten (Particulier)</h3>
+                    <h3 className="font-semibold mb-3">{t('particularCostsTitle')}</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Vul de onderstaande velden in om automatisch interest en schadevergoeding te berekenen volgens Belgische wetgeving.
+                      {t('particularCostsDesc')}
                     </p>
                   </div>
                   
@@ -1234,10 +1238,10 @@ export default function NewCasePage() {
                         }}
                         className="w-4 h-4 rounded border-gray-300"
                       />
-                      <span className="font-sans">Werd er een 1ste herinnering gratis opgestuurd?</span>
+                      <span className="font-sans">{t('firstReminderCheckbox')}</span>
                     </label>
                     <p className="text-xs text-muted-foreground ml-6">
-                      Dit is verplicht voordat bijkomende kosten kunnen worden aangerekend.
+                      {t('firstReminderDesc')}
                     </p>
                   </div>
                   
@@ -1245,14 +1249,14 @@ export default function NewCasePage() {
                   {firstReminderSent && (
                     <>
                       <div className="space-y-2">
-                        <Label htmlFor="firstReminderDate">Datum eerste gratis herinnering *</Label>
+                        <Label htmlFor="firstReminderDate">{t('firstReminderDateLabel')}</Label>
                         <Input
                           id="firstReminderDate"
                           type="date"
                           {...register("firstReminderDate")}
                         />
                         <p className="text-xs text-muted-foreground">
-                          De datum waarop de eerste gratis herinnering is verstuurd
+                          {t('firstReminderDateDesc')}
                         </p>
                       </div>
                       
@@ -1263,14 +1267,19 @@ export default function NewCasePage() {
                             <div className="text-amber-600 font-semibold">⚠️</div>
                             <div className="flex-1">
                               <p className="text-sm font-semibold text-amber-800 mb-1">
-                                Bijkomende kosten kunnen nog niet worden aangerekend
+                                {t('additionalCostsNotYet')}
                               </p>
                               <p className="text-sm text-amber-700">
-                                De eerste gratis herinnering is {daysSinceFirstReminder} dag{daysSinceFirstReminder !== 1 ? 'en' : ''} geleden verstuurd. 
-                                Bijkomende kosten mogen pas worden aangerekend na 14 dagen na de eerste gratis herinnering.
+                                {t('additionalCostsNotYetDesc', { 
+                                  days: daysSinceFirstReminder,
+                                  daysPlural: daysSinceFirstReminder !== 1 ? 'en' : ''
+                                })}
                                 {daysSinceFirstReminder < 14 && (
                                   <span className="block mt-1">
-                                    Nog {14 - daysSinceFirstReminder} dag{(14 - daysSinceFirstReminder) !== 1 ? 'en' : ''} te gaan.
+                                    {t('daysRemaining', { 
+                                      days: 14 - daysSinceFirstReminder,
+                                      daysPlural: (14 - daysSinceFirstReminder) !== 1 ? 'en' : ''
+                                    })}
                                   </span>
                                 )}
                               </p>
@@ -1285,52 +1294,52 @@ export default function NewCasePage() {
                   {particularCostsCalculation && (
                     <div className="bg-muted p-4 rounded-lg space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold">Interest:</span>
+                        <span className="font-semibold">{t('interest')}:</span>
                         <span>{formatCurrency(particularCostsCalculation.interest)}</span>
                       </div>
                       {particularCostsCalculation.breakdown.interest.days > 0 && (
                         <div className="text-sm text-muted-foreground pl-4">
-                          {particularCostsCalculation.breakdown.interest.days} dagen te laat 
-                          ({particularCostsCalculation.breakdown.interest.rate * 100}% per jaar)
+                          {t('daysLate', { days: particularCostsCalculation.breakdown.interest.days })} 
+                          ({t('perYear', { rate: particularCostsCalculation.breakdown.interest.rate * 100 })})
                           {particularCostsCalculation.breakdown.interest.startDate && (
                             <span className="block">
-                              Start: {formatDate(particularCostsCalculation.breakdown.interest.startDate)}
+                              {t('start')}: {formatDate(particularCostsCalculation.breakdown.interest.startDate)}
                             </span>
                           )}
                         </div>
                       )}
                       
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold">Schadevergoeding:</span>
+                        <span className="font-semibold">{t('compensation')}:</span>
                         <span>{formatCurrency(particularCostsCalculation.compensation)}</span>
                       </div>
                       {particularCostsCalculation.compensation > 0 && (
                         <div className="text-sm text-muted-foreground pl-4 space-y-1">
                           {particularCostsCalculation.breakdown.compensation.breakdown.firstTier > 0 && (
                             <div>
-                              Eerste schijf (tot €150): {formatCurrency(particularCostsCalculation.breakdown.compensation.breakdown.firstTier)}
+                              {t('firstTier')}: {formatCurrency(particularCostsCalculation.breakdown.compensation.breakdown.firstTier)}
                             </div>
                           )}
                           {particularCostsCalculation.breakdown.compensation.breakdown.secondTier > 0 && (
                             <div>
-                              Tweede schijf (€150-€500): {formatCurrency(particularCostsCalculation.breakdown.compensation.breakdown.secondTier)}
+                              {t('secondTier')}: {formatCurrency(particularCostsCalculation.breakdown.compensation.breakdown.secondTier)}
                             </div>
                           )}
                           {particularCostsCalculation.breakdown.compensation.breakdown.thirdTier > 0 && (
                             <div>
-                              Derde schijf (boven €500): {formatCurrency(particularCostsCalculation.breakdown.compensation.breakdown.thirdTier)}
+                              {t('thirdTier')}: {formatCurrency(particularCostsCalculation.breakdown.compensation.breakdown.thirdTier)}
                             </div>
                           )}
                           {particularCostsCalculation.compensation >= 2000 && (
                             <div className="text-xs text-amber-600 font-medium">
-                              Maximum van €2000 bereikt
+                              {t('maxReached')}
                             </div>
                           )}
                         </div>
                       )}
                       
                       <div className="flex justify-between items-center border-t pt-2 font-bold">
-                        <span>Totaal bijkomende kosten:</span>
+                        <span>{t('totalAdditionalCosts')}:</span>
                         <span>{formatCurrency(particularCostsCalculation.total)}</span>
                       </div>
                     </div>
@@ -1338,7 +1347,7 @@ export default function NewCasePage() {
                   
                   {dueDate && firstReminderDate && principalAmount > 0 && !particularCostsCalculation && (
                     <div className="text-sm text-amber-600">
-                      Controleer of alle datums correct zijn ingevuld. De eerste herinnering moet na de vervaldatum zijn.
+                      {t('checkDates')}
                     </div>
                   )}
                 </div>
@@ -1348,17 +1357,17 @@ export default function NewCasePage() {
               {debtorType === "company" && (
                 <div className="space-y-4 border-t pt-4">
                   <div>
-                    <h3 className="font-semibold mb-3">Berekening bijkomende kosten (Bedrijf)</h3>
+                    <h3 className="font-semibold mb-3">{t('companyCostsTitle')}</h3>
                     {!hasInvoiceTerms ? (
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
                         <p className="text-sm text-amber-800 font-medium mb-2">
-                          ⚠️ Geen algemene voorwaarden ingesteld
+                          {t('companyCostsNoTerms')}
                         </p>
                         <p className="text-sm text-amber-700 mb-3">
-                          Er kunnen momenteel geen bijkomende kosten worden berekend omdat er geen algemene voorwaarden zijn ingesteld in je account instellingen.
+                          {t('companyCostsNoTermsDesc')}
                         </p>
                         <p className="text-sm text-amber-700 mb-3">
-                          Voeg algemene voorwaarden toe aan je account instellingen om recht te hebben op het innen van bijkomende kosten bij toekomstige facturatie.
+                          {t('companyCostsNoTermsAction')}
                         </p>
                         <Button
                           type="button"
@@ -1367,15 +1376,15 @@ export default function NewCasePage() {
                           onClick={() => router.push("/portal/settings")}
                           className="mt-2"
                         >
-                          Naar Account instellingen
+                          {t('goToSettings')}
                         </Button>
                         <p className="text-xs text-amber-600 mt-3">
-                          Bij hulp, contacteer ons.
+                          {t('companyCostsHelp')}
                         </p>
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground mb-4">
-                        De bijkomende kosten worden automatisch berekend op basis van je account instellingen.
+                        {t('companyCostsAutoDesc')}
                       </p>
                     )}
                   </div>
@@ -1383,7 +1392,7 @@ export default function NewCasePage() {
                   {hasInvoiceTerms && (
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="companyInterestRate">Interest percentage per jaar</Label>
+                        <Label htmlFor="companyInterestRate">{t('interestRateLabel')}</Label>
                         <Input
                           id="companyInterestRate"
                           type="text"
@@ -1391,18 +1400,18 @@ export default function NewCasePage() {
                           readOnly
                           disabled
                           className="bg-muted cursor-not-allowed"
-                          value={companyInterestRate !== undefined ? `${(companyInterestRate * 100).toFixed(2)}%` : "10.5% (wettelijk)"}
+                          value={companyInterestRate !== undefined ? `${(companyInterestRate * 100).toFixed(2)}%` : t('legalRate', { rate: '10.5' })}
                         />
                         <p className="text-xs text-muted-foreground">
                           {delayInterestType === "law_2002" 
-                            ? "Wettelijk tarief (wet van 2002): 10,5% per jaar"
+                            ? t('legalRate2002')
                             : delayInterestType === "fixed" && delayInterestPercentage !== undefined
-                            ? `Vast tarief uit voorwaarden: ${(delayInterestPercentage * 100).toFixed(2)}% per jaar`
-                            : "Wettelijk tarief: 10,5% per jaar"}
+                            ? t('fixedRateFromTerms', { rate: (delayInterestPercentage * 100).toFixed(2) })
+                            : t('legalRateDefault')}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="companyCompensationAmount">Schadevergoeding</Label>
+                        <Label htmlFor="companyCompensationAmount">{t('compensation')}</Label>
                         <Input
                           id="companyCompensationAmount"
                           type="text"
@@ -1411,17 +1420,20 @@ export default function NewCasePage() {
                           disabled
                           className="bg-muted cursor-not-allowed"
                           value={companyCostsCalculation 
-                            ? `${formatCurrency(companyCostsCalculation.compensation)} (${companyCostsCalculation.breakdown.compensation.isFromTerms ? 'volgens voorwaarden' : 'wettelijk'})`
-                            : "Wordt automatisch berekend"}
+                            ? `${formatCurrency(companyCostsCalculation.compensation)} (${companyCostsCalculation.breakdown.compensation.isFromTerms ? t('fromTerms') : t('legal')})`
+                            : t('autoCalculated')}
                         />
                         <p className="text-xs text-muted-foreground">
                           {hasDamageClause 
                             ? hasMinimumDamageClause && minimumDamageClauseAmount
-                              ? `Minimum: ${formatCurrency(minimumDamageClauseAmount)}${damageClausePercentage ? `, Percentage: ${(damageClausePercentage * 100).toFixed(2)}%` : ''}`
+                              ? t('compensationMinAndPercentage', { 
+                                  min: formatCurrency(minimumDamageClauseAmount),
+                                  percentage: damageClausePercentage ? `${(damageClausePercentage * 100).toFixed(2)}%` : ''
+                                })
                               : damageClausePercentage
-                              ? `Percentage: ${(damageClausePercentage * 100).toFixed(2)}%`
-                              : "Volgens voorwaarden"
-                            : "Wettelijk bedrag: €40 per factuur"}
+                              ? t('compensationPercentage', { percentage: (damageClausePercentage * 100).toFixed(2) })
+                              : t('fromTerms')
+                            : t('legalAmountPerInvoice')}
                         </p>
                       </div>
                     </div>
@@ -1436,46 +1448,48 @@ export default function NewCasePage() {
                       </div>
                       {companyCostsCalculation.breakdown.interest.days > 0 && (
                         <div className="text-sm text-muted-foreground pl-4">
-                          {companyCostsCalculation.breakdown.interest.days} dagen te laat 
-                          ({companyCostsCalculation.breakdown.interest.rate * 100}% per jaar)
+                          {t('daysLate', { days: companyCostsCalculation.breakdown.interest.days })} 
+                          ({t('perYear', { rate: companyCostsCalculation.breakdown.interest.rate * 100 })})
                           {companyCostsCalculation.breakdown.interest.isFromTerms && (
                             <span className="block text-xs text-blue-600">
-                              (volgens voorwaarden)
+                              ({t('fromTerms')})
                             </span>
                           )}
                           {!companyCostsCalculation.breakdown.interest.isFromTerms && (
                             <span className="block text-xs text-muted-foreground">
-                              (wettelijk tarief)
+                              ({t('legalRate')})
                             </span>
                           )}
                         </div>
                       )}
                       
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold">Schadevergoeding:</span>
+                        <span className="font-semibold">{t('compensation')}:</span>
                         <span>{formatCurrency(companyCostsCalculation.compensation)}</span>
                       </div>
                       {companyCostsCalculation.compensation > 0 && (
                         <div className="text-sm text-muted-foreground pl-4">
                           {companyCostsCalculation.breakdown.compensation.isFromTerms ? (
                             <div className="text-xs text-blue-600">
-                              <span className="block">Volgens voorwaarden</span>
+                              <span className="block">{t('fromTerms')}</span>
                               {hasMinimumDamageClause && minimumDamageClauseAmount && damageClausePercentage && (
                                 <span className="block mt-1 text-muted-foreground">
-                                  Minimum: {formatCurrency(minimumDamageClauseAmount)}, 
-                                  Percentage: {formatCurrency(principalAmount * damageClausePercentage)} → 
-                                  Gebruikt: {formatCurrency(companyCostsCalculation.compensation)}
+                                  {t('compensationBreakdown', {
+                                    min: formatCurrency(minimumDamageClauseAmount),
+                                    percentage: formatCurrency(principalAmount * damageClausePercentage),
+                                    used: formatCurrency(companyCostsCalculation.compensation)
+                                  })}
                                 </span>
                               )}
                             </div>
                           ) : (
-                            <span className="text-xs text-muted-foreground">Wettelijk bedrag (€40)</span>
+                            <span className="text-xs text-muted-foreground">{t('legalAmount')}</span>
                           )}
                         </div>
                       )}
                       
                       <div className="flex justify-between items-center border-t pt-2 font-bold">
-                        <span>Totaal bijkomende kosten:</span>
+                        <span>{t('totalAdditionalCosts')}:</span>
                         <span>{formatCurrency(companyCostsCalculation.total)}</span>
                       </div>
                     </div>
@@ -1492,7 +1506,7 @@ export default function NewCasePage() {
               {/* Additional costs input - always read-only, automatically calculated */}
               <div className="space-y-2">
                 <Label htmlFor="additionalCosts">
-                  Bijkomende kosten (EUR) <span className="text-muted-foreground">(automatisch berekend)</span>
+                  {t('additionalCosts')} (EUR) <span className="text-muted-foreground">({t('autoCalculated')})</span>
                 </Label>
                 <Input
                   id="additionalCosts"
@@ -1507,21 +1521,21 @@ export default function NewCasePage() {
                 {debtorType === "particular" && (
                   <p className="text-sm text-muted-foreground">
                     {firstReminderSent && firstReminderDate
-                      ? "Berekend op basis van interest en schadevergoeding volgens Belgische wetgeving."
-                      : "Vul de datums hierboven in om de bijkomende kosten automatisch te berekenen."}
+                      ? t('particularCostsCalculated')
+                      : t('fillDates')}
                   </p>
                 )}
                 {debtorType === "company" && (
                   <p className="text-sm text-muted-foreground">
                     {companyCostsCalculation
-                      ? "Berekend op basis van interest en schadevergoeding vanaf vervaldatum."
-                      : "Vul de berekeningsdatum hierboven in om de bijkomende kosten automatisch te berekenen."}
+                      ? t('companyCostsCalculated')
+                      : t('fillCalculationDate')}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="document">Document upload *</Label>
+                <Label htmlFor="document">{t('documentUploadTitle')} *</Label>
                 <input
                   {...register("document")}
                   ref={(e) => {
@@ -1607,7 +1621,7 @@ export default function NewCasePage() {
                       <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
                       <div>
                         <p className="font-sans font-medium mb-1">
-                          Sleep een bestand hierheen of klik op de knop hieronder
+                          {t('documentUploadDesc')}
                         </p>
                         <p className="font-sans text-sm text-muted-foreground">
                           PDF, DOC, DOCX, JPG, PNG (max. 10MB)
@@ -1629,30 +1643,30 @@ export default function NewCasePage() {
 
               <div className="bg-muted p-4 rounded-lg">
                 <div className="flex justify-between mb-2">
-                  <span>Hoofdsom:</span>
+                  <span>{t('principalAmount')}:</span>
                   <span>{formatCurrency(principalAmount)}</span>
                 </div>
                 <div className="flex justify-between mb-2">
-                  <span>Bijkomende kosten:</span>
+                  <span>{t('additionalCosts')}:</span>
                   <span>{formatCurrency(additionalCosts)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
-                  <span>Totaal:</span>
+                  <span>{t('total')}:</span>
                   <span>{formatCurrency(totalAmount)}</span>
                 </div>
               </div>
 
               <div className="flex justify-between">
                 <Button type="button" variant="outline" onClick={() => setStep(1)}>
-                  Vorige
+                  {t('previous')}
                 </Button>
                 <Button 
                   type="button" 
                   onClick={() => {
                     if (!uploadedFile) {
                       toast({
-                        title: "Document verplicht",
-                        description: "Upload een document om door te gaan",
+                        title: t('documentRequired'),
+                        description: t('uploadDocumentToContinue'),
                         variant: "destructive",
                       });
                       return;
@@ -1661,7 +1675,7 @@ export default function NewCasePage() {
                   }}
                   disabled={!organizationSettings || organizationSettings.has_invoice_terms === null || organizationSettings.has_invoice_terms === undefined}
                 >
-                  Volgende
+                  {t('next')}
                 </Button>
               </div>
             </CardContent>
@@ -1671,17 +1685,17 @@ export default function NewCasePage() {
         {step === 3 && (
           <Card>
             <CardHeader>
-              <CardTitle>Stap 3: Overzicht</CardTitle>
-              <CardDescription>Controleer de gegevens voordat u de opdracht aanmaakt</CardDescription>
+              <CardTitle>{t('step3')}</CardTitle>
+              <CardDescription>{t('reviewBeforeSubmit')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold mb-2">Debiteur</h3>
+                  <h3 className="font-semibold mb-2">{t('debtor')}</h3>
                   <div className="bg-muted p-4 rounded-lg">
                     <p>{watch("debtorNameOrCompany")}</p>
                     <p>{watch("debtorEmail")}</p>
-                    {watch("debtorVatNumber") && <p>BTW: {watch("debtorVatNumber")}</p>}
+                    {watch("debtorVatNumber") && <p>{t('vatNumber')}: {watch("debtorVatNumber")}</p>}
                     {(watch("debtorStreet") || watch("debtorCity")) && (
                       <p>
                         {watch("debtorStreet")} {watch("debtorHouseNumber")}
@@ -1693,17 +1707,17 @@ export default function NewCasePage() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Factuur</h3>
+                  <h3 className="font-semibold mb-2">{t('invoice')}</h3>
                   <div className="bg-muted p-4 rounded-lg">
                     <p>
-                      <strong>Factuurnummer:</strong> {watch("invoiceNumber")}
+                      <strong>{t('invoiceNumber')}:</strong> {watch("invoiceNumber")}
                     </p>
                     <p>
-                      <strong>Factuurdatum:</strong> {watch("invoiceDate")}
+                      <strong>{t('invoiceDate')}:</strong> {watch("invoiceDate")}
                     </p>
                     {watch("dueDate") && (
                       <p>
-                        <strong>Vervaldatum:</strong> {watch("dueDate")}
+                        <strong>{t('dueDate')}:</strong> {watch("dueDate")}
                       </p>
                     )}
                   </div>
@@ -1711,7 +1725,7 @@ export default function NewCasePage() {
 
                 {uploadedFile && (
                   <div>
-                    <h3 className="font-semibold mb-2">Bijgevoegd document</h3>
+                    <h3 className="font-semibold mb-2">{t('attachedDocument')}</h3>
                     <div className="bg-muted p-4 rounded-lg">
                       {filePreview ? (
                         <div className="space-y-3">
@@ -1756,18 +1770,18 @@ export default function NewCasePage() {
                 )}
 
                 <div>
-                  <h3 className="font-semibold mb-2">Bedrag</h3>
+                  <h3 className="font-semibold mb-2">{t('amount')}</h3>
                   <div className="bg-muted p-4 rounded-lg">
                     <div className="flex justify-between mb-2">
-                      <span>Hoofdsom:</span>
+                      <span>{t('principalAmount')}:</span>
                       <span>{formatCurrency(principalAmount)}</span>
                     </div>
                     <div className="flex justify-between mb-2">
-                      <span>Bijkomende kosten:</span>
+                      <span>{t('additionalCosts')}:</span>
                       <span>{formatCurrency(additionalCosts)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg border-t pt-2">
-                      <span>Totaal:</span>
+                      <span>{t('total')}:</span>
                       <span>{formatCurrency(totalAmount)}</span>
                     </div>
                   </div>
@@ -1776,7 +1790,7 @@ export default function NewCasePage() {
 
               <div className="flex justify-between">
                 <Button type="button" variant="outline" onClick={() => setStep(2)}>
-                  Vorige
+                  {t('previous')}
                 </Button>
                 <Button 
                   type="submit" 
@@ -1795,14 +1809,14 @@ export default function NewCasePage() {
                     if (!isValid) {
                       console.error('❌ Form is not valid, errors:', errors);
                       toast({
-                        title: "Validatiefout",
-                        description: "Controleer alle velden en probeer opnieuw",
+                        title: tCommon('error'),
+                        description: t('validationError'),
                         variant: "destructive",
                       });
                     }
                   }}
                 >
-                  {loading ? "Aanmaken..." : "Opdracht aanmaken"}
+                  {loading ? t('creating') : t('createAssignment')}
                 </Button>
               </div>
             </CardContent>
@@ -1823,9 +1837,9 @@ export default function NewCasePage() {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b">
               <div>
-                <h2 id="invoice-modal-title" className="text-lg font-semibold">Factuurbibliotheek</h2>
+                <h2 id="invoice-modal-title" className="text-lg font-semibold">{t('invoiceLibrary')}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Selecteer een factuur uit je bibliotheek om de gegevens automatisch in te vullen
+                  {t('selectInvoiceFromLibrary')}
                 </p>
               </div>
               <Button
@@ -1833,7 +1847,7 @@ export default function NewCasePage() {
                 size="sm"
                 onClick={() => setInvoiceModalOpen(false)}
                 className="h-8 w-8 p-0"
-                aria-label="Sluit modal"
+                aria-label={tCommon('close')}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -1844,11 +1858,11 @@ export default function NewCasePage() {
               {loadingInvoices ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                  <span className="ml-2 font-sans">Facturen laden...</span>
+                  <span className="ml-2 font-sans">{t('loadingInvoices')}</span>
                 </div>
               ) : invoices.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="font-sans text-muted-foreground">Nog geen facturen in je bibliotheek</p>
+                  <p className="font-sans text-muted-foreground">{t('noInvoicesFound')}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -1858,6 +1872,7 @@ export default function NewCasePage() {
                       invoice={invoice}
                       onSelect={() => handleSelectInvoice(invoice)}
                       supabase={supabase}
+                      t={t}
                     />
                   ))}
                 </div>

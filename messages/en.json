@@ -1,0 +1,870 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "details": "Details",
+    "yes": "Yes",
+    "no": "No",
+    "name": "Name",
+    "email": "Email address",
+    "message": "Message",
+    "sending": "Sending...",
+    "send": "Send",
+    "address": "Address",
+    "phone": "Phone",
+    "contact": "Contact",
+    "readyToStart": "Ready to start?",
+    "submitNow": "Submit your assignment now",
+    "contactUs": "Contact us",
+    "lastUpdated": "Last updated",
+    "questions": "Do you have any questions? Contact us.",
+    "contactForm": "the contact form",
+    "illustration": "Illustration/Photo",
+    "user": "User",
+    "userData": "User data",
+    "note": "Note",
+    "optional": "optional"
+  },
+  "nav": {
+    "services": "Services",
+    "howItWorks": "How it works",
+    "pricing": "Pricing",
+    "about": "About us",
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "home": {
+    "comingSoon": "Coming soon",
+    "workingHard": "We're working hard on something great!",
+    "description": "Auxilium Incasso will soon launch a modern collection platform that allows you to collect unpaid invoices quickly and efficiently.",
+    "noCureNoPay": "No cure no pay",
+    "onlyPayOnSuccess": "- you only pay on success.",
+    "stayInformed": "Stay informed about our launch",
+    "expected": "Expected: Q1 2025",
+    "fastEfficient": "Fast & Efficient",
+    "fastEfficientDesc": "Assignments are processed within 24 hours",
+    "transparent": "Transparent",
+    "transparentDesc": "No hidden costs, clear rates",
+    "modernPlatform": "Modern Platform",
+    "modernPlatformDesc": "Easily submit and track assignments online"
+  },
+  "services": {
+    "title": "Collection",
+    "subtitle": "Professional collection services for efficiently collecting your unpaid invoices. Transparent, fast and reliable.",
+    "easySubmission": {
+      "title": "Easy assignment submission",
+      "description": "Submit your collection assignment easily through our online portal. Upload the required documents and provide all relevant information. Your assignment is registered within minutes."
+    },
+    "autoCheck": {
+      "title": "Automatic verification",
+      "description": "Our advanced system automatically checks all submitted information for completeness and accuracy. We verify the debtor's data and check the validity of the claim."
+    },
+    "professionalContact": {
+      "title": "Professional contact",
+      "description": "We immediately contact the debtor through various channels. Our experienced staff work on a quick and friendly solution for your claim."
+    },
+    "noCureNoPay": {
+      "title": "No cure - no pay",
+      "description": "You only pay when the collection is successful. No result, no costs. Our transparent pricing structure means you always know where you stand."
+    },
+    "fastTreatment": {
+      "title": "Fast processing",
+      "description": "Within 24 hours of submitting your assignment, the first steps are taken. No waiting times, no delays - immediate results."
+    },
+    "allAmounts": {
+      "title": "For all amounts",
+      "description": "Whether it's small or large amounts, we help you collect your unpaid invoices. No minimum or maximum amount."
+    },
+    "debtorManagement": {
+      "title": "Debtor management",
+      "subtitle": "Fully automatic invoice management",
+      "description": "At Auxilium, we ensure that all purchase invoices in your system are automatically maintained and followed up. We monitor your outstanding invoices and ensure timely payment, so you don't have to worry.",
+      "autoFollowup": "Automatic follow-up of all purchase invoices",
+      "proactiveMonitoring": "Proactive monitoring and timely payment",
+      "noWorries": "No more worries about missed payments",
+      "contactUs": "Contact us",
+      "outstandingInvoices": "Outstanding invoices",
+      "customer": "Customer",
+      "inProgress": "In progress",
+      "paid": "Paid",
+      "systemMonitors": "System monitors and follows up"
+    },
+    "cta": {
+      "title": "Ready to start?",
+      "description": "Submit your assignment now and let us work professionally",
+      "button": "Submit your assignment now"
+    }
+  },
+  "howItWorks": {
+    "title": "Our approach",
+    "subtitle": "A transparent and professional process for collecting your unpaid invoices",
+    "step": "Step",
+    "sensitivityScan": {
+      "title": "Sensitivity scan",
+      "description": "After receiving each file, we first scan its sensitivity. Are they regular customers with good relationships? Has the invoice recently expired? Based on these factors, our system can determine whether we start with a reminder without additional costs or not."
+    },
+    "firstContact": {
+      "title": "First contact",
+      "description": "After our system has determined the sensitivity, we contact the customer for the first time. This is done in a friendly and professional manner, tailored to the relationship and situation."
+    },
+    "intensiveFollowup": {
+      "title": "Intensive follow-up",
+      "description": "Still no payment after 3-5 business days? Then we proceed to more intensive follow-up: we send a reminder, a registered shipment and make a personal call. We remain professional but make it clear that payment is expected.",
+      "days": "3-5 business days"
+    },
+    "ultimatum": {
+      "title": "Ultimatum and legal steps",
+      "description": "Still no payment? Then we proceed to an ultimatum where we make it clear that the next steps will be legal. We give a final chance, but also make it clear that we will not hesitate to take legal action if necessary."
+    },
+    "cta": {
+      "title": "Ready to start?",
+      "description": "Submit your assignment now and let us work professionally",
+      "button": "Submit your assignment now"
+    }
+  },
+  "pricing": {
+    "title": "Our prices",
+    "subtitle": "Transparent and fair prices - only pay on success",
+    "noResultNoCommission": "No result, no commission",
+    "ourRates": "Our rates",
+    "ratesDescription": "We work with a progressive rate. The higher the invoice amount, the lower the percentage. This makes our service advantageous for both small and large amounts.",
+    "upTo": "Up to",
+    "above": "Above",
+    "ranges": {
+      "upTo500": "Up to €500",
+      "500to5000": "€500 - €5,000",
+      "5000to15000": "€5,000 - €15,000",
+      "15000to25000": "€15,000 - €25,000",
+      "above25000": "Above €25,000"
+    },
+    "noCureNoPay": {
+      "title": "No cure - no pay",
+      "description": "At Auxilium, you only pay when the collection is successful. No result, no costs. This means you take no risk - we share the risk with you.",
+      "noAdvance": "No advance payments or monthly costs",
+      "transparent": "Transparent prices without hidden costs",
+      "progressive": "Progressive rate - more advantageous for higher amounts"
+    },
+    "cta": {
+      "title": "Ready to start?",
+      "description": "Submit your assignment now and only pay on success",
+      "button": "Submit your assignment now"
+    }
+  },
+  "contact": {
+    "title": "Contact us",
+    "contactDetails": "Contact details",
+    "sendMessage": "Send us a message",
+    "messageSent": "Message sent",
+    "messageSentDesc": "We will contact you as soon as possible",
+    "couldNotSend": "Could not send message",
+    "errorOccurred": "An error occurred",
+    "ourTeam": "Our team",
+    "generalManager": "General Manager / Co-Owner",
+    "coOwner": "Co-Owner",
+    "address": "Kerkstraat 15\n2000 Antwerp\nBelgium"
+  },
+  "about": {
+    "title": "About us",
+    "subtitle": "Our story, our values and our mission",
+    "timeline": {
+      "founding": {
+        "year": "Founding",
+        "title": "The start of Auxilium",
+        "description": "Auxilium Incasso is founded with the vision to help companies efficiently collect unpaid invoices. With years of experience in the financial sector, the foundation is laid for a reliable collection agency."
+      },
+      "trusted": {
+        "year": "Trusted value",
+        "title": "Consultant and trusted advisor",
+        "description": "As a consultant and trusted advisor, a solid reputation is built. Customers appreciate the personal approach and expertise in collection and debtor management."
+      },
+      "anniversary": {
+        "year": "Anniversary",
+        "title": "Years of growth and success",
+        "description": "Over the years, Auxilium grows into a reliable partner for many companies. The anniversary marks years of successful collections and satisfied customers."
+      },
+      "takeover": {
+        "year": "Takeover",
+        "title": "A new chapter",
+        "description": "After the passing, the children take over the company. With respect for the built values and expertise, the legacy is continued and the company is brought into the future."
+      },
+      "modern": {
+        "year": "2025",
+        "title": "Modern approach with financial expertise",
+        "description": "With a strong financial background, a new step is taken. Modern technology and advanced systems are integrated, while maintaining the personal approach and reliability."
+      }
+    },
+    "cta": {
+      "title": "Ready to work together?",
+      "description": "Contact us and discover how we can help you",
+      "button": "Contact us"
+    }
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "questions": [
+      {
+        "question": "How does no cure no pay work?",
+        "answer": "With no cure no pay, you only pay when the collection is successful. If the debtor does not pay, you pay nothing."
+      },
+      {
+        "question": "How quickly is an assignment processed?",
+        "answer": "Assignments are processed within 24 hours. The debtor immediately receives a payment request by email."
+      },
+      {
+        "question": "What are the costs?",
+        "answer": "The costs consist of a percentage of the collected amount or a fixed amount, depending on the amount of the claim. Contact us for a detailed quote."
+      },
+      {
+        "question": "Can I track the status of my assignments?",
+        "answer": "Yes, through the customer portal you always have insight into the status of your collection files."
+      }
+    ],
+    "moreQuestions": "Do you have any questions? Contact us.",
+    "contactButton": "Contact us"
+  },
+  "terms": {
+    "title": "General terms and conditions",
+    "applicability": {
+      "title": "1. Applicability",
+      "content": "These general terms and conditions apply to all services of Auxilium Incasso."
+    },
+    "services": {
+      "title": "2. Services",
+      "content": "Auxilium Incasso offers collection services according to the no cure no pay principle. This means you only pay when the collection is successful."
+    },
+    "responsibilities": {
+      "title": "3. Responsibilities",
+      "content": "The customer is responsible for providing correct and complete data. Auxilium Incasso is not liable for damage resulting from incorrect data."
+    },
+    "payment": {
+      "title": "4. Payment",
+      "content": "Payment takes place after successful collection. The costs are charged according to the agreed rates."
+    },
+    "contact": {
+      "title": "5. Contact",
+      "content": "For questions about these terms, you can contact us via"
+    }
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "introduction": {
+      "title": "1. Introduction",
+      "content": "Auxilium Incasso respects your privacy and is committed to protecting your personal data. This privacy policy explains how we collect, use and protect your data."
+    },
+    "dataCollection": {
+      "title": "2. Data we collect",
+      "content": "We collect data that you provide to us when you:",
+      "items": [
+        "Create an account",
+        "Submit an assignment",
+        "Contact us",
+        "Visit our website"
+      ]
+    },
+    "dataUsage": {
+      "title": "3. How we use your data",
+      "content": "We use your data to:",
+      "items": [
+        "Deliver our services",
+        "Communicate with you",
+        "Improve our services",
+        "Comply with legal obligations"
+      ]
+    },
+    "rights": {
+      "title": "4. Your rights",
+      "content": "You have the right to:",
+      "items": [
+        "Access your data",
+        "Correct your data",
+        "Delete your data",
+        "Object to processing"
+      ]
+    },
+    "contact": {
+      "title": "5. Contact",
+      "content": "For questions about this privacy policy, you can contact us via"
+    }
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Log in to your customer portal",
+    "email": "Email address",
+    "password": "Password",
+    "loggingIn": "Logging in...",
+    "login": "Login",
+    "backToHome": "Back to homepage",
+    "loginError": "An error occurred while logging in",
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "••••••••"
+  },
+  "otp": {
+    "title": "Verification code",
+    "subtitle": "Enter the verification code we sent to your email",
+    "code": "Verification code",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "resend": "Resend code",
+    "resending": "Sending...",
+    "resendCooldown": "Resend in {seconds} seconds",
+    "invalidCode": "Invalid OTP code",
+    "notLoggedIn": "Not logged in. Please try logging in again.",
+    "error": "An error occurred",
+    "codePlaceholder": "000000"
+  },
+  "portal": {
+    "dashboard": {
+      "title": "Dashboard",
+      "welcomeBack": "Welcome back",
+      "newAssignment": "New assignment",
+      "totalAssignments": "Total assignments",
+      "outstanding": "Outstanding",
+      "totalAmount": "Total amount",
+      "recentAssignments": "Recent assignments",
+      "recentAssignmentsDesc": "Overview of your recent collection files",
+      "noAssignments": "No assignments yet",
+      "createFirstAssignment": "Create your first assignment",
+      "profileNotFound": "Profile not found",
+      "profileNotFoundDesc": "Your profile could not be found. Please contact the administrator.",
+      "goToSettings": "Go to settings"
+    },
+    "cases": {
+      "title": "Your assignments",
+      "subtitle": "Overview of all your submitted collection assignments",
+      "newAssignment": "New assignment",
+      "overview": "Overview",
+      "noAssignments": "You have not submitted any assignments yet.",
+      "submitFirstAssignment": "Submit first assignment",
+      "status": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "in_progress": "In progress",
+        "paid": "Paid",
+        "closed": "Closed",
+        "open": "Open",
+        "bailiff": "Bailiff"
+      },
+      "new": {
+        "title": "Submit new assignment",
+        "debtorInfo": "Debtor information",
+        "debtorInfoDesc": "Fill in the debtor's information",
+        "debtorNameOrCompany": "Name/Company name *",
+        "debtorNameOrCompanyRequired": "Name/Company name is required",
+        "debtorEmail": "Email address *",
+        "debtorEmailInvalid": "Invalid email address",
+        "debtorVatNumber": "VAT number",
+        "debtorStreet": "Street",
+        "debtorHouseNumber": "House number",
+        "debtorCity": "City",
+        "debtorPostalCode": "Postal code",
+        "debtorCountry": "Country",
+        "debtorType": "Type *",
+        "particular": "Individual",
+        "company": "Company",
+        "searchDebtor": "Search debtor in library",
+        "selectDebtor": "Select debtor",
+        "noDebtorsFound": "No debtors found",
+        "invoiceInfo": "Invoice information",
+        "invoiceInfoDesc": "Fill in the invoice information",
+        "invoiceNumber": "Invoice number *",
+        "invoiceNumberRequired": "Invoice number is required",
+        "invoiceDate": "Invoice date *",
+        "invoiceDateRequired": "Invoice date is required",
+        "dueDate": "Due date *",
+        "dueDateRequired": "Due date is required",
+        "principalAmount": "Principal amount",
+        "principalAmountInvalid": "Amount must be a positive number",
+        "selectInvoiceFromLibrary": "Select an invoice from your library to automatically fill in the data",
+        "invoiceLibrary": "Invoice library",
+        "selectInvoice": "Select this invoice",
+        "noInvoicesFound": "No invoices in your library yet",
+        "loadingInvoices": "Loading invoices...",
+        "preview": "Preview",
+        "loadPreview": "Load preview",
+        "noNumber": "No number",
+        "unknownDebtor": "Unknown debtor",
+        "date": "Date",
+        "amount": "Amount",
+        "additionalCosts": "Additional costs",
+        "additionalCostsDesc": "Calculation of additional costs",
+        "firstReminderSent": "First reminder sent",
+        "firstReminderDate": "Date first reminder",
+        "companyInterestRate": "Interest percentage",
+        "companyCompensationAmount": "Compensation amount",
+        "documentUpload": "Upload document",
+        "documentUploadDesc": "Drag a file here or click the button below",
+        "uploadFile": "Upload file",
+        "removeFile": "Remove file",
+        "fileUploaded": "File uploaded",
+        "fileRemoved": "File removed",
+        "warning": "Warning",
+        "documentLoadError": "Could not load document from library. Upload it manually.",
+        "documentLoaded": "Document loaded",
+        "documentLoadedDesc": "Document \"{name}\" has been automatically loaded from your library",
+        "noInvoiceTerms": "General terms and conditions not set",
+        "noInvoiceTermsDesc": "You must first set your general terms and conditions in the Account portal before you can create an assignment.",
+        "goToSettings": "Go to Account settings",
+        "checkingSettings": "Checking account settings...",
+        "searchInLibrary": "Search in library",
+        "validationError": "Check all fields and try again",
+        "documentRequired": "Document upload is required",
+        "uploadDocumentToContinue": "Upload a document to continue",
+        "step2": "Step 2: Invoice information",
+        "step3": "Step 3: Overview",
+        "step4": "Step 4: Upload document",
+        "createAssignment": "Create assignment",
+        "creating": "Creating...",
+        "assignmentCreated": "Assignment created",
+        "assignmentCreatedDesc": "The assignment has been successfully created and the debtor has been contacted",
+        "createError": "An error occurred while creating the assignment",
+        "type": "Type *",
+        "searchDebtorPlaceholder": "Search by name or email...",
+        "selectDebtorPlaceholder": "Select a debtor or fill in manually",
+        "principalAmountLabel": "Principal amount (EUR) *",
+        "particularCostsTitle": "Calculation of additional costs (Individual)",
+        "particularCostsDesc": "Fill in the fields below to automatically calculate interest and compensation according to Belgian law.",
+        "firstReminderCheckbox": "Was a 1st free reminder sent?",
+        "firstReminderDesc": "This is required before additional costs can be charged.",
+        "firstReminderDateLabel": "Date first free reminder *",
+        "firstReminderDateDesc": "The date on which the first free reminder was sent",
+        "additionalCostsNotYet": "Additional costs cannot yet be charged",
+        "additionalCostsNotYetDesc": "The first free reminder was sent {days} day{daysPlural} ago. Additional costs may only be charged after 14 days after the first free reminder.",
+        "daysRemaining": "{days} day{daysPlural} remaining.",
+        "interest": "Interest",
+        "compensation": "Compensation",
+        "totalAdditionalCosts": "Total additional costs",
+        "daysLate": "{days} days late",
+        "perYear": "{rate}% per year",
+        "start": "Start",
+        "firstTier": "First tier (up to €150)",
+        "secondTier": "Second tier (€150-€500)",
+        "thirdTier": "Third tier (above €500)",
+        "maxReached": "Maximum of €2000 reached",
+        "checkDates": "Check if all dates are correctly filled in. The first reminder must be after the due date.",
+        "companyCostsTitle": "Calculation of additional costs (Company)",
+        "companyCostsNoTerms": "⚠️ No general terms and conditions set",
+        "companyCostsNoTermsDesc": "Additional costs cannot currently be calculated because no general terms and conditions have been set in your account settings.",
+        "companyCostsNoTermsAction": "Add general terms and conditions to your account settings to be entitled to collect additional costs for future invoicing.",
+        "companyCostsHelp": "For help, contact us.",
+        "companyCostsAutoDesc": "Additional costs are automatically calculated based on your account settings.",
+        "interestRateLabel": "Interest percentage per year",
+        "legalRate": "{rate}% (legal)",
+        "legalRate2002": "Legal rate (Law of 2002): 10.5% per year",
+        "fixedRateFromTerms": "Fixed rate from terms: {rate}% per year",
+        "legalRateDefault": "Legal rate: 10.5% per year",
+        "fromTerms": "According to terms",
+        "legal": "Legal",
+        "legalRate": "Legal rate",
+        "legalAmount": "Legal amount (€40)",
+        "legalAmountPerInvoice": "Legal amount: €40 per invoice",
+        "autoCalculated": "automatically calculated",
+        "compensationMinAndPercentage": "Minimum: {min}, Percentage: {percentage}",
+        "compensationPercentage": "Percentage: {percentage}%",
+        "compensationBreakdown": "Minimum: {min}, Percentage: {percentage} → Used: {used}",
+        "particularCostsCalculated": "Calculated based on interest and compensation according to Belgian law.",
+        "companyCostsCalculated": "Calculated based on interest and compensation from due date.",
+        "fillDates": "Fill in the dates above to automatically calculate the additional costs.",
+        "fillCalculationDate": "Fill in the calculation date above to automatically calculate the additional costs.",
+        "vatNumber": "VAT",
+        "invoice": "Invoice",
+        "debtor": "Debtor",
+        "attachedDocument": "Attached document",
+        "reviewBeforeSubmit": "Review the information before creating the assignment"
+      }
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "assignments": "Your assignments",
+      "library": "Library",
+      "account": "Account",
+      "integrations": "Integrations"
+    },
+    "library": {
+      "title": "Library",
+      "subtitle": "Manage your saved invoices and contacts for quick assignment submission",
+      "invoices": {
+        "title": "Invoices",
+        "description": "Saved invoices for quick reuse",
+        "add": "Add",
+        "noInvoices": "No invoices saved yet",
+        "invoiceNumber": "Invoice number",
+        "date": "Date",
+        "amount": "Amount",
+        "debtor": "Debtor",
+        "actions": "Actions",
+        "view": "View",
+        "delete": "Delete",
+        "deleteConfirm": "Are you sure you want to delete this invoice?",
+        "deleted": "Invoice deleted",
+        "error": "Error deleting"
+      },
+      "debtors": {
+        "title": "Contacts",
+        "description": "Saved debtors for quick reuse",
+        "add": "Add",
+        "noDebtors": "No contacts saved yet",
+        "name": "Name",
+        "email": "Email",
+        "company": "Company",
+        "actions": "Actions",
+        "view": "View",
+        "delete": "Delete",
+        "deleteConfirm": "Are you sure you want to delete this contact?",
+        "deleted": "Contact deleted",
+        "error": "Error deleting"
+      }
+    },
+    "integrations": {
+      "title": "Integrations",
+      "subtitle": "Connect your systems to Auxilium for automated assignment submission",
+      "available": "Available",
+      "comingSoon": "Coming soon",
+      "activate": "Activate",
+      "soon": "Soon",
+      "apiIntegration": "API Integration",
+      "apiDescription": "Connect your own system via our API",
+      "webhookIntegration": "Webhook Integration",
+      "webhookDescription": "Receive real-time updates via webhooks",
+      "csvImport": "CSV Import",
+      "csvDescription": "Import multiple assignments via CSV file"
+    },
+    "settings": {
+      "title": "Settings",
+      "profile": {
+        "title": "Profile information",
+        "description": "Your personal information",
+        "fullName": "Full name",
+        "phone": "Phone number",
+        "save": "Save",
+        "saved": "Profile updated",
+        "savedDesc": "Your profile information has been successfully updated",
+        "error": "An error occurred"
+      },
+      "password": {
+        "title": "Password",
+        "description": "Change your password",
+        "change": "Change password",
+        "cancel": "Cancel",
+        "current": "Current password",
+        "new": "New password",
+        "confirm": "Confirm new password",
+        "changed": "Password changed",
+        "changedDesc": "Your password has been successfully changed",
+        "error": "An error occurred while changing the password",
+        "required": "Current password is required",
+        "minLength": "New password must be at least 8 characters long",
+        "confirmRequired": "Confirm password is required",
+        "mismatch": "Passwords do not match"
+      },
+      "organization": {
+        "title": "Organization information",
+        "description": "Your organization's information",
+        "name": "Company name",
+        "nameRequired": "Company name is required",
+        "vatNumber": "VAT number",
+        "email": "Email",
+        "emailInvalid": "Invalid email address",
+        "street": "Street",
+        "houseNumber": "House number",
+        "postalCode": "Postal code",
+        "city": "City",
+        "country": "Country",
+        "bankAccount": "Bank account number",
+        "bankAccountDesc": "We need this to transfer funds.",
+        "hasInvoiceTerms": "Do you have general terms and conditions?",
+        "yes": "Yes",
+        "no": "No",
+        "uploadTerms": "Upload general terms and conditions",
+        "uploadClick": "Click to upload or drag file here",
+        "hasDamageClause": "Have you provided a damage clause?",
+        "damageClauseDesc": "This is the fixed damage clause that is due in case of late payment. It is a percentage. For example: \"In case of late payment, a fixed compensation of 10% of the invoice amount will be due. If a fixed amount is also determined, you can fill it in below\".",
+        "percentage": "Percentage",
+        "hasMinimumDamageClause": "Is there a minimum damage clause per invoice?",
+        "minimumAmount": "Minimum damage clause amount",
+        "delayInterest": "Are there delay interest provisions?",
+        "delayInterestLaw2002": "Yes (Law of 2002)",
+        "delayInterestLaw2002Desc": "Fill in if application is made of the law to combat payment delays in commercial transactions of 02/08/2002.",
+        "delayInterestFixed": "Yes (fixed interest)",
+        "delayInterestFixedDesc": "Check this if there is a fixed interest rate provided in your general terms and conditions. (annual basis)",
+        "delayInterestPercentage": "Percentage",
+        "save": "Save",
+        "saved": "Organization updated",
+        "savedDesc": "Organization information has been successfully updated",
+        "error": "An error occurred",
+        "storageError": "The storage bucket \"organization-documents\" does not exist yet. Create it first in Supabase Storage."
+      }
+    },
+    "caseDetail": {
+      "notFound": "Assignment not found",
+      "backToDashboard": "Back to dashboard",
+      "title": "Assignment details",
+      "overview": "Overview",
+      "status": "Status",
+      "debtor": "Debtor",
+      "invoiceNumber": "Invoice number",
+      "structuredReference": "Structured reference",
+      "amount": "Amount",
+      "principalAmount": "Principal amount",
+      "additionalCosts": "Additional costs",
+      "total": "Total",
+      "timeline": "Timeline",
+      "timelineDesc": "Activities and events"
+    },
+    "library": {
+      "invoiceDetail": {
+        "backToLibrary": "Back to library",
+        "title": "Edit invoice",
+        "description": "Edit the information of this invoice",
+        "preview": "Invoice preview",
+        "invoiceData": "Invoice information",
+        "invoiceDataDesc": "Edit the invoice information",
+        "invoiceNumber": "Invoice number *",
+        "invoiceNumberRequired": "Invoice number is required",
+        "invoiceDate": "Invoice date *",
+        "invoiceDateRequired": "Invoice date is required",
+        "dueDate": "Due date",
+        "amount": "Amount *",
+        "amountInvalid": "Amount must be a positive number",
+        "currency": "Currency",
+        "debtorInfo": "Debtor information",
+        "type": "Type *",
+        "particular": "Individual",
+        "company": "Company",
+        "name": "Name/Company name",
+        "email": "Email address",
+        "emailInvalid": "Invalid email address",
+        "vatNumber": "VAT number",
+        "street": "Street",
+        "houseNumber": "House number",
+        "postalCode": "Postal code",
+        "city": "City",
+        "country": "Country",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "deleteConfirm": "Are you sure you want to delete this invoice?",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "saved": "Invoice updated",
+        "savedDesc": "The invoice has been successfully updated",
+        "error": "An error occurred",
+        "loadingError": "Could not load invoice"
+      },
+      "debtorDetail": {
+        "backToLibrary": "Back to library",
+        "title": "Edit relationship",
+        "description": "Edit the information of this relationship",
+        "debtorData": "Relationship information",
+        "debtorDataDesc": "Edit the relationship information",
+        "type": "Type *",
+        "particular": "Individual",
+        "company": "Company",
+        "name": "Name",
+        "companyName": "Company name",
+        "email": "Email address *",
+        "emailInvalid": "Invalid email address",
+        "vatNumber": "VAT number",
+        "phone": "Phone",
+        "street": "Street",
+        "houseNumber": "House number",
+        "postalCode": "Postal code",
+        "city": "City",
+        "country": "Country",
+        "notes": "Notes",
+        "notesPlaceholder": "Optional notes about this relationship",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "deleteConfirm": "Are you sure you want to delete this relationship?",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "saved": "Relationship updated",
+        "savedDesc": "The relationship has been successfully updated",
+        "error": "An error occurred",
+        "loadingError": "Could not load relationship",
+        "updateError": "Could not update relationship",
+        "deleteError": "Could not delete relationship"
+      }
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Dashboard",
+      "welcomeBack": "Welcome back",
+      "totalAssignments": "Total assignments",
+      "outstanding": "Outstanding",
+      "totalAmount": "Total amount",
+      "recentAssignments": "Recent assignments",
+      "recentAssignmentsDesc": "Overview of recent collection files",
+      "noAssignments": "No assignments found",
+      "status": {
+        "open": "Open",
+        "paid": "Received",
+        "bailiff": "Bailiff"
+      }
+    },
+    "cases": {
+      "title": "Files",
+      "overview": "Overview",
+      "loading": "Loading..."
+    },
+    "users": {
+      "title": "Users",
+      "subtitle": "Manage all platform users",
+      "addUser": "Add user",
+      "email": "Email address",
+      "fullName": "Full name",
+      "role": "Role",
+      "organization": "Organization",
+      "createdAt": "Created",
+      "noEmail": "No email",
+      "roles": {
+        "admin": "Administrator",
+        "staff": "Staff",
+        "client": "Client"
+      }
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "cases": "Files",
+      "users": "Users",
+      "account": "Account"
+    },
+    "account": {
+      "title": "Account settings",
+      "profile": "Profile",
+      "changePassword": "Change password",
+      "fullName": "Full name",
+      "email": "Email address",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "save": "Save",
+      "saved": "Saved",
+      "error": "Error",
+      "passwordChanged": "Password successfully changed",
+      "profileUpdated": "Profile successfully updated"
+    },
+    "caseDetail": {
+      "notFound": "File not found",
+      "backToCases": "Back to files",
+      "title": "File Details",
+      "statusAndCommission": "Status & Commission Invoice",
+      "status": "Status",
+      "commissionInvoiceSent": "Commission invoice sent",
+      "caseInfo": "File Information",
+      "caseId": "File ID",
+      "submittedOn": "Submitted on",
+      "invoiceNumber": "Invoice number",
+      "invoiceDate": "Invoice date",
+      "dueDate": "Due date",
+      "structuredReference": "Structured reference",
+      "financial": "Financial Information",
+      "principalAmount": "Principal amount",
+      "additionalCosts": "Additional costs",
+      "totalAmount": "Total amount",
+      "debtor": "Debtor Information",
+      "name": "Name",
+      "email": "Email",
+      "address": "Address",
+      "vatNumber": "VAT number",
+      "client": "Client Information",
+      "organization": "Organization",
+      "timeline": "Timeline",
+      "attachments": "Attachments"
+    },
+    "users": {
+      "new": {
+        "title": "New user",
+        "backToUsers": "Back to users",
+        "email": "Email address",
+        "password": "Password",
+        "fullName": "Full name",
+        "role": "Role",
+        "create": "Create user",
+        "creating": "Creating...",
+        "created": "User created",
+        "createdDesc": "has been successfully added as",
+        "error": "An error occurred while creating the user"
+      },
+      "edit": {
+        "title": "Edit user",
+        "backToUsers": "Back to users",
+        "email": "Email address",
+        "fullName": "Full name",
+        "role": "Role",
+        "save": "Save",
+        "saving": "Saving...",
+        "saved": "User updated",
+        "savedDesc": "has been successfully updated",
+        "error": "An error occurred while updating the user",
+        "notFound": "User not found",
+        "loadingError": "Could not load user"
+      },
+      "delete": {
+        "title": "Delete user",
+        "backToUsers": "Back to users",
+        "warning": "Warning",
+        "warningDesc": "You are about to permanently delete a user",
+        "userData": "User data:",
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "organization": "Organization",
+        "note": "Note: This action cannot be undone. All data for this user will be permanently deleted.",
+        "delete": "Delete user",
+        "deleting": "Deleting...",
+        "deleted": "User deleted",
+        "deletedDesc": "has been successfully deleted",
+        "error": "An error occurred while deleting the user",
+        "notFound": "User not found",
+        "loadingError": "Could not load user",
+        "confirm": "Are you sure you want to delete this user? This action cannot be undone.",
+        "noEmail": "No email"
+      },
+      "noUsers": "No users found"
+    },
+    "account": {
+      "title": "Account",
+      "profile": "Profile information",
+      "fullName": "Full name",
+      "email": "Email address",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Profile updated",
+      "profileUpdated": "Your profile information has been successfully updated",
+      "error": "Could not update profile",
+      "changePassword": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "passwordChanged": "Your password has been successfully changed"
+    }
+  },
+  "footer": {
+    "links": "Links",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "contact": "Contact",
+    "contactUs": "Contact us",
+    "clientPortal": "Client portal",
+    "login": "Login",
+    "followUs": "Follow us",
+    "allRightsReserved": "All rights reserved"
+  }
+}

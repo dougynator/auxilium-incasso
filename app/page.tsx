@@ -1,7 +1,10 @@
-import Header from "@/components/header";
-import { Mail, Clock, ArrowRight } from "lucide-react";
+import { redirect } from 'next/navigation';
+import { routing } from '@/i18n/routing';
 
-export default function Home() {
+export default function RootPage() {
+  // Redirect to default locale
+  redirect(`/${routing.defaultLocale}`);
+}
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-primary/5 to-white">
       <Header showPortalButton={false} hideNav={true} />

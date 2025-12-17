@@ -1,10 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import Link from "next/link";
-import { Suspense } from "react";
-import CaseFilters from "@/components/admin/case-filters";
-import CasesTable from "@/components/admin/cases-table";
+import AdminCasesPageContent from "@/components/admin/cases-page-content";
 
 export default async function AdminCasesPage({
   searchParams,
@@ -31,27 +26,6 @@ export default async function AdminCasesPage({
 
   const { data: cases } = await casesQuery.limit(50);
 
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Dossiers</h1>
-      </div>
-
-      <Suspense fallback={<div>Laden...</div>}>
-        <CaseFilters />
-      </Suspense>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Overzicht</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Suspense fallback={<div>Laden...</div>}>
-            <CasesTable cases={cases || []} />
-          </Suspense>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return <AdminCasesPageContent cases={cases || []} />;
 }
 

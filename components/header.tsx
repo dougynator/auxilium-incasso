@@ -1,7 +1,10 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import Logo from "@/components/logo";
 import { User } from "lucide-react";
+import LanguageSwitcher from "@/components/language-switcher";
 
 interface HeaderProps {
   currentPage?: string;
@@ -10,6 +13,8 @@ interface HeaderProps {
 }
 
 export default function Header({ currentPage, showPortalButton = true, hideNav = false }: HeaderProps) {
+  const t = useTranslations('nav');
+
   return (
     <header className="border-b border-primary/10 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -25,7 +30,7 @@ export default function Header({ currentPage, showPortalButton = true, hideNav =
               ${currentPage === "diensten" ? "text-primary font-semibold" : ""}
             `}
           >
-            Diensten
+            {t('services')}
           </Link>
           <Link 
             href="/werkwijze" 
@@ -36,7 +41,7 @@ export default function Header({ currentPage, showPortalButton = true, hideNav =
               ${currentPage === "werkwijze" ? "text-primary font-semibold" : ""}
             `}
           >
-            Werkwijze
+            {t('howItWorks')}
           </Link>
           <Link 
             href="/prijzen" 
@@ -47,7 +52,7 @@ export default function Header({ currentPage, showPortalButton = true, hideNav =
               ${currentPage === "prijzen" ? "text-primary font-semibold" : ""}
             `}
           >
-            Prijzen
+            {t('pricing')}
           </Link>
           <Link 
             href="/over-ons" 
@@ -58,7 +63,7 @@ export default function Header({ currentPage, showPortalButton = true, hideNav =
               ${currentPage === "over-ons" ? "text-primary font-semibold" : ""}
             `}
           >
-            Over ons
+            {t('about')}
           </Link>
           <Link 
             href="/contact" 
@@ -69,8 +74,9 @@ export default function Header({ currentPage, showPortalButton = true, hideNav =
               ${currentPage === "contact" ? "text-primary font-semibold" : ""}
             `}
           >
-            Contact
+            {t('contact')}
           </Link>
+          <LanguageSwitcher />
           {showPortalButton && (
             <Link href="/login">
               <button className="
@@ -82,7 +88,7 @@ export default function Header({ currentPage, showPortalButton = true, hideNav =
                 transform flex items-center gap-2
               ">
                 <User className="w-4 h-4" />
-                Inloggen
+                {t('login')}
               </button>
             </Link>
           )}

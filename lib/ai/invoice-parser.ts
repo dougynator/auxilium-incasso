@@ -43,7 +43,7 @@ export async function extractInvoiceData(file: File | ArrayBuffer | Buffer): Pro
     } else if (file instanceof Buffer) {
       arrayBuffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength) as ArrayBuffer;
     } else {
-      arrayBuffer = file;
+      arrayBuffer = file as ArrayBuffer;
     }
     const uint8Array = new Uint8Array(arrayBuffer);
 

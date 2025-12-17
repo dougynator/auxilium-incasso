@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Logo en contactgegevens */}
           <div className="md:col-span-1">
             <div className="mb-6 bg-white/10 backdrop-blur-sm rounded-xl p-5 inline-block">
-              <Logo showText={false} href={null} className="brightness-0 invert" height={60} />
+              <Logo showText={false} href={undefined} className="brightness-0 invert" height={60} />
             </div>
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-3">

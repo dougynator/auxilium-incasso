@@ -10,12 +10,16 @@ import { useTranslations } from 'next-intl';
 
 export default function DienstenPage() {
   const [mounted, setMounted] = useState(false);
+  
+  // Always call hooks, but only use them after mount
+  const t = useTranslations('services');
+  const tCommon = useTranslations('common');
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Don't render translations until mounted to prevent SSR issues
+  // Don't render content until mounted to prevent SSR issues
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -26,9 +30,6 @@ export default function DienstenPage() {
       </div>
     );
   }
-
-  const t = useTranslations('services');
-  const tCommon = useTranslations('common');
 
   const incassoServices = [
     {

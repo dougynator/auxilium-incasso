@@ -3,6 +3,14 @@
 import DienstenPageContent from '@/components/diensten-page-content';
 import { useEffect, useState } from 'react';
 
+// Prevent static generation
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export function generateStaticParams() {
+  return [];
+}
+
 export default function DienstenPage() {
   const [mounted, setMounted] = useState(false);
 

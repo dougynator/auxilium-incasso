@@ -1,9 +1,7 @@
-import type { File } from "buffer";
-
 /**
  * Extracts invoice data from a PDF or image file using OCR/AI
  */
-export async function extractInvoiceData(file: File): Promise<{
+export async function extractInvoiceData(file: File | ArrayBuffer | Buffer): Promise<{
   invoice_number?: string;
   invoice_date?: string;
   due_date?: string;
@@ -38,8 +36,15 @@ export async function extractInvoiceData(file: File): Promise<{
       throw new Error('PDF parsing library not available');
     }
 
-    // Convert File to Uint8Array for pdf-parse
-    const arrayBuffer = await file.arrayBuffer();
+    // Convert File/ArrayBuffer/Buffer to Uint8Array for pdf-parse
+    let arrayBuffer: ArrayBuffer;
+    if (file instanceof File) {
+      arrayBuffer = await file.arrayBuffer();
+    } else if (file instanceof Buffer) {
+      arrayBuffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength);
+    } else {
+      arrayBuffer = file;
+    }
     const uint8Array = new Uint8Array(arrayBuffer);
 
     // Parse PDF

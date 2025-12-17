@@ -72,7 +72,9 @@ export async function POST(request: NextRequest) {
     // Extract invoice data using AI
     let invoiceData;
     try {
-      invoiceData = await extractInvoiceData(document);
+      // Convert File to ArrayBuffer for extractInvoiceData
+      const documentArrayBuffer = await document.arrayBuffer();
+      invoiceData = await extractInvoiceData(documentArrayBuffer);
       console.log('✅ Invoice data extracted:', invoiceData);
     } catch (extractError: any) {
       console.error('❌ Error extracting invoice data:', extractError);

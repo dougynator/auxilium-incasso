@@ -74,20 +74,12 @@ export default function Home() {
             <p className="font-sans text-lg font-medium text-foreground mb-6">
               Blijf op de hoogte van onze lancering
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
-              <Link href="/contact">
-                <Button size="lg" className="w-full sm:w-auto px-8 py-6 text-lg font-display font-semibold">
-                  Neem contact op
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="w-full sm:w-auto px-8 py-6 text-lg font-display font-semibold border-2"
-                >
-                  Inloggen
-                </Button>
+            <div className="flex justify-center items-center">
+              <Link 
+                href="/tijdelijkehome" 
+                className="font-sans text-base text-primary hover:text-primary/80 underline transition-colors"
+              >
+                Bekijk tijdelijke homepage
               </Link>
             </div>
           </div>
@@ -97,16 +89,6 @@ export default function Home() {
             <p className="font-sans text-sm text-muted-foreground">
               Verwacht: Q1 2025
             </p>
-          </div>
-
-          {/* Verborgen admin link voor toegang tot website */}
-          <div className="mt-8">
-            <Link 
-              href="/diensten" 
-              className="text-xs text-muted-foreground/30 hover:text-muted-foreground/50 transition-colors"
-            >
-              Admin
-            </Link>
           </div>
         </div>
       </main>

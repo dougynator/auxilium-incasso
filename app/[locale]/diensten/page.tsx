@@ -1,10 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import DienstenPageClient from './diensten-page-client';
 
-export async function generateStaticParams() {
-  return []; // Don't generate static params for this page
-}
-
 export const dynamic = 'force-dynamic';
 
 export default async function DienstenPage() {

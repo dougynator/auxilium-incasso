@@ -20,7 +20,7 @@ export async function extractInvoiceData(file: File | ArrayBuffer | Buffer): Pro
     // Dynamic import to handle Next.js bundling
     let pdfParse: any;
     try {
-      const pdfParseModule = await import('pdf-parse');
+      const pdfParseModule: any = await import('pdf-parse');
       // Handle different export patterns
       if (typeof pdfParseModule === 'function') {
         pdfParse = pdfParseModule;

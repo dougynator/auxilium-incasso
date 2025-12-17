@@ -9,6 +9,9 @@ import FAQSection from "@/components/faq-section";
 import IntegrationsCarousel from "@/components/integrations-carousel";
 import ScrollFadeOverlay from "@/components/scroll-fade-overlay";
 
+// Force dynamic rendering to prevent prerendering errors
+export const dynamic = 'force-dynamic';
+
 export default function TijdelijkeHomePage() {
   return (
     <div className="min-h-screen relative flex flex-col">

@@ -3,9 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -28,7 +29,7 @@ export async function GET(
     const { data: debtor, error } = await supabase
       .from("saved_debtors")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("organization_id", profile.organization_id)
       .single();
 
@@ -48,9 +49,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -101,7 +103,7 @@ export async function PUT(
         debtor_type: debtor_type || "particular",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("organization_id", profile.organization_id)
       .select("*")
       .single();
@@ -123,9 +125,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -148,7 +151,7 @@ export async function DELETE(
     const { error } = await supabase
       .from("saved_debtors")
       .delete()
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("organization_id", profile.organization_id);
 
     if (error) {

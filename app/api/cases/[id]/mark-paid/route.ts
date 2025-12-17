@@ -5,9 +5,10 @@ import { logAuditEvent } from "@/lib/audit";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -30,7 +31,7 @@ export async function POST(
     const { data: currentCase } = await supabase
       .from("cases")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .single();
 
     if (!currentCase) {
@@ -41,7 +42,7 @@ export async function POST(
     const { data: updatedCase, error } = await supabase
       .from("cases")
       .update({ status: "paid" })
-      .eq("id", params.id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -54,7 +55,7 @@ export async function POST(
 
     // Create event
     await createCaseEvent({
-      caseId: params.id,
+      caseId: id,
       actorProfileId: user.id,
       type: "payment_marked",
       message: "Betaling gemarkeerd door medewerker",
@@ -65,7 +66,7 @@ export async function POST(
       actorProfileId: user.id,
       action: "case_payment_marked",
       entityType: "cases",
-      entityId: params.id,
+      entityId: id,
       before: { status: currentCase.status },
       after: { status: "paid" },
     });

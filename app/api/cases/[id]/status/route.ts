@@ -5,9 +5,10 @@ import { logAuditEvent } from "@/lib/audit";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -32,7 +33,7 @@ export async function PATCH(
     const { data: currentCase } = await supabase
       .from("cases")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .single();
 
     if (!currentCase) {
@@ -43,7 +44,7 @@ export async function PATCH(
     const { data: updatedCase, error } = await supabase
       .from("cases")
       .update({ status })
-      .eq("id", params.id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -56,7 +57,7 @@ export async function PATCH(
 
     // Create event
     await createCaseEvent({
-      caseId: params.id,
+      caseId: id,
       actorProfileId: user.id,
       type: "status_changed",
       message: `Status gewijzigd naar: ${status}`,
@@ -68,7 +69,7 @@ export async function PATCH(
       actorProfileId: user.id,
       action: "case_status_changed",
       entityType: "cases",
-      entityId: params.id,
+      entityId: id,
       before: { status: currentCase.status },
       after: { status },
     });

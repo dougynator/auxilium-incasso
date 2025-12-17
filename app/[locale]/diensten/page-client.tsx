@@ -7,6 +7,9 @@ import Footer from "@/components/footer";
 import { FileText, Search, MessageSquare, CreditCard, Clock, Shield, ArrowRight } from "lucide-react";
 import { useTranslations } from 'next-intl';
 
+// Prevent static generation
+export const dynamic = 'force-dynamic';
+
 export default function DienstenPage() {
   const t = useTranslations('services');
   const tCommon = useTranslations('common');

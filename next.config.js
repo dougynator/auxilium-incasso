@@ -9,10 +9,6 @@ const nextConfig = {
     unoptimized: false,
   },
   serverExternalPackages: ['pdf-parse', 'pdfjs-dist'],
-  // Exclude diensten page from static generation
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
-  },
 }
 
 module.exports = withNextIntl(nextConfig)

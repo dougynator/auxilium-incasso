@@ -4,12 +4,8 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
 export function generateStaticParams() {
-  // Exclude diensten page from static generation by not generating it
-  // The diensten page will be rendered dynamically
   return routing.locales.map((locale) => ({ locale }));
 }
-
-export const dynamicParams = true;
 
 export default async function LocaleLayout({
   children,

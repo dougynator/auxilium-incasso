@@ -20,6 +20,7 @@ interface CompanyCalculationParams {
   compensationAmount?: number; // Optioneel: vast bedrag schadevergoeding uit voorwaarden (bijv. 40)
   damageClausePercentage?: number; // Optioneel: percentage schadebeding uit voorwaarden (bijv. 0.10 voor 10%)
   minimumDamageClauseAmount?: number; // Optioneel: minimum schadebeding bedrag uit voorwaarden
+  hasDamageClause?: boolean; // Optioneel: of er een schadebeding is ingesteld
 }
 
 interface CompanyCalculationResult {

@@ -1,7 +1,5 @@
 import Header from "@/components/header";
-import { Button } from "@/components/ui/button";
 import { Mail, Clock, ArrowRight } from "lucide-react";
-import Link from "next/link";
 
 export default function Home() {
   return (
@@ -66,21 +64,6 @@ export default function Home() {
               <p className="font-sans text-sm text-muted-foreground">
                 Eenvoudig online opdrachten indienen en volgen
               </p>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="space-y-4">
-            <p className="font-sans text-lg font-medium text-foreground mb-6">
-              Blijf op de hoogte van onze lancering
-            </p>
-            <div className="flex justify-center items-center">
-              <Link 
-                href="/tijdelijkehome" 
-                className="font-sans text-base text-primary hover:text-primary/80 underline transition-colors"
-              >
-                Bekijk tijdelijke homepage
-              </Link>
             </div>
           </div>
 

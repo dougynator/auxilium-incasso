@@ -5,6 +5,8 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { FileText, Search, MessageSquare, CreditCard, Clock, Shield, ArrowRight } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DienstenPage() {
   const t = await getTranslations('services');
   const tCommon = await getTranslations('common');
@@ -104,7 +106,7 @@ export default async function DienstenPage() {
                 <Link href="/login" className="group inline-block">
                   <div className="relative">
                     {/* Glow effect achtergrond */}
-                    <div className="absolute inset-0 bg-primary rounded-2xl blur-xl opacity-50 group-hover:opacity-75 group-hover:blur-2xl transition-all duration-500 animate-pulse-slow" />
+                    <div className="absolute inset-0 bg-primary rounded-2xl blur-xl opacity-50 group-hover:opacity-75 group-hover:blur-2xl transition-all duration-500" />
                     
                     {/* Hoofd knop */}
                     <Button

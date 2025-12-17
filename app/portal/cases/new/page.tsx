@@ -164,7 +164,7 @@ export default function NewCasePage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   
   // Debtor search state
   const [debtorSearchQuery, setDebtorSearchQuery] = useState("");
@@ -1523,9 +1523,9 @@ export default function NewCasePage() {
               <div className="space-y-2">
                 <Label htmlFor="document">Document upload *</Label>
                 <input
+                  {...register("document")}
                   ref={(e) => {
-                    fileInputRef.current = e;
-                    register("document").ref(e);
+                    (fileInputRef as { current: HTMLInputElement | null }).current = e;
                   }}
                   id="document"
                   type="file"

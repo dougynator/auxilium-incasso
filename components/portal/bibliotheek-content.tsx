@@ -328,20 +328,16 @@ export default function BibliotheekContent() {
       {invoiceModalOpen && (
         <AddInvoiceModal
           open={invoiceModalOpen}
-          onClose={() => {
-            setInvoiceModalOpen(false);
-            loadData();
-          }}
+          onOpenChange={setInvoiceModalOpen}
+          onSuccess={loadData}
         />
       )}
 
       {debtorModalOpen && (
         <AddDebtorModal
           open={debtorModalOpen}
-          onClose={() => {
-            setDebtorModalOpen(false);
-            loadData();
-          }}
+          onOpenChange={setDebtorModalOpen}
+          onSuccess={loadData}
         />
       )}
     </div>

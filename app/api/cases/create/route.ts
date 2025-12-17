@@ -595,7 +595,7 @@ export async function POST(request: NextRequest) {
           caseUrl: adminCaseUrl,
         });
 
-        const internalToEmail = process.env.ADMIN_CC_EMAIL || "admin@auxilium-incasso.be";
+        const internalToEmail = process.env.ADMIN_CC_EMAIL || "admin@auxiliumincasso.com";
         
         await sendEmail({
           to: internalToEmail,

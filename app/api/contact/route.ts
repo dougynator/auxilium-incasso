@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const adminEmail = process.env.ADMIN_CC_EMAIL || "admin@auxilium-incasso.be";
+    const adminEmail = process.env.ADMIN_CC_EMAIL || "admin@auxiliumincasso.com";
 
     const emailHtml = `
       <h2>Nieuw contactformulier bericht</h2>

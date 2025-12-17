@@ -119,7 +119,7 @@ Environment: Production, Preview, Development (selecteer alle drie)
 
 ```
 Name: ADMIN_CC_EMAIL
-Value: admin@auxilium-incasso.be
+Value: admin@auxiliumincasso.com
 Environment: Production, Preview, Development (selecteer alle drie)
 ```
 
@@ -154,13 +154,13 @@ Environment: Production, Preview, Development (selecteer alle drie)
 #### Optioneel (voor productie met eigen domein):
 ```
 Name: RESEND_VERIFIED_DOMAIN
-Value: auxilium-incasso.be
+Value: auxiliumincasso.com
 Environment: Production (alleen production)
 ```
 
 ```
 Name: RESEND_FROM_EMAIL
-Value: Auxilium Incasso <noreply@auxilium-incasso.be>
+Value: Auxilium Incasso <noreply@auxiliumincasso.com>
 Environment: Production (alleen production)
 ```
 

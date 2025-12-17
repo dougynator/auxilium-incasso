@@ -24,23 +24,23 @@ Voor productie is het **sterk aanbevolen** om je eigen domein te verifiëren in 
 
 1. **Ga naar Resend Dashboard > Domains**
 2. **Klik op "Add Domain"**
-3. **Voer je domein in** (bijv. `auxilium-incasso.be`)
+3. **Voer je domein in** (bijv. `auxiliumincasso.com`)
 4. **Voeg DNS records toe** aan je domein provider:
    - **SPF record**: `v=spf1 include:resend.com ~all`
    - **DKIM record**: (Resend geeft je de exacte waarde)
-   - **DMARC record**: `v=DMARC1; p=none; rua=mailto:dmarc@auxilium-incasso.be`
+   - **DMARC record**: `v=DMARC1; p=none; rua=mailto:dmarc@auxiliumincasso.com`
 5. **Wacht op verificatie** (kan enkele uren duren)
 6. **Voeg toe aan `.env`:**
    ```env
-   RESEND_VERIFIED_DOMAIN=auxilium-incasso.be
-   RESEND_FROM_EMAIL=Auxilium Incasso <noreply@auxilium-incasso.be>
+   RESEND_VERIFIED_DOMAIN=auxiliumincasso.com
+   RESEND_FROM_EMAIL=Auxilium Incasso <noreply@auxiliumincasso.com>
    ```
 
-### DNS Records Voorbeeld (voor auxilium-incasso.be):
+### DNS Records Voorbeeld (voor auxiliumincasso.com):
 
 ```
 Type: TXT
-Name: @ (of auxilium-incasso.be)
+Name: @ (of auxiliumincasso.com)
 Value: v=spf1 include:resend.com ~all
 
 Type: TXT
@@ -49,7 +49,7 @@ Value: [Resend geeft je deze waarde]
 
 Type: TXT
 Name: _dmarc
-Value: v=DMARC1; p=none; rua=mailto:dmarc@auxilium-incasso.be
+Value: v=DMARC1; p=none; rua=mailto:dmarc@auxiliumincasso.com
 ```
 
 ## Email Flow
@@ -78,11 +78,11 @@ Na het aanmaken van een opdracht worden **3 aparte emails** verstuurd:
 RESEND_API_KEY=re_xxxxxxxxxxxxx
 
 # Voor productie met eigen domein (optioneel)
-RESEND_VERIFIED_DOMAIN=auxilium-incasso.be
-RESEND_FROM_EMAIL=Auxilium Incasso <noreply@auxilium-incasso.be>
+RESEND_VERIFIED_DOMAIN=auxiliumincasso.com
+RESEND_FROM_EMAIL=Auxilium Incasso <noreply@auxiliumincasso.com>
 
 # Intern email adres voor notificaties
-ADMIN_CC_EMAIL=admin@auxilium-incasso.be
+ADMIN_CC_EMAIL=admin@auxiliumincasso.com
 ```
 
 ## Testen

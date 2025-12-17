@@ -2,7 +2,7 @@
 
 ## Stap 1: Kies een Domein Registrar
 
-Voor een **.be domein** (auxilium-incasso.be) zijn hier de beste opties:
+Voor een **.com domein** (auxiliumincasso.com) zijn hier de beste opties:
 
 ### 🏆 Aanbevelingen (van goedkoop naar duurder):
 
@@ -61,7 +61,7 @@ Voor een **.be domein** (auxilium-incasso.be) zijn hier de beste opties:
 
 1. **Zoek beschikbaarheid**:
    - Ga naar je gekozen registrar
-   - Zoek naar `auxilium-incasso.be`
+   - Zoek naar `auxiliumincasso.com`
    - Controleer of het beschikbaar is
 
 2. **Registreer het domein**:
@@ -90,8 +90,8 @@ Voor een **.be domein** (auxilium-incasso.be) zijn hier de beste opties:
 
 3. **Voeg domein toe**:
    - Klik op **Add Domain**
-   - Voer `auxilium-incasso.be` in
-   - Voeg ook `www.auxilium-incasso.be` toe (optioneel, maar aanbevolen)
+   - Voer `auxiliumincasso.com` in
+   - Voeg ook `www.auxiliumincasso.com` toe (optioneel, maar aanbevolen)
 
 4. **Configureer DNS**:
    - Vercel geeft je DNS records die je moet toevoegen
@@ -121,7 +121,7 @@ Voor een **.be domein** (auxilium-incasso.be) zijn hier de beste opties:
 1. **Voeg domein toe aan Cloudflare**:
    - Ga naar Cloudflare Dashboard
    - Klik **Add Site**
-   - Voer `auxilium-incasso.be` in
+   - Voer `auxiliumincasso.com` in
    - Kies het **Free plan**
 
 2. **Update Nameservers**:
@@ -134,7 +134,7 @@ Voor een **.be domein** (auxilium-incasso.be) zijn hier de beste opties:
    - Voeg een **CNAME** record toe:
      ```
      Type: CNAME
-     Name: @ (of auxilium-incasso.be)
+     Name: @ (of auxiliumincasso.com)
      Value: cname.vercel-dns.com
      ```
    - Of gebruik **A record**:
@@ -146,7 +146,7 @@ Voor een **.be domein** (auxilium-incasso.be) zijn hier de beste opties:
 
 4. **Koppel aan Vercel**:
    - Ga terug naar Vercel → Settings → Domains
-   - Voeg `auxilium-incasso.be` toe
+   - Voeg `auxiliumincasso.com` toe
    - Vercel detecteert automatisch dat DNS correct is ingesteld
 
 ---
@@ -164,12 +164,12 @@ Voor een **.be domein** (auxilium-incasso.be) zijn hier de beste opties:
 
 1. **Wacht tot DNS is gepropageerd** (5 minuten tot 48 uur, meestal binnen 1 uur)
 2. **Test in browser**:
-   - Open `https://auxilium-incasso.be`
+   - Open `https://auxiliumincasso.com`
    - Controleer of je website laadt
    - Controleer of SSL werkt (groen slotje in browser)
 
 3. **Test www subdomain** (als je die hebt toegevoegd):
-   - Open `https://www.auxilium-incasso.be`
+   - Open `https://www.auxiliumincasso.com`
    - Controleer of het werkt
 
 ---
@@ -180,12 +180,12 @@ Update je `.env` bestand en Vercel environment variables:
 
 ```env
 # Update deze in Vercel Dashboard → Settings → Environment Variables
-NEXT_PUBLIC_APP_URL=https://auxilium-incasso.be
+NEXT_PUBLIC_APP_URL=https://auxiliumincasso.com
 ```
 
 **Belangrijk**: Update dit ook in je **Vercel project settings**:
 1. Ga naar Vercel → Project → Settings → Environment Variables
-2. Update `NEXT_PUBLIC_APP_URL` naar `https://auxilium-incasso.be`
+2. Update `NEXT_PUBLIC_APP_URL` naar `https://auxiliumincasso.com`
 3. Herdeploy je applicatie
 
 ---
@@ -196,7 +196,7 @@ Nu je eigen domein hebt, kun je je email verifiëren in Resend:
 
 1. **Ga naar Resend Dashboard** → **Domains**
 2. **Klik "Add Domain"**
-3. **Voer in**: `auxilium-incasso.be`
+3. **Voer in**: `auxiliumincasso.com`
 4. **Voeg DNS records toe** bij je registrar:
    - SPF record
    - DKIM record (Resend geeft je de exacte waarde)
@@ -204,8 +204,8 @@ Nu je eigen domein hebt, kun je je email verifiëren in Resend:
 5. **Wacht op verificatie** (kan enkele uren duren)
 6. **Update `.env`**:
    ```env
-   RESEND_VERIFIED_DOMAIN=auxilium-incasso.be
-   RESEND_FROM_EMAIL=Auxilium Incasso <noreply@auxilium-incasso.be>
+   RESEND_VERIFIED_DOMAIN=auxiliumincasso.com
+   RESEND_FROM_EMAIL=Auxilium Incasso <noreply@auxiliumincasso.com>
    ```
 
 Zie `RESEND_EMAIL_SETUP.md` voor gedetailleerde instructies.
@@ -255,7 +255,7 @@ Zie `RESEND_EMAIL_SETUP.md` voor gedetailleerde instructies.
 - [ ] DNS records toegevoegd bij registrar
 - [ ] Domein gekoppeld aan Vercel
 - [ ] SSL certificaat actief (automatisch)
-- [ ] Website laadt op https://auxilium-incasso.be
+- [ ] Website laadt op https://auxiliumincasso.com
 - [ ] Environment variables geüpdatet in Vercel
 - [ ] Email domein geverifieerd in Resend (optioneel)
 - [ ] Test emails werken (optioneel)

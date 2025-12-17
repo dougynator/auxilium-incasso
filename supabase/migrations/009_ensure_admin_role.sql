@@ -1,10 +1,10 @@
--- Ensure admin@auxilium-incasso.be has admin role
+-- Ensure admin@auxiliumincasso.com has admin role
 
 -- Update the profile role for admin@auxilium-incasso.be
 UPDATE profiles
 SET role = 'admin'
 WHERE id IN (
-  SELECT id FROM auth.users WHERE email = 'admin@auxilium-incasso.be'
+  SELECT id FROM auth.users WHERE email = 'admin@auxiliumincasso.com'
 )
 AND role != 'admin';
 
@@ -12,7 +12,7 @@ AND role != 'admin';
 INSERT INTO profiles (id, role, full_name)
 SELECT id, 'admin', 'Admin Gebruiker'
 FROM auth.users
-WHERE email = 'admin@auxilium-incasso.be'
+WHERE email = 'admin@auxiliumincasso.com'
 AND NOT EXISTS (
   SELECT 1 FROM profiles WHERE profiles.id = auth.users.id
 );

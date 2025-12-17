@@ -21,7 +21,7 @@ async function seed() {
 
   try {
     // Create admin user
-    const adminEmail = 'admin@auxilium-incasso.be';
+    const adminEmail = 'admin@auxiliumincasso.com';
     const adminPassword = 'admin123'; // Change in production!
 
     const { data: adminAuth, error: adminAuthError } = await supabase.auth.admin.createUser({
@@ -76,7 +76,7 @@ async function seed() {
     console.log('✓ Admin user created');
 
     // Create staff user
-    const staffEmail = 'staff@auxilium-incasso.be';
+    const staffEmail = 'staff@auxiliumincasso.com';
     const staffPassword = 'staff123'; // Change in production!
 
     const { data: staffAuth, error: staffAuthError } = await supabase.auth.admin.createUser({

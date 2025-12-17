@@ -127,8 +127,8 @@ export default function ContactPage() {
                         <div>
                           <h3 className="font-display font-semibold text-lg mb-1">E-mail</h3>
                           <p className="font-sans text-muted-foreground">
-                            <a href="mailto:info@auxilium-incasso.be" className="hover:text-primary transition-colors">
-                              info@auxilium-incasso.be
+                            <a href="mailto:info@auxiliumincasso.com" className="hover:text-primary transition-colors">
+                              info@auxiliumincasso.com
                             </a>
                           </p>
                         </div>
@@ -224,9 +224,9 @@ export default function ContactPage() {
                           <Phone className="w-4 h-4" />
                           +32 470 12 34 56
                         </a>
-                        <a href="mailto:douglas@auxilium-incasso.be" className="flex items-center gap-2 font-sans text-sm text-primary hover:text-primary/80 transition-colors">
+                        <a href="mailto:douglas@auxiliumincasso.com" className="flex items-center gap-2 font-sans text-sm text-primary hover:text-primary/80 transition-colors">
                           <Mail className="w-4 h-4" />
-                          douglas@auxilium-incasso.be
+                          douglas@auxiliumincasso.com
                         </a>
                       </div>
                     </div>
@@ -257,9 +257,9 @@ export default function ContactPage() {
                           <Phone className="w-4 h-4" />
                           +32 470 12 34 57
                         </a>
-                        <a href="mailto:deborah@auxilium-incasso.be" className="flex items-center gap-2 font-sans text-sm text-primary hover:text-primary/80 transition-colors">
+                        <a href="mailto:deborah@auxiliumincasso.com" className="flex items-center gap-2 font-sans text-sm text-primary hover:text-primary/80 transition-colors">
                           <Mail className="w-4 h-4" />
-                          deborah@auxilium-incasso.be
+                          deborah@auxiliumincasso.com
                         </a>
                       </div>
                     </div>

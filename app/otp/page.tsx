@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 
-export default function OTPPage() {
+function OTPPageContent() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -282,6 +282,24 @@ export default function OTPPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function OTPPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <p className="font-sans text-muted-foreground">Laden...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <OTPPageContent />
+    </Suspense>
   );
 }
 

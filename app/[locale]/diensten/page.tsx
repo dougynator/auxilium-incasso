@@ -1,22 +1,14 @@
-import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import DienstenPageClient from './page-client';
 
-// Prevent static generation - this page must be rendered dynamically
+// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Try to prevent prerendering by throwing during build
-export async function generateStaticParams() {
-  // Return empty array to prevent static generation
-  return [];
-}
-
+// Force this to be a dynamic route by using headers
 export default async function DienstenPageWrapper() {
-  // During build, this will prevent prerendering
-  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
-    // This should prevent prerendering
-    return <DienstenPageClient />;
-  }
+  // Access headers to force dynamic rendering
+  const headersList = await headers();
   
   return <DienstenPageClient />;
 }

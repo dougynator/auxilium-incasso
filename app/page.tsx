@@ -1,5 +1,4 @@
 import Header from "@/components/header";
-import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Mail, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -7,7 +6,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-primary/5 to-white">
-      <Header showPortalButton={false} />
+      <Header showPortalButton={false} hideNav={true} />
 
       <main className="flex-1 flex items-center justify-center px-4 py-20">
         <div className="max-w-3xl mx-auto text-center">
@@ -99,10 +98,18 @@ export default function Home() {
               Verwacht: Q1 2025
             </p>
           </div>
+
+          {/* Verborgen admin link voor toegang tot website */}
+          <div className="mt-8">
+            <Link 
+              href="/diensten" 
+              className="text-xs text-muted-foreground/30 hover:text-muted-foreground/50 transition-colors"
+            >
+              Admin
+            </Link>
+          </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

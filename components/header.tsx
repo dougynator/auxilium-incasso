@@ -6,13 +6,15 @@ import { User } from "lucide-react";
 interface HeaderProps {
   currentPage?: string;
   showPortalButton?: boolean;
+  hideNav?: boolean;
 }
 
-export default function Header({ currentPage, showPortalButton = true }: HeaderProps) {
+export default function Header({ currentPage, showPortalButton = true, hideNav = false }: HeaderProps) {
   return (
     <header className="border-b border-primary/10 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Logo />
+        {!hideNav && (
         <nav className="flex gap-6 items-center">
           <Link 
             href="/diensten" 
@@ -85,6 +87,7 @@ export default function Header({ currentPage, showPortalButton = true }: HeaderP
             </Link>
           )}
         </nav>
+        )}
       </div>
     </header>
   );

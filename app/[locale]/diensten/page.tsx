@@ -11,7 +11,8 @@ import { useTranslations } from 'next-intl';
 export default function DienstenPage() {
   const [mounted, setMounted] = useState(false);
   
-  // Always call hooks, but only use them after mount
+  // Always call hooks at the top level (Rules of Hooks)
+  // These will work during SSR/prerendering because NextIntlClientProvider provides messages
   const t = useTranslations('services');
   const tCommon = useTranslations('common');
 

@@ -7,6 +7,7 @@ import { FileText, Search, MessageSquare, CreditCard, Clock, Shield, ArrowRight 
 
 export default async function DienstenPage() {
   const t = await getTranslations('services');
+  const tCommon = await getTranslations('common');
 
   const incassoServices = [
     {
@@ -114,7 +115,7 @@ export default async function DienstenPage() {
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                       
                       <span className="relative flex items-center gap-3 z-10">
-                        <span className="font-bold">{t('submitNow', { ns: 'common' })}</span>
+                        <span className="font-bold">{tCommon('submitNow')}</span>
                         <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300 group-hover:scale-110" />
                       </span>
                     </Button>

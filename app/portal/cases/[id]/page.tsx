@@ -94,7 +94,7 @@ export default async function CaseDetailPage({
           </Link>
           <h1 className="text-3xl font-bold">Opdracht details</h1>
         </div>
-        {isStaffOrAdmin && <CaseActions caseId={params.id} currentStatus={caseItem.status} />}
+        {isStaffOrAdmin && <CaseActions caseId={id} currentStatus={caseItem.status} />}
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 mb-6">
@@ -158,7 +158,7 @@ export default async function CaseDetailPage({
         </Card>
       </div>
 
-      <CaseAttachments caseId={params.id} attachments={caseItem.case_attachments || []} />
+      <CaseAttachments caseId={id} attachments={caseItem.case_attachments || []} />
 
       <Card>
         <CardHeader>

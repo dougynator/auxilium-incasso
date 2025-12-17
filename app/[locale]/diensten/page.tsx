@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { Button } from "@/components/ui/button";
 import Header from "@/components/header";
@@ -8,6 +9,24 @@ import { FileText, Search, MessageSquare, CreditCard, Clock, Shield, ArrowRight 
 import { useTranslations } from 'next-intl';
 
 export default function DienstenPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render until mounted to prevent SSR issues
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Laden...</p>
+        </div>
+      </div>
+    );
+  }
+
   const t = useTranslations('services');
   const tCommon = useTranslations('common');
 

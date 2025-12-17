@@ -3,9 +3,9 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
+// Force dynamic rendering to prevent prerendering issues
+// Individual pages can still opt-in to static generation if needed
+export const dynamic = 'force-dynamic';
 
 export default async function LocaleLayout({
   children,

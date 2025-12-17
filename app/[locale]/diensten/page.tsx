@@ -8,6 +8,10 @@ import Footer from "@/components/footer";
 import { FileText, Search, MessageSquare, CreditCard, Clock, Shield, ArrowRight } from "lucide-react";
 import { useTranslations } from 'next-intl';
 
+// Force dynamic rendering to prevent prerendering during build
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function DienstenPage() {
   const [mounted, setMounted] = useState(false);
 

@@ -16,8 +16,13 @@ export interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
   if (!process.env.RESEND_API_KEY) {
-    console.warn('RESEND_API_KEY not set, email not sent:', options);
-    return;
+    console.error('❌ RESEND_API_KEY not set, email not sent');
+    console.error('❌ Email details:', {
+      to: options.to,
+      subject: options.subject,
+      hasAttachments: !!options.attachments?.length,
+    });
+    throw new Error('RESEND_API_KEY is not configured. Please set it in environment variables.');
   }
 
   const to = Array.isArray(options.to) ? options.to : [options.to];
@@ -28,8 +33,16 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     ? `Auxilium Incasso <noreply@${process.env.RESEND_VERIFIED_DOMAIN}>`
     : process.env.RESEND_FROM_EMAIL || 'Auxilium Incasso <onboarding@resend.dev>';
 
+  console.log('📧 Sending email:', {
+    from: fromEmail,
+    to,
+    cc,
+    subject: options.subject,
+    attachmentsCount: options.attachments?.length || 0,
+  });
+
   try {
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: fromEmail,
       to,
       cc,
@@ -41,8 +54,23 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         content_type: att.contentType,
       })),
     });
-  } catch (error) {
-    console.error('Failed to send email:', error);
+    
+    console.log('✅ Email sent successfully:', {
+      id: result.data?.id,
+      to,
+      cc,
+      subject: options.subject,
+    });
+  } catch (error: any) {
+    console.error('❌ Failed to send email:', {
+      error: error.message,
+      to,
+      cc,
+      subject: options.subject,
+      response: error.response?.data || error.response,
+      status: error.status,
+      details: error.details || error,
+    });
     throw error;
   }
 }

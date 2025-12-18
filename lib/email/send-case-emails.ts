@@ -176,6 +176,12 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
   // clientEmail is already fetched above from auth.users
   const internalToEmail = process.env.ADMIN_CC_EMAIL || "admin@auxiliumincasso.com";
 
+  // Log email addresses for debugging
+  console.log('📧 [EMAIL] Email addresses:');
+  console.log('  - Debtor email:', debtor.email);
+  console.log('  - Client email:', clientEmail);
+  console.log('  - Admin email:', internalToEmail);
+
   // Prepare CC list for debtor email
   const ccEmails: string[] = [];
   if (clientEmail) {
@@ -187,6 +193,11 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
 
   // 1. Email to debtor
   console.log('📧 [EMAIL] Sending email to debtor...');
+  console.log('📧 [EMAIL] Debtor email address:', debtor.email);
+  if (!debtor.email) {
+    console.error('❌ [EMAIL] Debtor email is missing!');
+    throw new Error("Debtor email address is required");
+  }
   const debtorEmailHtml = generateDebtorEmail({
     debtorName,
     invoiceNumber: caseData.invoice_number || undefined,
@@ -227,6 +238,7 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
   // 2. Email to client
   if (clientEmail) {
     console.log('📧 [EMAIL] Sending email to client...');
+    console.log('📧 [EMAIL] Client email address:', clientEmail);
     const clientEmailHtml = generateClientEmail({
       clientName,
       caseId,
@@ -251,6 +263,7 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
 
   // 3. Email to internal team
   console.log('📧 [EMAIL] Sending email to internal team...');
+  console.log('📧 [EMAIL] Admin email address:', internalToEmail);
   const internalEmailHtml = generateInternalEmail({
     caseId,
     organizationName: organization?.name || "Onbekend",

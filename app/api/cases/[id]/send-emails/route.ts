@@ -6,10 +6,11 @@ import { generateDebtorEmail, generateClientEmail, generateInternalEmail } from 
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const caseId = params.id;
+    const { id } = await params;
+    const caseId = id;
     
     console.log('📧 [EMAIL API] Starting email send for case:', caseId);
     

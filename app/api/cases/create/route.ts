@@ -502,17 +502,23 @@ export async function POST(request: NextRequest) {
     console.log('📧 Case ID:', caseIdForEmail);
     
     // Call email function asynchronously (don't wait for it)
-    import('@/lib/email/send-case-emails').then(({ sendCaseEmails }) => {
-      sendCaseEmails(caseIdForEmail).catch((error) => {
+    Promise.resolve().then(async () => {
+      try {
+        console.log('📧 [CREATE] Importing email function...');
+        const { sendCaseEmails } = await import('@/lib/email/send-case-emails');
+        console.log('✅ [CREATE] Email function imported');
+        console.log('📧 [CREATE] Calling sendCaseEmails...');
+        await sendCaseEmails(caseIdForEmail);
+        console.log('✅ [CREATE] Emails sent successfully');
+      } catch (error: any) {
         console.error('❌ [CREATE] Failed to send emails:', error);
         console.error('❌ [CREATE] Error details:', {
           message: error.message,
           stack: error.stack,
+          name: error.name,
         });
         // Don't fail case creation if email fails
-      });
-    }).catch((error) => {
-      console.error('❌ [CREATE] Failed to import email function:', error);
+      }
     });
     
     console.log('✅ Case creation completed successfully, returning response');

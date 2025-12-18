@@ -24,23 +24,55 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
 
   // Fetch case with all related data
   console.log('📧 [EMAIL] Fetching case data...');
-  const { data: caseData, error: caseError } = await supabase
-    .from("cases")
-    .select(`
-      *,
-      debtors(*),
-      organizations(name, billing_email),
-      profiles!cases_created_by_fkey(full_name, email)
-    `)
-    .eq("id", caseId)
-    .single();
+  console.log('📧 [EMAIL] Case ID:', caseId);
+  
+  let caseData: any;
+  
+  try {
+    console.log('📧 [EMAIL] Executing Supabase query...');
+    const queryStart = Date.now();
+    
+    const { data: queryData, error: caseError } = await supabase
+      .from("cases")
+      .select(`
+        *,
+        debtors(*),
+        organizations(name, billing_email),
+        profiles!cases_created_by_fkey(full_name, email)
+      `)
+      .eq("id", caseId)
+      .single();
 
-  if (caseError || !caseData) {
-    console.error('❌ [EMAIL] Error fetching case:', caseError);
-    throw new Error("Case not found");
+    const queryDuration = Date.now() - queryStart;
+    console.log(`📧 [EMAIL] Case query completed in ${queryDuration}ms`);
+    console.log('📧 [EMAIL] Has data:', !!queryData);
+    console.log('📧 [EMAIL] Has error:', !!caseError);
+    
+    if (caseError) {
+      console.error('❌ [EMAIL] Error fetching case:', {
+        message: caseError.message,
+        details: caseError.details,
+        hint: caseError.hint,
+        code: caseError.code,
+      });
+      throw new Error(`Case not found: ${caseError.message}`);
+    }
+
+    if (!queryData) {
+      console.error('❌ [EMAIL] No case data returned');
+      throw new Error("Case not found");
+    }
+
+    caseData = queryData;
+    console.log('✅ [EMAIL] Case found:', caseData.id);
+  } catch (queryError: any) {
+    console.error('❌ [EMAIL] Exception while fetching case:', {
+      message: queryError.message,
+      stack: queryError.stack,
+      name: queryError.name,
+    });
+    throw queryError;
   }
-
-  console.log('✅ [EMAIL] Case found:', caseData.id);
 
   const debtor = caseData.debtors;
   const organization = caseData.organizations;

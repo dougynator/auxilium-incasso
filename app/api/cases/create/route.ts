@@ -468,20 +468,41 @@ export async function POST(request: NextRequest) {
     });
 
     // Get debtor details for email/PDF
-    const { data: debtor } = await supabase
+    console.log('📧 Fetching debtor data for emails...');
+    const { data: debtor, error: debtorError } = await supabase
       .from("debtors")
       .select("*")
       .eq("id", debtorId)
       .single();
 
+    if (debtorError) {
+      console.error('❌ Error fetching debtor:', debtorError);
+    } else {
+      console.log('✅ Debtor found:', debtor?.name || debtor?.company_name);
+    }
+
     // Return success immediately, send email asynchronously
     console.log('✅ Case created, preparing async email send...');
+    console.log('📧 Debtor email:', body.debtorEmail);
+    console.log('📧 Client email:', user.email);
     
     // Send email asynchronously (don't wait for it)
     // Note: We pass the supabase client and other needed variables to avoid scope issues
     (async () => {
       try {
         console.log('📧 Starting async email generation...');
+        console.log('📧 Case ID:', newCase.id);
+        console.log('📧 User ID:', user.id);
+        console.log('📧 Organization ID:', organizationId);
+        
+        // Check if RESEND_API_KEY is set
+        if (!process.env.RESEND_API_KEY) {
+          console.error('❌ RESEND_API_KEY is not set in environment variables!');
+          console.error('❌ Emails will not be sent. Please set RESEND_API_KEY in Vercel environment variables.');
+          return;
+        }
+        
+        console.log('✅ RESEND_API_KEY is set');
         
         // Reuse the existing supabase client (it's already authenticated)
         const asyncSupabase = supabase;
@@ -544,6 +565,7 @@ export async function POST(request: NextRequest) {
         }
         
         // Generate PDF
+        console.log('📧 Generating PDF...');
         const pdfBuffer = await generatePaymentRequestPDF({
           debtorName: debtor?.name || debtor?.company_name || "Debiteur",
           debtorAddress: {
@@ -561,10 +583,15 @@ export async function POST(request: NextRequest) {
           dueDate: body.dueDate || undefined,
         });
 
+        console.log('✅ PDF generated, size:', pdfBuffer.length, 'bytes');
+
         // Generate URLs
-        const paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/pay/${newCase.id}?ref=${structuredReference}`;
-        const caseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portal/cases/${newCase.id}`;
-        const adminCaseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/admin/cases/${newCase.id}`;
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.auxiliumincasso.com';
+        const paymentUrl = `${baseUrl}/pay/${newCase.id}?ref=${structuredReference}`;
+        const caseUrl = `${baseUrl}/portal/cases/${newCase.id}`;
+        const adminCaseUrl = `${baseUrl}/admin/cases/${newCase.id}`;
+        
+        console.log('📧 URLs generated:', { paymentUrl, caseUrl, adminCaseUrl });
 
         const debtorName = debtor?.name || debtor?.company_name || "Debiteur";
         const clientName = clientProfile?.full_name || organization?.name || "Klant";
@@ -700,10 +727,15 @@ export async function POST(request: NextRequest) {
           message: "Betalingsverzoek verzonden naar debiteur",
         });
 
-        console.log('✅ Email sent successfully');
+        console.log('✅ All emails sent successfully');
       } catch (emailError: any) {
         console.error('❌ Error sending email (non-blocking):', emailError);
-        // Don't fail the case creation if email fails
+        console.error('❌ Error details:', {
+          message: emailError.message,
+          stack: emailError.stack,
+          response: emailError.response?.data || emailError.response,
+        });
+        // Don't fail the case creation if email fails, but log extensively
       }
     })();
 

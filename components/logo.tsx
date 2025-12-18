@@ -19,23 +19,28 @@ export default function Logo({
 }: LogoProps) {
   const [imageError, setImageError] = useState(false);
 
+  // Check if we need to apply white filter (for footer)
+  const needsWhiteFilter = className.includes('brightness-0') && className.includes('invert');
+  
   const logoContent = (
     <div className="flex items-center gap-2">
       {!imageError ? (
-        <div className={className}>
-          <Image
-            src="/images/logo.png"
-            alt="Auxilium Incasso"
-            width={height * 3}
-            height={height}
-            className="h-auto w-auto object-contain"
-            priority
-            onError={() => {
-              console.error('Logo image failed to load');
-              setImageError(true);
-            }}
-          />
-        </div>
+        <Image
+          src="/images/logo.png"
+          alt="Auxilium Incasso"
+          width={height * 3}
+          height={height}
+          className={`h-auto w-auto object-contain ${needsWhiteFilter ? 'brightness-0 invert' : ''}`}
+          style={needsWhiteFilter ? { 
+            filter: 'brightness(0) invert(1)',
+            WebkitFilter: 'brightness(0) invert(1)'
+          } : undefined}
+          priority
+          onError={() => {
+            console.error('Logo image failed to load');
+            setImageError(true);
+          }}
+        />
       ) : (
         <div 
           style={{ width: height * 3, height: height }}

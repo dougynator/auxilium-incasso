@@ -497,20 +497,22 @@ export async function POST(request: NextRequest) {
     const debtorEmailForEmail = body.debtorEmail;
     const documentForEmail = document;
     
-    // Return success immediately, send email via separate API route
+    // Return success immediately, send email asynchronously
     console.log('✅ Case created, preparing email send...');
     console.log('📧 Case ID:', caseIdForEmail);
     
-    // Call email API route asynchronously (don't wait for it)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.auxiliumincasso.com';
-    fetch(`${baseUrl}/api/cases/${caseIdForEmail}/send-emails`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    // Call email function asynchronously (don't wait for it)
+    import('@/lib/email/send-case-emails').then(({ sendCaseEmails }) => {
+      sendCaseEmails(caseIdForEmail).catch((error) => {
+        console.error('❌ [CREATE] Failed to send emails:', error);
+        console.error('❌ [CREATE] Error details:', {
+          message: error.message,
+          stack: error.stack,
+        });
+        // Don't fail case creation if email fails
+      });
     }).catch((error) => {
-      console.error('❌ [CREATE] Failed to trigger email send:', error);
-      // Don't fail case creation if email trigger fails
+      console.error('❌ [CREATE] Failed to import email function:', error);
     });
     
     console.log('✅ Case creation completed successfully, returning response');

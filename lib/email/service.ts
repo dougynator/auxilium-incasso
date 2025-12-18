@@ -14,7 +14,7 @@ export interface EmailOptions {
   }>;
 }
 
-export async function sendEmail(options: EmailOptions): Promise<void> {
+export async function sendEmail(options: EmailOptions): Promise<any> {
   if (!process.env.RESEND_API_KEY) {
     console.error('❌ RESEND_API_KEY not set, email not sent');
     console.error('❌ Email details:', {

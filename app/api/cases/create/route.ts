@@ -481,121 +481,184 @@ export async function POST(request: NextRequest) {
       console.log('✅ Debtor found:', debtor?.name || debtor?.company_name);
     }
 
+    // Store variables needed for email in local scope
+    const caseIdForEmail = newCase.id;
+    const userIdForEmail = user.id;
+    const userEmailForEmail = user.email;
+    const organizationIdForEmail = organizationId;
+    const debtorIdForEmail = debtorId;
+    const structuredRefForEmail = structuredReference;
+    const principalAmountForEmail = principalAmount;
+    const additionalCostsForEmail = additionalCosts;
+    const totalAmountForEmail = totalAmount;
+    const invoiceNumberForEmail = body.invoiceNumber;
+    const invoiceDateForEmail = body.invoiceDate;
+    const dueDateForEmail = body.dueDate;
+    const debtorEmailForEmail = body.debtorEmail;
+    const documentForEmail = document;
+    
     // Return success immediately, send email asynchronously
     console.log('✅ Case created, preparing async email send...');
-    console.log('📧 Debtor email:', body.debtorEmail);
-    console.log('📧 Client email:', user.email);
+    console.log('📧 Debtor email:', debtorEmailForEmail);
+    console.log('📧 Client email:', userEmailForEmail);
+    console.log('📧 Case ID:', caseIdForEmail);
+    console.log('📧 Organization ID:', organizationIdForEmail);
     
     // Send email asynchronously (don't wait for it)
-    // Note: We pass the supabase client and other needed variables to avoid scope issues
-    (async () => {
+    // Note: We pass all needed variables explicitly to avoid scope issues
+    // Use Promise.resolve().then() to ensure it runs after response is sent
+    Promise.resolve().then(async () => {
       try {
-        console.log('📧 Starting async email generation...');
-        console.log('📧 Case ID:', newCase.id);
-        console.log('📧 User ID:', user.id);
-        console.log('📧 Organization ID:', organizationId);
+        console.log('📧 [ASYNC] Starting async email generation...');
+        console.log('📧 [ASYNC] Case ID:', caseIdForEmail);
+        console.log('📧 [ASYNC] User ID:', userIdForEmail);
+        console.log('📧 [ASYNC] Organization ID:', organizationIdForEmail);
         
         // Check if RESEND_API_KEY is set
         if (!process.env.RESEND_API_KEY) {
-          console.error('❌ RESEND_API_KEY is not set in environment variables!');
-          console.error('❌ Emails will not be sent. Please set RESEND_API_KEY in Vercel environment variables.');
+          console.error('❌ [ASYNC] RESEND_API_KEY is not set in environment variables!');
+          console.error('❌ [ASYNC] Emails will not be sent. Please set RESEND_API_KEY in Vercel environment variables.');
           return;
         }
         
-        console.log('✅ RESEND_API_KEY is set');
+        console.log('✅ [ASYNC] RESEND_API_KEY is set');
         
-        // Reuse the existing supabase client (it's already authenticated)
-        const asyncSupabase = supabase;
+        // Create a new supabase client for async operations
+        // We need to use the service role to bypass RLS for some operations
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        
+        if (!supabaseUrl || !supabaseServiceKey) {
+          console.error('❌ [ASYNC] Missing Supabase credentials');
+          throw new Error('Supabase credentials not found');
+        }
+        
+        const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+        const asyncSupabase = createServiceClient(supabaseUrl, supabaseServiceKey);
         
         // Get organization and profile data first (needed for CC)
-        const { data: organization } = await asyncSupabase
+        console.log('📧 [ASYNC] Fetching organization data...');
+        const { data: organization, error: orgError } = await asyncSupabase
           .from("organizations")
           .select("name, billing_email")
-          .eq("id", organizationId)
+          .eq("id", organizationIdForEmail)
           .single();
 
-        const { data: clientProfile } = await asyncSupabase
+        if (orgError) {
+          console.error('❌ [ASYNC] Error fetching organization:', orgError);
+          throw orgError;
+        }
+
+        if (!organization) {
+          console.error('❌ [ASYNC] Organization not found:', organizationIdForEmail);
+          throw new Error('Organization not found');
+        }
+
+        console.log('✅ [ASYNC] Organization found:', organization.name);
+
+        console.log('📧 [ASYNC] Fetching client profile...');
+        const { data: clientProfile, error: profileError } = await asyncSupabase
           .from("profiles")
           .select("full_name")
-          .eq("id", user.id)
+          .eq("id", userIdForEmail)
           .single();
 
+        if (profileError) {
+          console.error('❌ [ASYNC] Error fetching client profile:', profileError);
+          // Don't throw, use fallback
+        }
+
         // Use login email of the user who created the case
-        const clientEmail = user.email;
+        const clientEmail = userEmailForEmail;
+        console.log('✅ [ASYNC] Client email:', clientEmail);
 
         // Get the uploaded invoice document if it exists
         let invoiceDocumentBuffer: Buffer | null = null;
         let invoiceDocumentName: string | null = null;
         
-        if (document) {
+        if (documentForEmail) {
           try {
+            console.log('📧 [ASYNC] Loading invoice document...');
             // Get the attachment record to find the file path
             const { data: attachment } = await asyncSupabase
               .from("case_attachments")
               .select("file_path, file_name")
-              .eq("case_id", newCase.id)
+              .eq("case_id", caseIdForEmail)
               .order("created_at", { ascending: false })
               .limit(1)
               .single();
 
             if (attachment?.file_path) {
               // Download the file from Supabase Storage using service client
-              const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-              const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-              const { createClient: createServiceClient } = await import('@supabase/supabase-js');
-              const supabaseService = createServiceClient(supabaseUrl, supabaseServiceKey);
-
-              const { data: fileData, error: downloadError } = await supabaseService.storage
+              const { data: fileData, error: downloadError } = await asyncSupabase.storage
                 .from('case-attachments')
                 .download(attachment.file_path);
 
               if (!downloadError && fileData) {
                 const arrayBuffer = await fileData.arrayBuffer();
                 invoiceDocumentBuffer = Buffer.from(arrayBuffer);
-                invoiceDocumentName = attachment.file_name || document.name;
-                console.log('✅ Invoice document loaded for email attachment');
+                invoiceDocumentName = attachment.file_name || documentForEmail.name;
+                console.log('✅ [ASYNC] Invoice document loaded for email attachment');
               } else {
-                console.warn('⚠️ Could not download invoice document:', downloadError);
+                console.warn('⚠️ [ASYNC] Could not download invoice document:', downloadError);
               }
             }
           } catch (docError: any) {
-            console.warn('⚠️ Error loading invoice document for email:', docError);
+            console.warn('⚠️ [ASYNC] Error loading invoice document for email:', docError);
             // Continue without invoice attachment if it fails
           }
         }
         
+        // Get debtor data for PDF
+        console.log('📧 [ASYNC] Fetching debtor data for PDF...');
+        const { data: debtorForEmail, error: debtorErrorForEmail } = await asyncSupabase
+          .from("debtors")
+          .select("*")
+          .eq("id", debtorIdForEmail)
+          .single();
+
+        if (debtorErrorForEmail) {
+          console.error('❌ [ASYNC] Error fetching debtor:', debtorErrorForEmail);
+        }
+
         // Generate PDF
-        console.log('📧 Generating PDF...');
+        console.log('📧 [ASYNC] Generating PDF...');
         const pdfBuffer = await generatePaymentRequestPDF({
-          debtorName: debtor?.name || debtor?.company_name || "Debiteur",
+          debtorName: debtorForEmail?.name || debtorForEmail?.company_name || "Debiteur",
           debtorAddress: {
-            street: debtor?.address_street || undefined,
-            city: debtor?.address_city || undefined,
-            postalCode: debtor?.address_postal_code || undefined,
-            country: debtor?.address_country || "BE",
+            street: debtorForEmail?.address_street || undefined,
+            city: debtorForEmail?.address_city || undefined,
+            postalCode: debtorForEmail?.address_postal_code || undefined,
+            country: debtorForEmail?.address_country || "BE",
           },
-          structuredReference,
-          principalAmount,
-          additionalCosts,
-          totalAmount,
-          invoiceNumber: body.invoiceNumber,
-          invoiceDate: body.invoiceDate || undefined,
-          dueDate: body.dueDate || undefined,
+          structuredReference: structuredRefForEmail,
+          principalAmount: principalAmountForEmail,
+          additionalCosts: additionalCostsForEmail,
+          totalAmount: totalAmountForEmail,
+          invoiceNumber: invoiceNumberForEmail,
+          invoiceDate: invoiceDateForEmail || undefined,
+          dueDate: dueDateForEmail || undefined,
         });
 
-        console.log('✅ PDF generated, size:', pdfBuffer.length, 'bytes');
+        console.log('✅ [ASYNC] PDF generated, size:', pdfBuffer.length, 'bytes');
 
         // Generate URLs
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.auxiliumincasso.com';
-        const paymentUrl = `${baseUrl}/pay/${newCase.id}?ref=${structuredReference}`;
-        const caseUrl = `${baseUrl}/portal/cases/${newCase.id}`;
-        const adminCaseUrl = `${baseUrl}/admin/cases/${newCase.id}`;
+        const paymentUrl = `${baseUrl}/pay/${caseIdForEmail}?ref=${structuredRefForEmail}`;
+        const caseUrl = `${baseUrl}/portal/cases/${caseIdForEmail}`;
+        const adminCaseUrl = `${baseUrl}/admin/cases/${caseIdForEmail}`;
         
-        console.log('📧 URLs generated:', { paymentUrl, caseUrl, adminCaseUrl });
+        console.log('📧 [ASYNC] URLs generated:', { paymentUrl, caseUrl, adminCaseUrl });
 
-        const debtorName = debtor?.name || debtor?.company_name || "Debiteur";
+        const debtorName = debtorForEmail?.name || debtorForEmail?.company_name || "Debiteur";
         const clientName = clientProfile?.full_name || organization?.name || "Klant";
         const internalToEmail = process.env.ADMIN_CC_EMAIL || "admin@auxiliumincasso.com";
+        
+        console.log('📧 [ASYNC] Email recipients:', {
+          debtor: debtorEmailForEmail,
+          client: clientEmail,
+          internal: internalToEmail,
+        });
 
         // Prepare CC list for debtor email (client login email + internal)
         const ccEmails: string[] = [];
@@ -607,21 +670,22 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Email naar debiteur (met PDF attachment + factuur als bijlage + CC)
+        console.log('📧 [ASYNC] Generating debtor email...');
         const debtorEmailHtml = generateDebtorEmail({
           debtorName,
-          invoiceNumber: body.invoiceNumber,
-          invoiceDate: body.invoiceDate,
-          dueDate: body.dueDate,
-          principalAmount,
-          additionalCosts,
-          totalAmount,
-          structuredReference,
+          invoiceNumber: invoiceNumberForEmail,
+          invoiceDate: invoiceDateForEmail,
+          dueDate: dueDateForEmail,
+          principalAmount: principalAmountForEmail,
+          additionalCosts: additionalCostsForEmail,
+          totalAmount: totalAmountForEmail,
+          structuredReference: structuredRefForEmail,
           paymentUrl,
         });
 
         const debtorAttachments = [
           {
-            filename: `Betalingsverzoek_${structuredReference}.pdf`,
+            filename: `Betalingsverzoek_${structuredRefForEmail}.pdf`,
             content: pdfBuffer,
             contentType: "application/pdf",
           },
@@ -636,61 +700,67 @@ export async function POST(request: NextRequest) {
           });
         }
 
+        console.log('📧 [ASYNC] Sending email to debtor...');
         await sendEmail({
-          to: body.debtorEmail,
+          to: debtorEmailForEmail,
           cc: ccEmails.length > 0 ? ccEmails : undefined,
-          subject: `Betalingsverzoek – Auxilium Incasso – Referentie ${structuredReference}`,
+          subject: `Betalingsverzoek – Auxilium Incasso – Referentie ${structuredRefForEmail}`,
           html: debtorEmailHtml,
           attachments: debtorAttachments,
         });
 
-        console.log('✅ Email sent to debtor with attachments and CC');
+        console.log('✅ [ASYNC] Email sent to debtor with attachments and CC');
 
         // 2. Email naar klant (apart, zonder PDF) - naar login email van gebruiker die opdracht heeft aangemaakt
         if (clientEmail) {
+          console.log('📧 [ASYNC] Generating client email...');
           const clientEmailHtml = generateClientEmail({
             clientName,
-            caseId: newCase.id,
+            caseId: caseIdForEmail,
             debtorName,
-            invoiceNumber: body.invoiceNumber,
-            invoiceDate: body.invoiceDate,
-            dueDate: body.dueDate,
-            principalAmount,
-            additionalCosts,
-            totalAmount,
-            structuredReference,
+            invoiceNumber: invoiceNumberForEmail,
+            invoiceDate: invoiceDateForEmail,
+            dueDate: dueDateForEmail,
+            principalAmount: principalAmountForEmail,
+            additionalCosts: additionalCostsForEmail,
+            totalAmount: totalAmountForEmail,
+            structuredReference: structuredRefForEmail,
             caseUrl,
           });
 
+          console.log('📧 [ASYNC] Sending email to client...');
           await sendEmail({
             to: clientEmail,
-            subject: `Opdracht ontvangen – Opdrachtnummer ${newCase.id}`,
+            subject: `Opdracht ontvangen – Opdrachtnummer ${caseIdForEmail}`,
             html: clientEmailHtml,
           });
 
-          console.log('✅ Email sent to client');
+          console.log('✅ [ASYNC] Email sent to client');
+        } else {
+          console.warn('⚠️ [ASYNC] No client email found, skipping client email');
         }
 
         // 3. Email intern naar ons (met alle details + bijlagen)
+        console.log('📧 [ASYNC] Generating internal email...');
         const internalEmailHtml = generateInternalEmail({
-          caseId: newCase.id,
+          caseId: caseIdForEmail,
           organizationName: organization?.name || "Onbekend",
           clientName,
           debtorName,
-          debtorEmail: body.debtorEmail,
-          invoiceNumber: body.invoiceNumber,
-          invoiceDate: body.invoiceDate,
-          dueDate: body.dueDate,
-          principalAmount,
-          additionalCosts,
-          totalAmount,
-          structuredReference,
+          debtorEmail: debtorEmailForEmail,
+          invoiceNumber: invoiceNumberForEmail,
+          invoiceDate: invoiceDateForEmail,
+          dueDate: dueDateForEmail,
+          principalAmount: principalAmountForEmail,
+          additionalCosts: additionalCostsForEmail,
+          totalAmount: totalAmountForEmail,
+          structuredReference: structuredRefForEmail,
           caseUrl: adminCaseUrl,
         });
 
         const internalAttachments = [
           {
-            filename: `Betalingsverzoek_${structuredReference}.pdf`,
+            filename: `Betalingsverzoek_${structuredRefForEmail}.pdf`,
             content: pdfBuffer,
             contentType: "application/pdf",
           },
@@ -705,39 +775,44 @@ export async function POST(request: NextRequest) {
           });
         }
         
+        console.log('📧 [ASYNC] Sending email to internal team...');
         await sendEmail({
           to: internalToEmail,
-          subject: `Nieuwe opdracht aangemaakt – ${newCase.id}`,
+          subject: `Nieuwe opdracht aangemaakt – ${caseIdForEmail}`,
           html: internalEmailHtml,
           attachments: internalAttachments,
         });
 
-        console.log('✅ Email sent to internal team with attachments');
+        console.log('✅ [ASYNC] Email sent to internal team with attachments');
 
         // Update case status to "sent" and create event
+        console.log('📧 [ASYNC] Updating case status...');
         await asyncSupabase
           .from("cases")
           .update({ status: "sent" })
-          .eq("id", newCase.id);
+          .eq("id", caseIdForEmail);
 
         await createCaseEvent({
-          caseId: newCase.id,
-          actorProfileId: user.id,
+          caseId: caseIdForEmail,
+          actorProfileId: userIdForEmail,
           type: "email_sent",
           message: "Betalingsverzoek verzonden naar debiteur",
         });
+        
+        console.log('✅ [ASYNC] Case status updated to "sent"');
 
-        console.log('✅ All emails sent successfully');
+        console.log('✅ [ASYNC] All emails sent successfully');
       } catch (emailError: any) {
-        console.error('❌ Error sending email (non-blocking):', emailError);
-        console.error('❌ Error details:', {
-          message: emailError.message,
-          stack: emailError.stack,
-          response: emailError.response?.data || emailError.response,
-        });
+        console.error('❌ [ASYNC] Error sending email (non-blocking):', emailError);
+        console.error('❌ [ASYNC] Error message:', emailError.message);
+        console.error('❌ [ASYNC] Error stack:', emailError.stack);
+        console.error('❌ [ASYNC] Error response:', emailError.response?.data || emailError.response);
+        console.error('❌ [ASYNC] Full error object:', JSON.stringify(emailError, Object.getOwnPropertyNames(emailError)));
         // Don't fail the case creation if email fails, but log extensively
       }
-    })();
+    }).catch((error) => {
+      console.error('❌ [ASYNC] Unhandled promise rejection in email function:', error);
+    });
 
     console.log('✅ Case creation completed successfully, returning response');
     

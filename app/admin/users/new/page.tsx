@@ -82,63 +82,26 @@ export default function NewUserPage() {
   const onSubmit = async (data: UserFormData) => {
     setLoading(true);
     try {
-      let organizationId: string | null = null;
-
-      // If client role, create or get organization
-      if (data.role === "client") {
-        if (data.organizationId) {
-          organizationId = data.organizationId;
-        } else if (data.organizationName) {
-          // Create new organization
-          const { data: newOrg, error: orgError } = await supabase
-            .from("organizations")
-            .insert({
-              name: data.organizationName,
-              billing_email: data.email,
-              address_country: "BE",
-            })
-            .select("id")
-            .single();
-
-          if (orgError) {
-            throw new Error(`Kon organisatie niet aanmaken: ${orgError.message}`);
-          }
-
-          organizationId = newOrg.id;
-        } else {
-          throw new Error("Organisatie is verplicht voor client accounts");
-        }
-      }
-
-      // Create user in auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: data.email,
-        password: data.password,
-        email_confirm: true,
+      // Call API route instead of direct Supabase calls to bypass RLS
+      const response = await fetch("/api/admin/users/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          fullName: data.fullName,
+          role: data.role,
+          organizationId: data.organizationId || null,
+          organizationName: data.organizationName || null,
+        }),
       });
 
-      if (authError) {
-        throw authError;
-      }
+      const result = await response.json();
 
-      if (!authData.user) {
-        throw new Error("Gebruiker kon niet worden aangemaakt");
-      }
-
-      // Create profile
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          id: authData.user.id,
-          full_name: data.fullName,
-          role: data.role,
-          organization_id: organizationId,
-        });
-
-      if (profileError) {
-        // If profile creation fails, try to delete the auth user
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        throw profileError;
+      if (!response.ok) {
+        throw new Error(result.error || "Kon gebruiker niet aanmaken");
       }
 
       toast({

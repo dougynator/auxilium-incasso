@@ -534,20 +534,39 @@ export async function POST(request: NextRequest) {
         }
         
         const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+        console.log('📧 [ASYNC] Creating Supabase service client...');
         const asyncSupabase = createServiceClient(supabaseUrl, supabaseServiceKey);
+        console.log('✅ [ASYNC] Supabase service client created');
         
         // Get organization and profile data first (needed for CC)
         console.log('📧 [ASYNC] Fetching organization data...');
         console.log('📧 [ASYNC] Organization ID to fetch:', organizationIdForEmail);
+        console.log('📧 [ASYNC] Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'NOT SET');
+        console.log('📧 [ASYNC] Service key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
         
         let organization: { name: string; billing_email: string } | null = null;
         
         try {
-          const { data: orgData, error: orgError } = await asyncSupabase
+          console.log('📧 [ASYNC] Executing organization query...');
+          console.log('📧 [ASYNC] Query details:', {
+            table: 'organizations',
+            select: 'name, billing_email',
+            filter: `id = ${organizationIdForEmail}`,
+          });
+          const orgQueryStart = Date.now();
+          
+          const queryPromise = asyncSupabase
             .from("organizations")
             .select("name, billing_email")
             .eq("id", organizationIdForEmail)
             .single();
+          
+          console.log('📧 [ASYNC] Query promise created, awaiting...');
+          
+          const { data: orgData, error: orgError } = await queryPromise;
+
+          const orgQueryDuration = Date.now() - orgQueryStart;
+          console.log(`📧 [ASYNC] Organization query completed in ${orgQueryDuration}ms`);
 
           console.log('📧 [ASYNC] Organization query result:', { 
             hasData: !!orgData, 
@@ -579,6 +598,7 @@ export async function POST(request: NextRequest) {
             message: orgFetchError.message,
             stack: orgFetchError.stack,
             name: orgFetchError.name,
+            type: typeof orgFetchError,
           });
           throw orgFetchError;
         }

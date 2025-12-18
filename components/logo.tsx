@@ -22,22 +22,24 @@ export default function Logo({
   const logoContent = (
     <div className="flex items-center gap-2">
       {!imageError ? (
-        <Image
-          src="/images/logo.png"
-          alt="Auxilium Incasso"
-          width={height * 3}
-          height={height}
-          className={`h-auto w-auto object-contain ${className}`}
-          priority
-          onError={() => {
-            console.error('Logo image failed to load');
-            setImageError(true);
-          }}
-        />
+        <div className={className}>
+          <Image
+            src="/images/logo.png"
+            alt="Auxilium Incasso"
+            width={height * 3}
+            height={height}
+            className="h-auto w-auto object-contain"
+            priority
+            onError={() => {
+              console.error('Logo image failed to load');
+              setImageError(true);
+            }}
+          />
+        </div>
       ) : (
         <div 
           style={{ width: height * 3, height: height }}
-          className={`flex items-center justify-center bg-white/10 rounded px-2 ${className}`}
+          className="flex items-center justify-center bg-white/10 rounded px-2"
         >
           <span className="text-xs font-bold" style={{ fontSize: `${height * 0.4}px` }}>Auxilium</span>
         </div>

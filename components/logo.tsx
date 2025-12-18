@@ -9,32 +9,27 @@ interface LogoProps {
   href?: string;
   showText?: boolean;
   height?: number;
+  white?: boolean; // Use white version of logo
 }
 
 export default function Logo({ 
   className = "", 
   href = "/", 
   showText = false,
-  height = 40 
+  height = 40,
+  white = false
 }: LogoProps) {
   const [imageError, setImageError] = useState(false);
-
-  // Check if we need to apply white filter (for footer)
-  const needsWhiteFilter = className.includes('brightness-0') && className.includes('invert');
   
   const logoContent = (
-    <div className="flex items-center gap-2">
+    <div className={`flex items-center gap-2 ${className}`}>
       {!imageError ? (
         <Image
-          src="/images/logo.png"
+          src={white ? "/images/logo-white.png" : "/images/logo.png"}
           alt="Auxilium Incasso"
           width={height * 3}
           height={height}
-          className={`h-auto w-auto object-contain ${needsWhiteFilter ? 'brightness-0 invert' : ''}`}
-          style={needsWhiteFilter ? { 
-            filter: 'brightness(0) invert(1)',
-            WebkitFilter: 'brightness(0) invert(1)'
-          } : undefined}
+          className="h-auto w-auto object-contain"
           priority
           onError={() => {
             console.error('Logo image failed to load');

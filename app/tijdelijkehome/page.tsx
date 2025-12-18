@@ -1,16 +1,28 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import HeroVideo from "@/components/hero-video";
-import FeaturesSection from "@/components/features-section";
-import ClientsCarousel from "@/components/clients-carousel";
-import StepsCarousel from "@/components/steps-carousel";
-import AchievementsSection from "@/components/achievements-section";
-import FAQSection from "@/components/faq-section";
-import IntegrationsCarousel from "@/components/integrations-carousel";
-import ScrollFadeOverlay from "@/components/scroll-fade-overlay";
+
+// Dynamically import all components to prevent SSR issues
+const ScrollFadeOverlay = dynamic(() => import("@/components/scroll-fade-overlay"), { ssr: false });
+const HeroVideo = dynamic(() => import("@/components/hero-video"), { ssr: false });
+const FeaturesSection = dynamic(() => import("@/components/features-section"), { ssr: false });
+const ClientsCarousel = dynamic(() => import("@/components/clients-carousel"), { ssr: false });
+const StepsCarousel = dynamic(() => import("@/components/steps-carousel"), { ssr: false });
+const AchievementsSection = dynamic(() => import("@/components/achievements-section"), { ssr: false });
+const FAQSection = dynamic(() => import("@/components/faq-section"), { ssr: false });
+const IntegrationsCarousel = dynamic(() => import("@/components/integrations-carousel"), { ssr: false });
+
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p className="text-muted-foreground">Laden...</p>
+    </div>
+  </div>
+);
 
 export default function TijdelijkeHomePage() {
   const [mounted, setMounted] = useState(false);
@@ -21,41 +33,44 @@ export default function TijdelijkeHomePage() {
 
   // Don't render until mounted to prevent SSR issues
   if (!mounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Laden...</p>
-        </div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
+
   return (
     <div className="min-h-screen relative flex flex-col">
-      <ScrollFadeOverlay />
+      <Suspense fallback={<LoadingFallback />}>
+        <ScrollFadeOverlay />
+      </Suspense>
       <Header />
 
       <main className="relative z-10 flex-1">
-        {/* Hero Section met Video */}
-        <HeroVideo />
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <HeroVideo />
+        </Suspense>
 
-        {/* Features Section met foto en voordelen */}
-        <FeaturesSection />
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <FeaturesSection />
+        </Suspense>
 
-        {/* Klantenreferenties Carousel */}
-        <ClientsCarousel />
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <ClientsCarousel />
+        </Suspense>
 
-        {/* Stappenplan Carousel */}
-        <StepsCarousel />
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <StepsCarousel />
+        </Suspense>
 
-        {/* Realisaties Sectie */}
-        <AchievementsSection />
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <AchievementsSection />
+        </Suspense>
 
-        {/* FAQ Sectie */}
-        <FAQSection />
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <FAQSection />
+        </Suspense>
 
-        {/* Integratiepartners Carousel */}
-        <IntegrationsCarousel />
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <IntegrationsCarousel />
+        </Suspense>
       </main>
 
       <Footer />

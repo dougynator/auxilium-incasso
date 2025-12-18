@@ -1,5 +1,13 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 
+// Company physical address for email footer (required by law in EU)
+const COMPANY_ADDRESS = `
+Auxilium Incasso<br />
+Kerkstraat 123<br />
+1000 Brussel<br />
+België
+`;
+
 export interface DebtorEmailData {
   debtorName: string;
   invoiceNumber?: string;
@@ -108,6 +116,16 @@ export function generateDebtorEmail(data: DebtorEmailData): string {
       Met vriendelijke groet,<br />
       Auxilium Incasso
     </p>
+    
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0" />
+    
+    <div style="font-size: 12px; color: #666; line-height: 1.6">
+      <p style="margin: 0 0 10px 0"><strong>Auxilium Incasso</strong></p>
+      ${COMPANY_ADDRESS}
+      <p style="margin-top: 10px; margin-bottom: 0">
+        <a href="mailto:info@auxiliumincasso.com" style="color: #2563eb; text-decoration: none">info@auxiliumincasso.com</a>
+      </p>
+    </div>
   </div>
 </body>
 </html>`;
@@ -183,6 +201,16 @@ export function generateClientEmail(data: ClientEmailData): string {
       Met vriendelijke groet,<br />
       Auxilium Incasso
     </p>
+    
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0" />
+    
+    <div style="font-size: 12px; color: #666; line-height: 1.6">
+      <p style="margin: 0 0 10px 0"><strong>Auxilium Incasso</strong></p>
+      ${COMPANY_ADDRESS}
+      <p style="margin-top: 10px; margin-bottom: 0">
+        <a href="mailto:info@auxiliumincasso.com" style="color: #2563eb; text-decoration: none">info@auxiliumincasso.com</a>
+      </p>
+    </div>
   </div>
 </body>
 </html>`;
@@ -254,6 +282,16 @@ export function generateInternalEmail(data: InternalEmailData): string {
     <p style="margin-top: 30px; font-size: 14px; color: #666">
       Deze e-mail is automatisch gegenereerd door het Auxilium Incasso systeem.
     </p>
+    
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0" />
+    
+    <div style="font-size: 12px; color: #666; line-height: 1.6">
+      <p style="margin: 0 0 10px 0"><strong>Auxilium Incasso</strong></p>
+      ${COMPANY_ADDRESS}
+      <p style="margin-top: 10px; margin-bottom: 0">
+        <a href="mailto:info@auxiliumincasso.com" style="color: #2563eb; text-decoration: none">info@auxiliumincasso.com</a>
+      </p>
+    </div>
   </div>
 </body>
 </html>`;

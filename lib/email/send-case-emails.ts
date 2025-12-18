@@ -38,7 +38,7 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
         *,
         debtors(*),
         organizations(name, billing_email),
-        profiles!cases_created_by_fkey(full_name, email)
+        profiles!cases_created_by_fkey(full_name, id)
       `)
       .eq("id", caseId)
       .single();
@@ -81,6 +81,23 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
   if (!debtor) {
     console.error('❌ [EMAIL] Debtor not found for case');
     throw new Error("Debtor not found");
+  }
+
+  // Get creator email from auth.users table
+  let clientEmail: string | undefined;
+  if (creatorProfile?.id) {
+    console.log('📧 [EMAIL] Fetching creator email from auth...');
+    try {
+      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(creatorProfile.id);
+      if (!authError && authUser?.user?.email) {
+        clientEmail = authUser.user.email;
+        console.log('✅ [EMAIL] Creator email found:', clientEmail);
+      } else {
+        console.warn('⚠️ [EMAIL] Could not fetch creator email:', authError);
+      }
+    } catch (authErr: any) {
+      console.warn('⚠️ [EMAIL] Error fetching creator email:', authErr);
+    }
   }
 
   // Get invoice document if it exists
@@ -143,7 +160,7 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
 
   const debtorName = debtor.name || debtor.company_name || "Debiteur";
   const clientName = creatorProfile?.full_name || organization?.name || "Klant";
-  const clientEmail = creatorProfile?.email;
+  // clientEmail is already fetched above from auth.users
   const internalToEmail = process.env.ADMIN_CC_EMAIL || "admin@auxiliumincasso.com";
 
   // Prepare CC list for debtor email

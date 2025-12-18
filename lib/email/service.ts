@@ -57,19 +57,29 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     
     console.log('✅ Email sent successfully:', {
       id: result.data?.id,
-      to,
-      cc,
+      to: Array.isArray(to) ? to : [to],
+      cc: cc ? (Array.isArray(cc) ? cc : [cc]) : undefined,
       subject: options.subject,
+      hasAttachments: !!options.attachments?.length,
     });
+    
+    // Log any errors from Resend response
+    if (result.error) {
+      console.error('⚠️ Resend returned an error:', result.error);
+    }
+    
+    return result;
   } catch (error: any) {
     console.error('❌ Failed to send email:', {
       error: error.message,
-      to,
-      cc,
+      to: Array.isArray(to) ? to : [to],
+      cc: cc ? (Array.isArray(cc) ? cc : [cc]) : undefined,
       subject: options.subject,
+      hasAttachments: !!options.attachments?.length,
       response: error.response?.data || error.response,
       status: error.status,
       details: error.details || error,
+      stack: error.stack,
     });
     throw error;
   }

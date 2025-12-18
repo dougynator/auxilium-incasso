@@ -226,14 +226,23 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
     });
   }
 
-  await sendEmail({
-    to: debtor.email,
-    cc: ccEmails.length > 0 ? ccEmails : undefined,
-    subject: `Betalingsverzoek – Auxilium Incasso – Referentie ${caseData.structured_reference}`,
-    html: debtorEmailHtml,
-    attachments: debtorAttachments,
-  });
-  console.log('✅ [EMAIL] Email sent to debtor');
+  try {
+    await sendEmail({
+      to: debtor.email,
+      cc: ccEmails.length > 0 ? ccEmails : undefined,
+      subject: `Betalingsverzoek – Auxilium Incasso – Referentie ${caseData.structured_reference}`,
+      html: debtorEmailHtml,
+      attachments: debtorAttachments,
+    });
+    console.log('✅ [EMAIL] Email sent to debtor');
+  } catch (debtorEmailError: any) {
+    console.error('❌ [EMAIL] Failed to send email to debtor:', {
+      error: debtorEmailError.message,
+      debtorEmail: debtor.email,
+      ccEmails,
+    });
+    // Don't throw - continue with other emails
+  }
 
   // 2. Email to client
   if (clientEmail) {
@@ -253,12 +262,20 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
       caseUrl,
     });
 
-    await sendEmail({
-      to: clientEmail,
-      subject: `Opdracht ontvangen – Opdrachtnummer ${caseId}`,
-      html: clientEmailHtml,
-    });
-    console.log('✅ [EMAIL] Email sent to client');
+    try {
+      await sendEmail({
+        to: clientEmail,
+        subject: `Opdracht ontvangen – Opdrachtnummer ${caseId}`,
+        html: clientEmailHtml,
+      });
+      console.log('✅ [EMAIL] Email sent to client');
+    } catch (clientEmailError: any) {
+      console.error('❌ [EMAIL] Failed to send email to client:', {
+        error: clientEmailError.message,
+        clientEmail,
+      });
+      // Don't throw - continue with other emails
+    }
   }
 
   // 3. Email to internal team
@@ -296,13 +313,21 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
     });
   }
 
-  await sendEmail({
-    to: internalToEmail,
-    subject: `Nieuwe opdracht aangemaakt – ${caseId}`,
-    html: internalEmailHtml,
-    attachments: internalAttachments,
-  });
-  console.log('✅ [EMAIL] Email sent to internal team');
+  try {
+    await sendEmail({
+      to: internalToEmail,
+      subject: `Nieuwe opdracht aangemaakt – ${caseId}`,
+      html: internalEmailHtml,
+      attachments: internalAttachments,
+    });
+    console.log('✅ [EMAIL] Email sent to internal team');
+  } catch (adminEmailError: any) {
+    console.error('❌ [EMAIL] Failed to send email to admin:', {
+      error: adminEmailError.message,
+      adminEmail: internalToEmail,
+    });
+    // Don't throw - at least client email was sent
+  }
 
   // Update case status to "sent"
   await supabase

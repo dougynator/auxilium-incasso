@@ -486,6 +486,63 @@ export async function POST(request: NextRequest) {
         // Reuse the existing supabase client (it's already authenticated)
         const asyncSupabase = supabase;
         
+        // Get organization and profile data first (needed for CC)
+        const { data: organization } = await asyncSupabase
+          .from("organizations")
+          .select("name, billing_email")
+          .eq("id", organizationId)
+          .single();
+
+        const { data: clientProfile } = await asyncSupabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+
+        // Use login email of the user who created the case
+        const clientEmail = user.email;
+
+        // Get the uploaded invoice document if it exists
+        let invoiceDocumentBuffer: Buffer | null = null;
+        let invoiceDocumentName: string | null = null;
+        
+        if (document) {
+          try {
+            // Get the attachment record to find the file path
+            const { data: attachment } = await asyncSupabase
+              .from("case_attachments")
+              .select("file_path, file_name")
+              .eq("case_id", newCase.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .single();
+
+            if (attachment?.file_path) {
+              // Download the file from Supabase Storage using service client
+              const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+              const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+              const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+              const supabaseService = createServiceClient(supabaseUrl, supabaseServiceKey);
+
+              const { data: fileData, error: downloadError } = await supabaseService.storage
+                .from('case-attachments')
+                .download(attachment.file_path);
+
+              if (!downloadError && fileData) {
+                const arrayBuffer = await fileData.arrayBuffer();
+                invoiceDocumentBuffer = Buffer.from(arrayBuffer);
+                invoiceDocumentName = attachment.file_name || document.name;
+                console.log('✅ Invoice document loaded for email attachment');
+              } else {
+                console.warn('⚠️ Could not download invoice document:', downloadError);
+              }
+            }
+          } catch (docError: any) {
+            console.warn('⚠️ Error loading invoice document for email:', docError);
+            // Continue without invoice attachment if it fails
+          }
+        }
+        
         // Generate PDF
         const pdfBuffer = await generatePaymentRequestPDF({
           debtorName: debtor?.name || debtor?.company_name || "Debiteur",
@@ -509,23 +566,20 @@ export async function POST(request: NextRequest) {
         const caseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portal/cases/${newCase.id}`;
         const adminCaseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/admin/cases/${newCase.id}`;
 
-        // Get organization and profile data
-        const { data: organization } = await asyncSupabase
-          .from("organizations")
-          .select("name, billing_email")
-          .eq("id", organizationId)
-          .single();
-
-        const { data: clientProfile } = await asyncSupabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", user.id)
-          .single();
-
         const debtorName = debtor?.name || debtor?.company_name || "Debiteur";
         const clientName = clientProfile?.full_name || organization?.name || "Klant";
+        const internalToEmail = process.env.ADMIN_CC_EMAIL || "admin@auxiliumincasso.com";
 
-        // 1. Email naar debiteur (met PDF attachment)
+        // Prepare CC list for debtor email (client login email + internal)
+        const ccEmails: string[] = [];
+        if (clientEmail) {
+          ccEmails.push(clientEmail);
+        }
+        if (internalToEmail) {
+          ccEmails.push(internalToEmail);
+        }
+
+        // 1. Email naar debiteur (met PDF attachment + factuur als bijlage + CC)
         const debtorEmailHtml = generateDebtorEmail({
           debtorName,
           invoiceNumber: body.invoiceNumber,
@@ -538,23 +592,35 @@ export async function POST(request: NextRequest) {
           paymentUrl,
         });
 
+        const debtorAttachments = [
+          {
+            filename: `Betalingsverzoek_${structuredReference}.pdf`,
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ];
+
+        // Add invoice document if available
+        if (invoiceDocumentBuffer && invoiceDocumentName) {
+          debtorAttachments.push({
+            filename: invoiceDocumentName,
+            content: invoiceDocumentBuffer,
+            contentType: "application/pdf",
+          });
+        }
+
         await sendEmail({
           to: body.debtorEmail,
+          cc: ccEmails.length > 0 ? ccEmails : undefined,
           subject: `Betalingsverzoek – Auxilium Incasso – Referentie ${structuredReference}`,
           html: debtorEmailHtml,
-          attachments: [
-            {
-              filename: `Betalingsverzoek_${structuredReference}.pdf`,
-              content: pdfBuffer,
-              contentType: "application/pdf",
-            },
-          ],
+          attachments: debtorAttachments,
         });
 
-        console.log('✅ Email sent to debtor');
+        console.log('✅ Email sent to debtor with attachments and CC');
 
-        // 2. Email naar klant (apart, zonder PDF)
-        if (organization?.billing_email) {
+        // 2. Email naar klant (apart, zonder PDF) - naar login email van gebruiker die opdracht heeft aangemaakt
+        if (clientEmail) {
           const clientEmailHtml = generateClientEmail({
             clientName,
             caseId: newCase.id,
@@ -570,7 +636,7 @@ export async function POST(request: NextRequest) {
           });
 
           await sendEmail({
-            to: organization.billing_email,
+            to: clientEmail,
             subject: `Opdracht ontvangen – Opdrachtnummer ${newCase.id}`,
             html: clientEmailHtml,
           });
@@ -578,7 +644,7 @@ export async function POST(request: NextRequest) {
           console.log('✅ Email sent to client');
         }
 
-        // 3. Email intern naar ons (met alle details, CC)
+        // 3. Email intern naar ons (met alle details + bijlagen)
         const internalEmailHtml = generateInternalEmail({
           caseId: newCase.id,
           organizationName: organization?.name || "Onbekend",
@@ -595,15 +661,31 @@ export async function POST(request: NextRequest) {
           caseUrl: adminCaseUrl,
         });
 
-        const internalToEmail = process.env.ADMIN_CC_EMAIL || "admin@auxiliumincasso.com";
+        const internalAttachments = [
+          {
+            filename: `Betalingsverzoek_${structuredReference}.pdf`,
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ];
+
+        // Add invoice document if available
+        if (invoiceDocumentBuffer && invoiceDocumentName) {
+          internalAttachments.push({
+            filename: invoiceDocumentName,
+            content: invoiceDocumentBuffer,
+            contentType: "application/pdf",
+          });
+        }
         
         await sendEmail({
           to: internalToEmail,
           subject: `Nieuwe opdracht aangemaakt – ${newCase.id}`,
           html: internalEmailHtml,
+          attachments: internalAttachments,
         });
 
-        console.log('✅ Email sent to internal team');
+        console.log('✅ Email sent to internal team with attachments');
 
         // Update case status to "sent" and create event
         await asyncSupabase

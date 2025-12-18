@@ -81,57 +81,105 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create auth user using service role
-    const { data: authData, error: authError } = await supabaseService.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
+    // Check if user already exists
+    const { data: existingUsers } = await supabaseService.auth.admin.listUsers();
+    const existingUser = existingUsers.users.find(u => u.email === email);
 
-    if (authError) {
-      // If auth creation fails and we created an org, try to clean it up
-      if (finalOrganizationId && role === "client" && !organizationId) {
-        await supabaseService.from("organizations").delete().eq("id", finalOrganizationId);
+    let userId: string;
+
+    if (existingUser) {
+      // User already exists, use existing ID
+      userId = existingUser.id;
+      
+      // Update password if provided
+      if (password) {
+        await supabaseService.auth.admin.updateUserById(userId, {
+          password: password,
+        });
       }
-      return NextResponse.json(
-        { error: `Kon gebruiker niet aanmaken: ${authError.message}` },
-        { status: 500 }
-      );
-    }
-
-    if (!authData.user) {
-      return NextResponse.json(
-        { error: "Gebruiker kon niet worden aangemaakt" },
-        { status: 500 }
-      );
-    }
-
-    // Create profile using service role (bypasses RLS)
-    const { error: profileError } = await supabaseService
-      .from("profiles")
-      .insert({
-        id: authData.user.id,
-        full_name: fullName,
-        role,
-        organization_id: finalOrganizationId,
+    } else {
+      // Create new auth user using service role
+      const { data: authData, error: authError } = await supabaseService.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
       });
 
-    if (profileError) {
-      // Cleanup: delete auth user and org if created
-      await supabaseService.auth.admin.deleteUser(authData.user.id);
-      if (finalOrganizationId && role === "client" && !organizationId) {
-        await supabaseService.from("organizations").delete().eq("id", finalOrganizationId);
+      if (authError) {
+        // If auth creation fails and we created an org, try to clean it up
+        if (finalOrganizationId && role === "client" && !organizationId) {
+          await supabaseService.from("organizations").delete().eq("id", finalOrganizationId);
+        }
+        return NextResponse.json(
+          { error: `Kon gebruiker niet aanmaken: ${authError.message}` },
+          { status: 500 }
+        );
       }
-      return NextResponse.json(
-        { error: `Kon profiel niet aanmaken: ${profileError.message}` },
-        { status: 500 }
-      );
+
+      if (!authData.user) {
+        return NextResponse.json(
+          { error: "Gebruiker kon niet worden aangemaakt" },
+          { status: 500 }
+        );
+      }
+
+      userId = authData.user.id;
+    }
+
+    // Check if profile already exists
+    const { data: existingProfile } = await supabaseService
+      .from("profiles")
+      .select("id")
+      .eq("id", userId)
+      .single();
+
+    if (existingProfile) {
+      // Update existing profile
+      const { error: profileError } = await supabaseService
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          role,
+          organization_id: finalOrganizationId,
+        })
+        .eq("id", userId);
+
+      if (profileError) {
+        return NextResponse.json(
+          { error: `Kon profiel niet bijwerken: ${profileError.message}` },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Create new profile using service role (bypasses RLS)
+      const { error: profileError } = await supabaseService
+        .from("profiles")
+        .insert({
+          id: userId,
+          full_name: fullName,
+          role,
+          organization_id: finalOrganizationId,
+        });
+
+      if (profileError) {
+        // Cleanup: delete auth user and org if created (only if user was just created)
+        if (!existingUser) {
+          await supabaseService.auth.admin.deleteUser(userId);
+        }
+        if (finalOrganizationId && role === "client" && !organizationId) {
+          await supabaseService.from("organizations").delete().eq("id", finalOrganizationId);
+        }
+        return NextResponse.json(
+          { error: `Kon profiel niet aanmaken: ${profileError.message}` },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({
       success: true,
-      userId: authData.user.id,
-      message: "Gebruiker succesvol aangemaakt",
+      userId: userId,
+      message: existingUser ? "Gebruiker succesvol bijgewerkt" : "Gebruiker succesvol aangemaakt",
     });
   } catch (error: any) {
     console.error("Error creating user:", error);

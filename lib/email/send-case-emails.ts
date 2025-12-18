@@ -134,23 +134,36 @@ export async function sendCaseEmails(caseId: string): Promise<void> {
 
   // Generate PDF
   console.log('📧 [EMAIL] Generating PDF...');
-  const pdfBuffer = await generatePaymentRequestPDF({
-    debtorName: debtor.name || debtor.company_name || "Debiteur",
-    debtorAddress: {
-      street: debtor.address_street || undefined,
-      city: debtor.address_city || undefined,
-      postalCode: debtor.address_postal_code || undefined,
-      country: debtor.address_country || "BE",
-    },
-    structuredReference: caseData.structured_reference || "",
-    principalAmount: caseData.principal_amount,
-    additionalCosts: caseData.additional_costs || 0,
-    totalAmount: caseData.total_amount,
-    invoiceNumber: caseData.invoice_number || undefined,
-    invoiceDate: caseData.invoice_date || undefined,
-    dueDate: caseData.due_date || undefined,
-  });
-  console.log('✅ [EMAIL] PDF generated');
+  let pdfBuffer: Buffer;
+  try {
+    pdfBuffer = await generatePaymentRequestPDF({
+      debtorName: debtor.name || debtor.company_name || "Debiteur",
+      debtorAddress: {
+        street: debtor.address_street || undefined,
+        city: debtor.address_city || undefined,
+        postalCode: debtor.address_postal_code || undefined,
+        country: debtor.address_country || "BE",
+      },
+      structuredReference: caseData.structured_reference || "",
+      principalAmount: caseData.principal_amount,
+      additionalCosts: caseData.additional_costs || 0,
+      totalAmount: caseData.total_amount,
+      invoiceNumber: caseData.invoice_number || undefined,
+      invoiceDate: caseData.invoice_date || undefined,
+      dueDate: caseData.due_date || undefined,
+    });
+    console.log('✅ [EMAIL] PDF generated');
+  } catch (pdfError: any) {
+    console.error('❌ [EMAIL] PDF generation failed:', pdfError);
+    console.error('❌ [EMAIL] PDF error details:', {
+      message: pdfError.message,
+      stack: pdfError.stack,
+      name: pdfError.name,
+    });
+    // Create a minimal PDF buffer or skip PDF attachment
+    // For now, we'll throw the error to prevent sending emails without PDF
+    throw new Error(`PDF generation failed: ${pdfError.message}`);
+  }
 
   // Generate URLs
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.auxiliumincasso.com';

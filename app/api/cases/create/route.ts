@@ -497,22 +497,36 @@ export async function POST(request: NextRequest) {
     const debtorEmailForEmail = body.debtorEmail;
     const documentForEmail = document;
     
-    // Return success immediately, send email asynchronously
-    console.log('✅ Case created, preparing async email send...');
-    console.log('📧 Debtor email:', debtorEmailForEmail);
-    console.log('📧 Client email:', userEmailForEmail);
+    // Return success immediately, send email via separate API route
+    console.log('✅ Case created, preparing email send...');
     console.log('📧 Case ID:', caseIdForEmail);
-    console.log('📧 Organization ID:', organizationIdForEmail);
     
-    // Send email asynchronously (don't wait for it)
-    // Note: We pass all needed variables explicitly to avoid scope issues
-    // Use Promise.resolve().then() to ensure it runs after response is sent
-    Promise.resolve().then(async () => {
-      try {
-        console.log('📧 [ASYNC] Starting async email generation...');
-        console.log('📧 [ASYNC] Case ID:', caseIdForEmail);
-        console.log('📧 [ASYNC] User ID:', userIdForEmail);
-        console.log('📧 [ASYNC] Organization ID:', organizationIdForEmail);
+    // Call email API route asynchronously (don't wait for it)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.auxiliumincasso.com';
+    fetch(`${baseUrl}/api/cases/${caseIdForEmail}/send-emails`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).catch((error) => {
+      console.error('❌ [CREATE] Failed to trigger email send:', error);
+      // Don't fail case creation if email trigger fails
+    });
+    
+    console.log('✅ Case creation completed successfully, returning response');
+    
+    return NextResponse.json({
+      success: true,
+      caseId: newCase.id,
+    });
+  } catch (error: any) {
+    console.error("Create case error:", error);
+    return NextResponse.json(
+      { error: error.message || "Er is een fout opgetreden" },
+      { status: 500 }
+    );
+  }
+}
         
         // Check if RESEND_API_KEY is set
         if (!process.env.RESEND_API_KEY) {

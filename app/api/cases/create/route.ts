@@ -497,29 +497,27 @@ export async function POST(request: NextRequest) {
     const debtorEmailForEmail = body.debtorEmail;
     const documentForEmail = document;
     
-    // Return success immediately, send email asynchronously
+    // Send email before returning response (but don't fail if email fails)
     console.log('✅ Case created, preparing email send...');
     console.log('📧 Case ID:', caseIdForEmail);
     
-    // Call email function asynchronously (don't wait for it)
-    Promise.resolve().then(async () => {
-      try {
-        console.log('📧 [CREATE] Importing email function...');
-        const { sendCaseEmails } = await import('@/lib/email/send-case-emails');
-        console.log('✅ [CREATE] Email function imported');
-        console.log('📧 [CREATE] Calling sendCaseEmails...');
-        await sendCaseEmails(caseIdForEmail);
-        console.log('✅ [CREATE] Emails sent successfully');
-      } catch (error: any) {
-        console.error('❌ [CREATE] Failed to send emails:', error);
-        console.error('❌ [CREATE] Error details:', {
-          message: error.message,
-          stack: error.stack,
-          name: error.name,
-        });
-        // Don't fail case creation if email fails
-      }
-    });
+    // Call email function and wait for it, but don't fail case creation if email fails
+    try {
+      console.log('📧 [CREATE] Importing email function...');
+      const { sendCaseEmails } = await import('@/lib/email/send-case-emails');
+      console.log('✅ [CREATE] Email function imported');
+      console.log('📧 [CREATE] Calling sendCaseEmails...');
+      await sendCaseEmails(caseIdForEmail);
+      console.log('✅ [CREATE] Emails sent successfully');
+    } catch (error: any) {
+      console.error('❌ [CREATE] Failed to send emails:', error);
+      console.error('❌ [CREATE] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+      // Don't fail case creation if email fails - continue and return success
+    }
     
     console.log('✅ Case creation completed successfully, returning response');
     

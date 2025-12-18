@@ -181,8 +181,7 @@ export function PaymentRequestPDF({
 }
 
 export async function generatePaymentRequestPDF(props: PaymentRequestPDFProps): Promise<Buffer> {
-  // Use React.createElement instead of JSX to avoid React 19 compatibility issues
-  const doc = React.createElement(PaymentRequestPDF, props);
+  const doc = <PaymentRequestPDF {...props} />;
   const blob = await pdf(doc).toBlob();
   const arrayBuffer = await blob.arrayBuffer();
   return Buffer.from(arrayBuffer);

@@ -538,23 +538,50 @@ export async function POST(request: NextRequest) {
         
         // Get organization and profile data first (needed for CC)
         console.log('📧 [ASYNC] Fetching organization data...');
-        const { data: organization, error: orgError } = await asyncSupabase
-          .from("organizations")
-          .select("name, billing_email")
-          .eq("id", organizationIdForEmail)
-          .single();
+        console.log('📧 [ASYNC] Organization ID to fetch:', organizationIdForEmail);
+        
+        let organization: { name: string; billing_email: string } | null = null;
+        
+        try {
+          const { data: orgData, error: orgError } = await asyncSupabase
+            .from("organizations")
+            .select("name, billing_email")
+            .eq("id", organizationIdForEmail)
+            .single();
 
-        if (orgError) {
-          console.error('❌ [ASYNC] Error fetching organization:', orgError);
-          throw orgError;
+          console.log('📧 [ASYNC] Organization query result:', { 
+            hasData: !!orgData, 
+            hasError: !!orgError,
+            errorMessage: orgError?.message,
+            errorCode: orgError?.code,
+            errorDetails: orgError?.details,
+          });
+
+          if (orgError) {
+            console.error('❌ [ASYNC] Error fetching organization:', {
+              message: orgError.message,
+              details: orgError.details,
+              hint: orgError.hint,
+              code: orgError.code,
+            });
+            throw orgError;
+          }
+
+          if (!orgData) {
+            console.error('❌ [ASYNC] Organization not found:', organizationIdForEmail);
+            throw new Error('Organization not found');
+          }
+
+          organization = orgData;
+          console.log('✅ [ASYNC] Organization found:', organization.name);
+        } catch (orgFetchError: any) {
+          console.error('❌ [ASYNC] Exception while fetching organization:', {
+            message: orgFetchError.message,
+            stack: orgFetchError.stack,
+            name: orgFetchError.name,
+          });
+          throw orgFetchError;
         }
-
-        if (!organization) {
-          console.error('❌ [ASYNC] Organization not found:', organizationIdForEmail);
-          throw new Error('Organization not found');
-        }
-
-        console.log('✅ [ASYNC] Organization found:', organization.name);
 
         console.log('📧 [ASYNC] Fetching client profile...');
         const { data: clientProfile, error: profileError } = await asyncSupabase

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +19,17 @@ const userSchema = z.object({
   email: z.string().email("Ongeldig e-mailadres"),
   password: z.string().min(8, "Wachtwoord moet minimaal 8 karakters zijn"),
   fullName: z.string().min(1, "Naam is verplicht"),
-  role: z.enum(["admin", "staff"]),
+  role: z.enum(["admin", "staff", "client"]),
+  organizationId: z.string().optional(),
+  organizationName: z.string().optional(),
+}).refine((data) => {
+  if (data.role === "client") {
+    return !!(data.organizationId || data.organizationName);
+  }
+  return true;
+}, {
+  message: "Organisatie is verplicht voor client accounts",
+  path: ["organizationId"],
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -32,10 +42,13 @@ export default function NewUserPage() {
   const { toast } = useToast();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
+  const [organizations, setOrganizations] = useState<Array<{ id: string; name: string }>>([]);
+  const [loadingOrgs, setLoadingOrgs] = useState(true);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
@@ -44,9 +57,59 @@ export default function NewUserPage() {
     },
   });
 
+  const selectedRole = watch("role");
+
+  // Load organizations when component mounts
+  useEffect(() => {
+    async function loadOrganizations() {
+      try {
+        const { data, error } = await supabase
+          .from("organizations")
+          .select("id, name")
+          .order("name");
+
+        if (error) throw error;
+        setOrganizations(data || []);
+      } catch (error: any) {
+        console.error("Error loading organizations:", error);
+      } finally {
+        setLoadingOrgs(false);
+      }
+    }
+    loadOrganizations();
+  }, [supabase]);
+
   const onSubmit = async (data: UserFormData) => {
     setLoading(true);
     try {
+      let organizationId: string | null = null;
+
+      // If client role, create or get organization
+      if (data.role === "client") {
+        if (data.organizationId) {
+          organizationId = data.organizationId;
+        } else if (data.organizationName) {
+          // Create new organization
+          const { data: newOrg, error: orgError } = await supabase
+            .from("organizations")
+            .insert({
+              name: data.organizationName,
+              billing_email: data.email,
+              address_country: "BE",
+            })
+            .select("id")
+            .single();
+
+          if (orgError) {
+            throw new Error(`Kon organisatie niet aanmaken: ${orgError.message}`);
+          }
+
+          organizationId = newOrg.id;
+        } else {
+          throw new Error("Organisatie is verplicht voor client accounts");
+        }
+      }
+
       // Create user in auth
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: data.email,
@@ -69,6 +132,7 @@ export default function NewUserPage() {
           id: authData.user.id,
           full_name: data.fullName,
           role: data.role,
+          organization_id: organizationId,
         });
 
       if (profileError) {
@@ -160,11 +224,51 @@ export default function NewUserPage() {
               >
                 <option value="staff">{tRoles('staff')}</option>
                 <option value="admin">{tRoles('admin')}</option>
+                <option value="client">{tRoles('client')}</option>
               </select>
               {errors.role && (
                 <p className="text-sm text-destructive">{errors.role.message}</p>
               )}
             </div>
+
+            {selectedRole === "client" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="organizationId">Bestaande organisatie</Label>
+                  <select
+                    id="organizationId"
+                    {...register("organizationId")}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="">-- Selecteer organisatie --</option>
+                    {loadingOrgs ? (
+                      <option>Laden...</option>
+                    ) : (
+                      organizations.map((org) => (
+                        <option key={org.id} value={org.id}>
+                          {org.name}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                  {errors.organizationId && (
+                    <p className="text-sm text-destructive">{errors.organizationId.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="organizationName">Of nieuwe organisatie naam</Label>
+                  <Input
+                    id="organizationName"
+                    {...register("organizationName")}
+                    placeholder="Nieuwe organisatie naam"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Laat leeg als je een bestaande organisatie hebt geselecteerd
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="flex gap-4">
               <Button type="submit" disabled={loading}>

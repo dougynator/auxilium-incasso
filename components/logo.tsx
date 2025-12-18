@@ -29,12 +29,20 @@ export default function Logo({
           height={height}
           className="h-auto w-auto object-contain"
           priority
-          onError={() => setImageError(true)}
+          onError={() => {
+            console.error('Logo image failed to load');
+            setImageError(true);
+          }}
         />
       ) : (
-        <span className="text-2xl font-bold text-primary">Auxilium Incasso</span>
+        <div 
+          style={{ width: height * 3, height: height }}
+          className="flex items-center justify-center bg-white/10 rounded px-2"
+        >
+          <span className="text-xs font-bold" style={{ fontSize: `${height * 0.4}px` }}>Auxilium</span>
+        </div>
       )}
-      {showText && !imageError && (
+      {showText && (
         <span className="text-2xl font-bold text-primary ml-2">Auxilium Incasso</span>
       )}
     </div>

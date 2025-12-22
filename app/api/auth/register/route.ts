@@ -144,9 +144,11 @@ export async function POST(request: NextRequest) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       
       // Generate confirmation link (Supabase will handle the actual confirmation)
+      // Note: For signup links, password is required
       const { data: linkData, error: linkError } = await supabaseService.auth.admin.generateLink({
         type: 'signup',
         email: email,
+        password: password, // Required for signup type
       });
 
       const confirmationLink = linkData?.properties?.action_link || `${appUrl}/login`;

@@ -155,11 +155,28 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Use the hashed token from the link data
-      const confirmationLink = linkData?.properties?.action_link || 
-        (linkData?.properties?.hashed_token 
-          ? `${appUrl}/api/auth/confirm?token=${linkData.properties.hashed_token}&type=signup`
-          : `${appUrl}/login`);
+      // Extract the confirmation link from Supabase
+      // The action_link should contain the full Supabase confirmation URL
+      // We'll use it directly, or construct our own callback URL
+      let confirmationLink = linkData?.properties?.action_link;
+      
+      if (!confirmationLink && linkData?.properties?.hashed_token) {
+        // Construct our own confirmation URL
+        confirmationLink = `${appUrl}/api/auth/confirm?token_hash=${linkData.properties.hashed_token}&type=signup`;
+      } else if (!confirmationLink) {
+        // Fallback
+        confirmationLink = `${appUrl}/login`;
+      } else {
+        // Supabase link contains redirect_to parameter, we need to replace it with our callback
+        try {
+          const url = new URL(confirmationLink);
+          url.searchParams.set('redirect_to', `${appUrl}/api/auth/confirm`);
+          confirmationLink = url.toString();
+        } catch (e) {
+          // If URL parsing fails, use as-is
+          console.warn('Could not parse confirmation link:', confirmationLink);
+        }
+      }
 
       const emailHtml = `
 <!DOCTYPE html>

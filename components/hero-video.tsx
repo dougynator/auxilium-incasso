@@ -36,17 +36,27 @@ export default function HeroVideo() {
   const [videoError, setVideoError] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [videoSources, setVideoSources] = useState<Array<{ src: string; type: string }>>([]);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   useEffect(() => {
     // Trigger animatie wanneer component mount
     setIsVisible(true);
     // Set video sources
-    setVideoSources(getVideoSources());
+    const sources = getVideoSources();
+    setVideoSources(sources);
+    console.log('🎥 Video sources:', sources);
   }, []);
 
+  // Handle video load success
+  const handleVideoLoaded = () => {
+    console.log('✅ Video loaded successfully');
+    setVideoLoaded(true);
+  };
+
   // Try next source if current fails
-  const handleVideoError = () => {
-    console.warn('Video failed to load, trying fallback...');
+  const handleVideoError = (e: any) => {
+    console.warn('❌ Video failed to load:', e);
+    console.warn('📋 Available sources:', videoSources);
     setVideoError(true);
   };
 
@@ -62,13 +72,31 @@ export default function HeroVideo() {
           loop
           muted
           playsInline
+          preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
           onError={handleVideoError}
+          onLoadedData={handleVideoLoaded}
+          onCanPlay={handleVideoLoaded}
         >
           {videoSources.map((source, index) => (
             <source key={index} src={source.src} type={source.type} />
           ))}
+          Your browser does not support the video tag.
         </video>
+      )}
+      
+      {/* Debug info (alleen in development) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-2 left-2 bg-black/70 text-white text-xs p-2 rounded z-20">
+          <div>Video Error: {videoError ? 'Yes' : 'No'}</div>
+          <div>Video Loaded: {videoLoaded ? 'Yes' : 'No'}</div>
+          <div>Sources: {videoSources.length}</div>
+          {videoSources.length > 0 && (
+            <div className="mt-1 text-[10px]">
+              Trying: {videoSources[0]?.src}
+            </div>
+          )}
+        </div>
       )}
       
       {/* Overlay voor betere leesbaarheid */}

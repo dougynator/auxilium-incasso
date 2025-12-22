@@ -100,13 +100,23 @@ export default function LoginPage() {
                 {loading ? t('loggingIn') : t('login')}
               </Button>
             </form>
-            <div className="mt-6 text-center">
-              <Link 
-                href="/" 
-                className="font-sans text-sm text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
-              >
-                {t('backToHome')}
-              </Link>
+            <div className="mt-6 space-y-3 text-center">
+              <div>
+                <Link 
+                  href="/register" 
+                  className="font-sans text-sm text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
+                >
+                  Nog geen account? Registreer hier
+                </Link>
+              </div>
+              <div>
+                <Link 
+                  href="/" 
+                  className="font-sans text-sm text-muted-foreground hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
+                >
+                  {t('backToHome')}
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>

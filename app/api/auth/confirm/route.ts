@@ -43,25 +43,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Fallback: try with token if token_hash didn't work
+    // Note: token format requires email, so we'll skip this if we don't have email
+    // The token_hash method should work for Supabase-generated links
     if (token) {
-      const { data, error } = await supabase.auth.verifyOtp({
-        token: token,
-        type: (type as any) || 'signup',
-      });
-
-      if (error) {
-        console.error('Email confirmation error (token):', error);
-        return NextResponse.redirect(
-          new URL(`/login?error=${encodeURIComponent(error.message)}`, appUrl)
-        );
-      }
-
-      if (data.user) {
-        console.log('✅ Email confirmed successfully:', data.user.email);
-        return NextResponse.redirect(
-          new URL('/login?confirmed=true', appUrl)
-        );
-      }
+      // For token format, we need email - but we don't have it in the URL
+      // So we'll just log and redirect with error
+      console.warn('Token format requires email, but email not provided in URL');
+      return NextResponse.redirect(
+        new URL('/login?error=invalid_confirmation_link_format', appUrl)
+      );
     }
 
     // If we get here, something went wrong

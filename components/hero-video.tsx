@@ -4,14 +4,51 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+// Video sources in volgorde van prioriteit
+const getVideoSources = () => {
+  const sources: Array<{ src: string; type: string }> = [];
+  
+  // 1. Local video (hoogste prioriteit)
+  sources.push({ src: "/videos/hero-video.mp4", type: "video/mp4" });
+  sources.push({ src: "/videos/hero-video.webm", type: "video/webm" });
+  
+  // 2. Supabase Storage fallback
+  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    sources.push({ 
+      src: `${supabaseUrl}/storage/v1/object/public/public-assets/hero-video.mp4`, 
+      type: "video/mp4" 
+    });
+  }
+  
+  // 3. External URL fallback (laagste prioriteit)
+  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_HERO_VIDEO_URL) {
+    sources.push({ 
+      src: process.env.NEXT_PUBLIC_HERO_VIDEO_URL, 
+      type: "video/mp4" 
+    });
+  }
+  
+  return sources;
+};
+
 export default function HeroVideo() {
   const [videoError, setVideoError] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [videoSources, setVideoSources] = useState<Array<{ src: string; type: string }>>([]);
 
   useEffect(() => {
     // Trigger animatie wanneer component mount
     setIsVisible(true);
+    // Set video sources
+    setVideoSources(getVideoSources());
   }, []);
+
+  // Try next source if current fails
+  const handleVideoError = () => {
+    console.warn('Video failed to load, trying fallback...');
+    setVideoError(true);
+  };
 
   return (
     <section className="relative w-full min-h-[400px] max-h-[600px] h-[50vh] md:h-[55vh] lg:h-[60vh] overflow-hidden">
@@ -19,17 +56,18 @@ export default function HeroVideo() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5" />
       
       {/* Video achtergrond */}
-      {!videoError && (
+      {!videoError && videoSources.length > 0 && (
         <video
           autoPlay
           loop
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
-          onError={() => setVideoError(true)}
+          onError={handleVideoError}
         >
-          <source src="/videos/hero-video.mp4" type="video/mp4" />
-          <source src="/videos/hero-video.webm" type="video/webm" />
+          {videoSources.map((source, index) => (
+            <source key={index} src={source.src} type={source.type} />
+          ))}
         </video>
       )}
       

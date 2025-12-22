@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,32 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const supabase = createClient();
+
+  // Check for confirmation success or error in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const confirmed = params.get('confirmed');
+    const error = params.get('error');
+
+    if (confirmed === 'true') {
+      toast({
+        title: "Email bevestigd!",
+        description: "Uw email adres is succesvol bevestigd. U kunt nu inloggen.",
+      });
+      // Clean URL
+      router.replace('/login');
+    }
+
+    if (error) {
+      toast({
+        title: "Bevestiging mislukt",
+        description: decodeURIComponent(error),
+        variant: "destructive",
+      });
+      // Clean URL
+      router.replace('/login');
+    }
+  }, [router, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -142,16 +142,24 @@ export async function POST(request: NextRequest) {
     // Send confirmation email via Resend
     try {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const redirectTo = `${appUrl}/api/auth/confirm`;
       
-      // Generate confirmation link (Supabase will handle the actual confirmation)
+      // Generate confirmation link with redirect URL
       // Note: For signup links, password is required
       const { data: linkData, error: linkError } = await supabaseService.auth.admin.generateLink({
         type: 'signup',
         email: email,
         password: password, // Required for signup type
+        options: {
+          redirectTo: redirectTo,
+        },
       });
 
-      const confirmationLink = linkData?.properties?.action_link || `${appUrl}/login`;
+      // Use the hashed token from the link data
+      const confirmationLink = linkData?.properties?.action_link || 
+        (linkData?.properties?.hashed_token 
+          ? `${appUrl}/api/auth/confirm?token=${linkData.properties.hashed_token}&type=signup`
+          : `${appUrl}/login`);
 
       const emailHtml = `
 <!DOCTYPE html>

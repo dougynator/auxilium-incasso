@@ -8,6 +8,13 @@ const intlMiddleware = createIntlMiddleware(routing)
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
+  // Skip middleware entirely for static files (videos, images, etc.)
+  if (pathname.startsWith('/videos/') || 
+      pathname.startsWith('/images/') ||
+      pathname.match(/\.(mp4|webm|mov|avi|svg|png|jpg|jpeg|gif|webp|ico)$/i)) {
+    return NextResponse.next();
+  }
+  
   // Skip i18n for portal/admin/api routes (they don't need locale)
   const skipI18n = pathname.startsWith('/portal') || 
                     pathname.startsWith('/admin') || 

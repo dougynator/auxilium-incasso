@@ -1,83 +1,86 @@
-import { getTranslations } from 'next-intl/server';
-import Header from "@/components/header";
-import { Mail, Clock, ArrowRight } from "lucide-react";
+"use client";
 
-export default async function Home() {
-  const t = await getTranslations('home');
+import { useEffect, useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+
+// Dynamically import all components to prevent SSR issues
+const ScrollFadeOverlay = dynamic(() => import("@/components/scroll-fade-overlay"), { ssr: false });
+const HeroVideo = dynamic(() => import("@/components/hero-video"), { ssr: false });
+const FeaturesSection = dynamic(() => import("@/components/features-section"), { ssr: false });
+const ClientsCarousel = dynamic(() => import("@/components/clients-carousel"), { ssr: false });
+const StepsCarousel = dynamic(() => import("@/components/steps-carousel"), { ssr: false });
+const AchievementsSection = dynamic(() => import("@/components/achievements-section"), { ssr: false });
+const FAQSection = dynamic(() => import("@/components/faq-section"), { ssr: false });
+const IntegrationsCarousel = dynamic(() => import("@/components/integrations-carousel"), { ssr: false });
+
+const LoadingFallback = (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p className="text-muted-foreground">Laden...</p>
+    </div>
+  </div>
+);
+
+export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render until mounted to prevent SSR issues
+  if (!mounted) {
+    return LoadingFallback;
+  }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-primary/5 to-white">
-      <Header showPortalButton={false} hideNav={true} />
+    <div className="min-h-screen relative flex flex-col">
+      <Suspense fallback={null}>
+        <ScrollFadeOverlay />
+      </Suspense>
+      <Header />
 
-      <main className="flex-1 flex items-center justify-center px-4 py-20">
-        <div className="max-w-3xl mx-auto text-center">
-          {/* Logo of titel */}
-          <div className="mb-8">
-            <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-primary mb-4">
-              {t('comingSoon')}
-            </h1>
-            <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
-          </div>
+      <main className="relative z-10 flex-1">
+        {/* Hero Section met Video */}
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <HeroVideo />
+        </Suspense>
 
-          {/* Hoofdtekst */}
-          <div className="mb-12">
-            <p className="font-sans text-xl md:text-2xl text-muted-foreground mb-6 leading-relaxed">
-              {t('workingHard')}
-            </p>
-            <p className="font-sans text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t('description')}{' '}
-              <span className="font-semibold text-primary">{t('noCureNoPay')}</span> {t('onlyPayOnSuccess')}
-            </p>
-          </div>
+        {/* Features Section met foto en voordelen */}
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <FeaturesSection />
+        </Suspense>
 
-          {/* Features */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-primary/10 shadow-sm">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-display text-lg font-semibold text-primary mb-2">
-                {t('fastEfficient')}
-              </h3>
-              <p className="font-sans text-sm text-muted-foreground">
-                {t('fastEfficientDesc')}
-              </p>
-            </div>
+        {/* Klantenreferenties Carousel */}
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <ClientsCarousel />
+        </Suspense>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-primary/10 shadow-sm">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ArrowRight className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-display text-lg font-semibold text-primary mb-2">
-                {t('transparent')}
-              </h3>
-              <p className="font-sans text-sm text-muted-foreground">
-                {t('transparentDesc')}
-              </p>
-            </div>
+        {/* Stappenplan Carousel */}
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <StepsCarousel />
+        </Suspense>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-primary/10 shadow-sm">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-display text-lg font-semibold text-primary mb-2">
-                {t('modernPlatform')}
-              </h3>
-              <p className="font-sans text-sm text-muted-foreground">
-                {t('modernPlatformDesc')}
-              </p>
-            </div>
-          </div>
+        {/* Realisaties Sectie */}
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <AchievementsSection />
+        </Suspense>
 
-          {/* Countdown of datum (optioneel) */}
-          <div className="mt-12 pt-8 border-t border-primary/10">
-            <p className="font-sans text-sm text-muted-foreground">
-              {t('expected')}
-            </p>
-          </div>
-        </div>
+        {/* FAQ Sectie */}
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <FAQSection />
+        </Suspense>
+
+        {/* Integratiepartners Carousel */}
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <IntegrationsCarousel />
+        </Suspense>
       </main>
+
+      <Footer />
     </div>
   );
 }
-

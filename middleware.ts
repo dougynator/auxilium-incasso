@@ -21,7 +21,8 @@ export async function middleware(request: NextRequest) {
                     pathname.startsWith('/api') ||
                     pathname.startsWith('/login') ||
                     pathname.startsWith('/otp') ||
-                    pathname.startsWith('/pay');
+                    pathname.startsWith('/pay') ||
+                    pathname.startsWith('/auth');
   
   let intlResponse: NextResponse | null = null;
   

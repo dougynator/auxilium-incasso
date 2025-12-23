@@ -158,6 +158,9 @@ export async function POST(request: NextRequest) {
       // Extract the confirmation link from Supabase
       // Supabase generates a link that redirects to the Site URL with tokens in hash
       // We need to set redirect_to to our callback page that handles the hash
+      // Note: /auth/confirm-email is outside locale folder (like /login and /otp)
+      const confirmEmailUrl = `${appUrl}/auth/confirm-email`;
+      
       let confirmationLink = linkData?.properties?.action_link;
       
       if (!confirmationLink) {
@@ -165,7 +168,7 @@ export async function POST(request: NextRequest) {
         if (linkData?.properties?.hashed_token) {
           // Use Supabase auth endpoint with our redirect
           const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-          confirmationLink = `${supabaseUrl}/auth/v1/verify?token=${linkData.properties.hashed_token}&type=signup&redirect_to=${encodeURIComponent(`${appUrl}/auth/confirm-email`)}`;
+          confirmationLink = `${supabaseUrl}/auth/v1/verify?token=${linkData.properties.hashed_token}&type=signup&redirect_to=${encodeURIComponent(confirmEmailUrl)}`;
         } else {
           confirmationLink = `${appUrl}/login`;
         }
@@ -173,15 +176,15 @@ export async function POST(request: NextRequest) {
         // Modify the existing link to redirect to our callback
         try {
           const url = new URL(confirmationLink);
-          // Set redirect_to to our client-side confirmation page
-          url.searchParams.set('redirect_to', `${appUrl}/auth/confirm-email`);
+          // Set redirect_to to our client-side confirmation page (no locale prefix)
+          url.searchParams.set('redirect_to', confirmEmailUrl);
           confirmationLink = url.toString();
         } catch (e) {
           // If URL parsing fails, try to append redirect_to
           if (confirmationLink.includes('?')) {
-            confirmationLink += `&redirect_to=${encodeURIComponent(`${appUrl}/auth/confirm-email`)}`;
+            confirmationLink += `&redirect_to=${encodeURIComponent(confirmEmailUrl)}`;
           } else {
-            confirmationLink += `?redirect_to=${encodeURIComponent(`${appUrl}/auth/confirm-email`)}`;
+            confirmationLink += `?redirect_to=${encodeURIComponent(confirmEmailUrl)}`;
           }
         }
       }

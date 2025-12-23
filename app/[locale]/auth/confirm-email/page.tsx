@@ -52,10 +52,13 @@ export default function ConfirmEmailPage() {
             description: "Uw email adres is succesvol bevestigd. U wordt doorgestuurd naar de login pagina.",
           });
 
-          // Use window.location for hard redirect to login
-          // This prevents any middleware redirects
+          // Use window.location for hard redirect to login with locale
+          // Get current locale from URL or use default 'nl'
+          const currentLocale = window.location.pathname.split('/')[1] || 'nl';
+          const loginUrl = `/${currentLocale}/login?confirmed=true`;
+          
           setTimeout(() => {
-            window.location.href = '/login?confirmed=true';
+            window.location.href = loginUrl;
           }, 2000);
         } else {
           throw new Error('Kon gebruiker niet verifiëren');
@@ -69,8 +72,12 @@ export default function ConfirmEmailPage() {
           variant: "destructive",
         });
 
+        // Get current locale from URL or use default 'nl'
+        const currentLocale = window.location.pathname.split('/')[1] || 'nl';
+        const loginUrl = `/${currentLocale}/login?error=` + encodeURIComponent(error.message || 'confirmation_failed');
+        
         setTimeout(() => {
-          window.location.href = '/login?error=' + encodeURIComponent(error.message || 'confirmation_failed');
+          window.location.href = loginUrl;
         }, 3000);
       }
     };

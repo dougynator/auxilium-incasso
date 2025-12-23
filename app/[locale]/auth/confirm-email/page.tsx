@@ -43,15 +43,19 @@ export default function ConfirmEmailPage() {
 
         if (data.user) {
           // Email confirmed successfully
+          // Sign out immediately so user is not auto-logged in
+          await supabase.auth.signOut();
+          
           setStatus('success');
           toast({
             title: "Email bevestigd!",
             description: "Uw email adres is succesvol bevestigd. U wordt doorgestuurd naar de login pagina.",
           });
 
-          // Wait a bit for the toast to show, then redirect
+          // Use window.location for hard redirect to login
+          // This prevents any middleware redirects
           setTimeout(() => {
-            router.push('/login?confirmed=true');
+            window.location.href = '/login?confirmed=true';
           }, 2000);
         } else {
           throw new Error('Kon gebruiker niet verifiëren');
@@ -66,7 +70,7 @@ export default function ConfirmEmailPage() {
         });
 
         setTimeout(() => {
-          router.push('/login?error=' + encodeURIComponent(error.message || 'confirmation_failed'));
+          window.location.href = '/login?error=' + encodeURIComponent(error.message || 'confirmation_failed');
         }, 3000);
       }
     };

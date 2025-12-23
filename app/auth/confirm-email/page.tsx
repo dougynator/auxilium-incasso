@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from '@/i18n/routing';
+import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
 
@@ -52,13 +52,10 @@ export default function ConfirmEmailPage() {
             description: "Uw email adres is succesvol bevestigd. U wordt doorgestuurd naar de login pagina.",
           });
 
-          // Use window.location for hard redirect to login with locale
-          // Get current locale from URL or use default 'nl'
-          const currentLocale = window.location.pathname.split('/')[1] || 'nl';
-          const loginUrl = `/${currentLocale}/login?confirmed=true`;
-          
+          // Use window.location for hard redirect to login with default locale
+          // Default locale is 'nl' based on routing config
           setTimeout(() => {
-            window.location.href = loginUrl;
+            window.location.href = '/nl/login?confirmed=true';
           }, 2000);
         } else {
           throw new Error('Kon gebruiker niet verifiëren');
@@ -72,12 +69,8 @@ export default function ConfirmEmailPage() {
           variant: "destructive",
         });
 
-        // Get current locale from URL or use default 'nl'
-        const currentLocale = window.location.pathname.split('/')[1] || 'nl';
-        const loginUrl = `/${currentLocale}/login?error=` + encodeURIComponent(error.message || 'confirmation_failed');
-        
         setTimeout(() => {
-          window.location.href = loginUrl;
+          window.location.href = '/nl/login?error=' + encodeURIComponent(error.message || 'confirmation_failed');
         }, 3000);
       }
     };

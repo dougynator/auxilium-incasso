@@ -18,7 +18,7 @@ export default function Header({ currentPage, showPortalButton = true, hideNav =
   return (
     <header className="border-b border-primary/10 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Logo />
+        <Logo height={50} />
         {!hideNav && (
         <nav className="flex gap-6 items-center">
           <Link 

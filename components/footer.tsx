@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 md:gap-12">
           {/* Logo en contactgegevens */}
           <div className="md:col-span-1">
-            <div className="mb-6 bg-white/10 backdrop-blur-sm rounded-xl p-5 inline-block">
+            <div className="mb-6">
               <Logo showText={false} href={undefined} white={true} height={60} />
             </div>
             <div className="space-y-3 text-sm">
